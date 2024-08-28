@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub mod commands;
 
-use lxp::packet::{DeviceFunction, TcpFunction};
+use lxp::{inverter, packet::{DeviceFunction, TcpFunction}};
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub enum ChannelData {
@@ -143,6 +143,34 @@ impl Coordinator {
                 )
                 .await
             }
+            DelayTimeForOverFDerate(inverter, delay_time) => {
+                self.set_hold(inverter, Register::DelayTimeForOverFDerate, delay_time)
+                    .await
+            }
+            OVFDerateStart(inverter, hz) => {
+                self.set_hold(inverter, Register::OVFDerateStart, hz)
+                    .await
+            }
+            OVFDerateEnd(inverter, hz) => {
+                self.set_hold(inverter, Register::OVFDerateEnd, hz)
+                    .await
+            }
+            OVFDeratePctPerHz(inverter, pct) => {
+                self.set_hold(inverter, Register::OVFDeratePctPerHz, pct)
+                    .await
+            }
+            UnderFrDroopStart(inverter, hz) => {
+                self.set_hold(inverter, Register::UnderFrDroopStart, hz)
+                    .await
+            }
+            UnderFrDroopEnd(inverter, hz) => {
+                self.set_hold(inverter, Register::UnderFrDroopEnd, hz)
+                    .await
+            }
+            UnderFrIncreasePctPerHz(inverter, pct) => {
+                self.set_hold(inverter, Register::UnderFrIncreasePctPerHz, pct)
+                    .await
+            }
             DRMS(inverter, enable) => {
                 self.update_hold(
                     inverter,
@@ -251,15 +279,6 @@ impl Coordinator {
                 )
                 .await
             }
-            DCI(inverter, enable) => {
-                self.update_hold(
-                    inverter,
-                    Register::Register21,
-                    RegisterBit::DCIEnable,
-                    enable,
-                )
-                .await
-            }
             FeedInGrid(inverter, enable) => {
                 self.update_hold(
                     inverter,
@@ -291,7 +310,8 @@ impl Coordinator {
             DischargeCutoffSocLimit(inverter, pct) => {
                 self.set_hold(inverter, Register::DischgCutOffSocEod, pct)
                     .await
-            }
+            },
+
         }
     }
 
