@@ -666,7 +666,7 @@ pub enum RegisterBit {
     GridOnPowerSSEnable = 1 << 6,
     AcChargeEnable = 1 << 7,
     SwSeamlessEnable = 1 << 8,
-    SetToStandby = 1 << 9,
+    SetToStandbyEnable = 1 << 9,
     ForcedDischargeEnable = 1 << 10,
     ChargePriorityEnable = 1 << 11,
     ISOEnable = 1 << 12,

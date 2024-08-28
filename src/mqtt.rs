@@ -182,10 +182,10 @@ impl Message {
             ["read", "inputs", "4"] => ReadInputs(inverter, 4),
             ["read", "input", register] => {
                 ReadInput(inverter, register.parse()?, self.payload_int_or_1()?)
-            }
+            },
             ["read", "hold", register] => {
                 ReadHold(inverter, register.parse()?, self.payload_int_or_1()?)
-            }
+            },
             ["read", "param", register] => ReadParam(inverter, register.parse()?),
             ["read", "ac_charge", num] => ReadAcChargeTime(inverter, num.parse()?),
             ["read", "ac_first", num] => ReadAcFirstTime(inverter, num.parse()?),
@@ -194,8 +194,8 @@ impl Message {
             ["set", "hold", register] => SetHold(inverter, register.parse()?, self.payload_int()?),
             ["set", "param", register] => {
                 WriteParam(inverter, register.parse()?, self.payload_int()?)
-            }
-            ["set", "eps"] = > EPS(inverter, self.payload_bool()),
+            },
+            ["set", "eps"] => EPS(inverter, self.payload_bool()),
             ["set", "ovf_load_derate"] => OVFLoadDerate(inverter, self.payload_bool()),
             ["set", "frequency_active_open_loop_response_time"] => DelayTimeForOverFDerate(inverter, self.payload_int()?),
             ["set", "under_fr_increase_pct_per_hz"] => UnderFrIncreasePctPerHz(inverter, self.payload_int()?),
@@ -212,24 +212,24 @@ impl Message {
             ["set", "ac_charge"] => AcCharge(inverter, self.payload_bool()),
             ["set", "ac_charge", num] => {
                 SetAcChargeTime(inverter, num.parse()?, self.payload_start_end_time()?)
-            }
+            },
             ["set", "sw_seamless"] => SwSeamless(inverter, self.payload_bool()),
             ["set", "set_to_standby"] => SetToStandby(inverter, self.payload_bool()),
             ["set", "forced_discharge"] => ForcedDischarge(inverter, self.payload_bool()),
             ["set", "forced_discharge", num] => {
                 SetForcedDischargeTime(inverter, num.parse()?, self.payload_start_end_time()?)
-            }
+            },
             ["set", "charge_priority"] => ChargePriority(inverter, self.payload_bool()),
             ["set", "charge_priority", num] => {
                 SetChargePriorityTime(inverter, num.parse()?, self.payload_start_end_time()?)
-            }
+            },
             ["set", "iso"] => ISO(inverter, self.payload_bool()),
             ["set", "gfci"] => GFCI(inverter, self.payload_bool()),
             ["set", "dci"] => DCI(inverter, self.payload_bool()),
             ["set", "feed_in_grid"] => FeedInGrid(inverter, self.payload_bool()),
             ["set", "ac_first", num] => {
                 SetAcFirstTime(inverter, num.parse()?, self.payload_start_end_time()?)
-            }
+            },
             ["set", "charge_rate_pct"] => ChargeRate(inverter, self.payload_int()?),
             ["set", "discharge_rate_pct"] => DischargeRate(inverter, self.payload_int()?),
             ["set", "ac_charge_rate_pct"] => AcChargeRate(inverter, self.payload_int()?),
@@ -238,7 +238,7 @@ impl Message {
 
             ["set", "discharge_cutoff_soc_limit_pct"] => {
                 DischargeCutoffSocLimit(inverter, self.payload_int()?)
-            }
+            },
 
             [..] => bail!("unhandled: {:?}", self),
         };
