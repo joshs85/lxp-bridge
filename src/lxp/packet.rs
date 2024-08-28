@@ -644,14 +644,13 @@ pub enum Register {
     EpsDischgCutoffSocEod = 125, // EPS Discharge cut-off SOC (%)
     AcChargeStartSocLimit = 160, // SOC at which AC charging will begin (%)
     AcChargeEndSocLimit = 161,   // SOC at which AC charging will end (%)
-    DelayTimeForOverFDerate = 97 // Open Loop Response time for Frequency Active Power Mode (ms)
-    OVFDerateStart = 115         // Frequency Active Power Mode Over frequency Droop Start dbOF(Hz)
-    OVFDerateEnd = 124           // Frequency Active Power Mode Over frequency Droop End (Hz)
-    OVFDeratePctPerHz = 136      // Frequency Active Power Mode Over frequency Droop kUF (%/Hz) 
-    UnderFrDroopStart = 134      // Frequency Active Power Mode Under frequency Droop Start dbUF(Hz)
-    UnderFrDroopEnd = 135        // Frequency Active Power Mode Under frequency Droop End (Hz)
-    UnderFrIncreasePctPerHz = 193// Frequency Active Power Mode Under frequency Droop kUF (%/Hz)
-
+    DelayTimeForOverFDerate = 97, // Open Loop Response time for Frequency Active Power Mode (ms)
+    OVFDerateStart = 115,         // Frequency Active Power Mode Over frequency Droop Start dbOF(Hz)
+    OVFDerateEnd = 124,           // Frequency Active Power Mode Over frequency Droop End (Hz)
+    OVFDeratePctPerHz = 136,      // Frequency Active Power Mode Over frequency Droop kUF (%/Hz) 
+    UnderFrDroopStart = 134,      // Frequency Active Power Mode Under frequency Droop Start dbUF(Hz)
+    UnderFrDroopEnd = 135,        // Frequency Active Power Mode Under frequency Droop End (Hz)
+    UnderFrIncreasePctPerHz = 193,// Frequency Active Power Mode Under frequency Droop kUF (%/Hz)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
