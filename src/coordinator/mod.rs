@@ -125,11 +125,92 @@ impl Coordinator {
                 self.set_time_register(inverter, Action::ForcedDischarge(num), values)
                     .await
             }
+            EPS(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::EpsEnable,
+                    enable,
+                )
+                .await
+            }
+            OVFLoadDerate(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::OVFLoadDerateEnable,
+                    enable,
+                )
+                .await
+            }
+            DRMS(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::DRMSEnable,
+                    enable,
+                )
+                .await
+            }
+            LVRT(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::LVRTEnable,
+                    enable,
+                )
+                .await
+            }
+            AntiIslanding(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::AntiIslandingEnable,
+                    enable,
+                )
+                .await
+            }
+            NeutralDetect(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::NeutralDetectEnable,
+                    enable,
+                )
+                .await
+            }
+            GridOnPowerSS(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::GridOnPowerSSEnable,
+                    enable,
+                )
+                .await
+            }
             AcCharge(inverter, enable) => {
                 self.update_hold(
                     inverter,
                     Register::Register21,
                     RegisterBit::AcChargeEnable,
+                    enable,
+                )
+                .await
+            }
+            SwSeamless(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::SwSeamlessEnable,
+                    enable,
+                )
+                .await
+            }
+            SetToStandby(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::SetToStandbyEnable,
                     enable,
                 )
                 .await
@@ -143,12 +224,47 @@ impl Coordinator {
                 )
                 .await
             }
-
             ForcedDischarge(inverter, enable) => {
                 self.update_hold(
                     inverter,
                     Register::Register21,
                     RegisterBit::ForcedDischargeEnable,
+                    enable,
+                )
+                .await
+            }
+            ISO(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::ISOEnable,
+                    enable,
+                )
+                .await
+            }
+            GFCI(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::GFCIEnable,
+                    enable,
+                )
+                .await
+            }
+            DCI(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::DCIEnable,
+                    enable,
+                )
+                .await
+            }
+            FeedInGrid(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::FeedInGridEnable,
                     enable,
                 )
                 .await

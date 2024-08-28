@@ -632,9 +632,22 @@ impl Config {
 
     pub fn all(&self) -> Result<Vec<mqtt::Message>> {
         let mut r = vec![
+            self.switch("eps", "EPS")?,
+            self.switch("ovf_load_derate", "Over Frequency Load Derate")?,
+            self.switch("drms", "DRMS")?,
+            self.switch("lvrt", "LVRT")?,
+            self.switch("anti_islanding", "Anti-Islanding")?,
+            self.switch("neutral_detect", "Neutral Detect")?,
+            self.switch("grid_on_power_ss", "Grid On Power SS")?,
             self.switch("ac_charge", "AC Charge")?,
+            self.switch("sw_seamless", "Seamless Switch")?,
+            self.switch("set_to_standby", "Set to Standby")?,
             self.switch("charge_priority", "Charge Priority")?,
             self.switch("forced_discharge", "Forced Discharge")?,
+            self.switch("iso", "Isolation")?,
+            self.switch("gfci", "GFCI")?,
+            self.switch("dci", "DCI")?,
+            self.switch("feed_in_grid", "Feed In Grid")?,
             self.number_percent(Register::ChargePowerPercentCmd, "System Charge Rate (%)")?,
             self.number_percent(Register::DischgPowerPercentCmd, "System Discharge Rate (%)")?,
             self.number_percent(Register::AcChargePowerCmd, "AC Charge Rate (%)")?,
@@ -643,6 +656,8 @@ impl Config {
             self.number_percent(Register::ChargePrioritySocLimit, "Charge Priority Limit %")?,
             self.number_percent(Register::ForcedDischgSocLimit, "Forced Discharge Limit %")?,
             self.number_percent(Register::DischgCutOffSocEod, "Discharge Cutoff %")?,
+            self.number_percent(Register::OVFDeratePctPerHz, "Over Frequency Derate %/Hz")?,
+            self.number_percent(Register::UnderFrIncreasePctPerHz, "Under Frequency Increase %/Hz")?,
             self.number_percent(
                 Register::EpsDischgCutoffSocEod,
                 "Discharge Cutoff for EPS %",
