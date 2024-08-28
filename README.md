@@ -15,4 +15,3 @@ You can use pre-built images from here: https://hub.docker.com/r/joshs85/lxp-bri
 ## Documentation
 
 Full documentation is now in the [Wiki](https://github.com/joshs85/lxp-bridge/wiki).
-
