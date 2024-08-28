@@ -6,7 +6,7 @@ arch:
 - armv7
 - aarch64
 - amd64
-url: "https://github.com/celsworth/lxp-bridge"
+url: "https://github.com/joshs85/lxp-bridge"
 init: false
 startup: application
 stage: experimental

@@ -3,7 +3,7 @@ version: '3.4'
 services:
  lxp-bridge:
    container_name: lxp-bridge
-   image: celsworth/lxp-bridge:latest
+   image: joshs85/lxp-bridge:latest
    restart: unless-stopped
    init: true
    volumes:
