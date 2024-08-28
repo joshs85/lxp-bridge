@@ -673,6 +673,7 @@ pub enum RegisterBit {
     GFCIEnable = 1 << 13,
     DCIEnable = 1 << 14,
     FeedInGridEnable = 1 << 15,
+    
 }
 
 // Register21Bits {{{
