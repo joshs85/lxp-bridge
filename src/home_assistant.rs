@@ -192,6 +192,14 @@ impl Config {
             ..base.clone()
         };
 
+        let energy_storage = Entity {
+            device_class: Some("energy_storage"),
+            state_class: Some("measurement"),
+            unit_of_measurement: Some("KWh"),
+            value_template: ValueTemplate::String("{{ float(value) * 51.2 / 1000 }}".to_string()),
+            ..base.clone()
+        };
+
         let temperature = Entity {
             device_class: Some("temperature"),
             state_class: Some("measurement"),
@@ -448,6 +456,11 @@ impl Config {
                 key: "e_pv_day_3",
                 name: "PV Generation (Today) (String 3)",
                 ..energy.clone()
+            },
+            Entity {
+                key: "bat_capacity",
+                name: "Battery Capacity",
+                ..energy_storage.clone()
             },
             Entity {
                 key: "e_chg_all",
