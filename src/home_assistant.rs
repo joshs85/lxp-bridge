@@ -195,8 +195,8 @@ impl Config {
         let energy_storage = Entity {
             device_class: Some("energy_storage"),
             state_class: Some("measurement"),
-            unit_of_measurement: Some("KWh"),
-            value_template: ValueTemplate::String("{{ float(value) * 51.2 / 1000 }}".to_string()),
+            unit_of_measurement: Some("Wh"),
+            value_template: ValueTemplate::String("{{ float(value) * 51.2 }}".to_string()),
             ..base.clone()
         };
 
