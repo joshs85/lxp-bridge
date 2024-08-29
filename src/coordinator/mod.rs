@@ -467,6 +467,7 @@ impl Coordinator {
         loop {
             match receiver.recv().await? {
                 Packet(packet) => {
+                    debug!("inverter_receiver: RX: {:?}", packet);
                     self.process_inverter_packet(packet, &mut inputs_store)
                         .await?;
                 }
@@ -489,7 +490,7 @@ impl Coordinator {
         packet: lxp::packet::Packet,
         inputs_store: &mut InputsStore,
     ) -> Result<()> {
-        debug!("RX: {:?}", packet);
+        debug!("process_inverter_packet: {:?}", packet);
 
         if let Packet::TranslatedData(td) = &packet {
             // temporary special greppable logging for Param packets as I try to
@@ -526,8 +527,10 @@ impl Coordinator {
 
                         if let Some(input) = entry.to_input_all() {
                             if self.config.mqtt().enabled() {
+                                debug!("process_inverter_packet: sending input_all");
                                 let message = mqtt::Message::for_input_all(&input, datalog)?;
                                 let channel_data = mqtt::ChannelData::Message(message);
+                                debug!("process_inverter_packet: sending {:?}", channel_data);
                                 if self.channels.to_mqtt.send(channel_data).is_err() {
                                     bail!("send(to_mqtt) failed - channel closed?");
                                 }

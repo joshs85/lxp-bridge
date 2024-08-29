@@ -131,7 +131,8 @@ impl std::fmt::Debug for Serial {
 pub struct Inverter {
     config: ConfigWrapper,
     host: String,
-    channels: Channels,
+    channels: Chan
+    nels,
 }
 
 impl Inverter {
@@ -226,6 +227,7 @@ impl Inverter {
             }
 
             while let Some(packet) = decoder.decode(&mut buf)? {
+                debug!("inverter receiver: RX {:?}", packet);
                 self.handle_incoming_packet(packet.clone())?;
 
                 self.compare_datalog(packet.datalog()); // all packets have datalog serial
@@ -241,11 +243,12 @@ impl Inverter {
 
     fn handle_incoming_packet(&self, packet: Packet) -> Result<()> {
         // bytes received are logged in packet_decoder, no need here
-        //debug!("inverter {}: RX {:?}", self.config.datalog, packet);
+        debug!("inverter {}: RX {:?}", self.host, packet);
 
         if self.config().heartbeats()
             && packet.tcp_function() == lxp::packet::TcpFunction::Heartbeat
         {
+            debug!("handle_incoming_packet: Heartbeat {:?}", packet);
             self.channels
                 .to_inverter
                 .send(ChannelData::Packet(packet.clone()))?;
