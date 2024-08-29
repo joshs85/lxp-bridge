@@ -196,7 +196,6 @@ impl Config {
             device_class: Some("energy_storage"),
             state_class: Some("measurement"),
             unit_of_measurement: Some("Wh"),
-            value_template: ValueTemplate::String("{{ float(value) * 51.2 }}".to_string()),
             ..base.clone()
         };
 
@@ -460,6 +459,7 @@ impl Config {
             Entity {
                 key: "bat_capacity",
                 name: "Battery Capacity",
+                value_template: ValueTemplate::String("{{ float(value_json.bat_capacity) * 51.2 }}".to_string()),
                 ..energy_storage.clone()
             },
             Entity {
