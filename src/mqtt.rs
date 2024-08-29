@@ -225,6 +225,7 @@ impl Message {
             },
             ["set", "iso"] => ISO(inverter, self.payload_bool()),
             ["set", "gfci"] => GFCI(inverter, self.payload_bool()),
+            ["set", "dci"] => DCI(inverter, self.payload_bool()),
             ["set", "feed_in_grid"] => FeedInGrid(inverter, self.payload_bool()),
             ["set", "ac_first", num] => {
                 SetAcFirstTime(inverter, num.parse()?, self.payload_start_end_time()?)

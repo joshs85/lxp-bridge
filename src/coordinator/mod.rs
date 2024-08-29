@@ -279,6 +279,15 @@ impl Coordinator {
                 )
                 .await
             }
+            DCI(inverter, enable) => {
+                self.update_hold(
+                    inverter,
+                    Register::Register21,
+                    RegisterBit::DCIEnable,
+                    enable,
+                )
+                .await
+            }
             FeedInGrid(inverter, enable) => {
                 self.update_hold(
                     inverter,

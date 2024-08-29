@@ -731,9 +731,11 @@ impl Register21Bits {
 // Register110Bits {{{
 #[derive(Clone, Debug, Serialize)]
 pub struct Register110Bits {
-    pub ub_pv_grid_off_en: String,
-    pub ub_run_without_grid: String,
-    pub ub_micro_grid_en: String,
+    pub pv_off_grid_en: String,
+    pub fast_zero_export_en: String,
+    pub micro_grid_en: String,
+    pub shared_battery_en: String,
+    pub charge_last_en: String,
 }
 impl Register110Bits {
     fn is_bit_set(data: u16, bit: u16) -> String {
@@ -746,9 +748,11 @@ impl Register110Bits {
 
     pub fn new(data: u16) -> Self {
         Self {
-            ub_pv_grid_off_en: Self::is_bit_set(data, 1 << 0),
-            ub_run_without_grid: Self::is_bit_set(data, 1 << 1),
-            ub_micro_grid_en: Self::is_bit_set(data, 1 << 2),
+            pv_off_grid_en: Self::is_bit_set(data, 1 << 0),
+            fast_zero_export_en: Self::is_bit_set(data, 1 << 1),
+            micro_grid_en: Self::is_bit_set(data, 1 << 2),
+            shared_battery_en: Self::is_bit_set(data, 1 << 3),
+            charge_last_en: Self::is_bit_set(data, 1 << 4),
         }
     }
 } // }}}
@@ -1353,6 +1357,7 @@ impl StatusString {
     pub fn from_value(status: u16) -> &'static str {
         match status {
             0x00 => "Standby",
+            0x01 => "Fault",
             0x02 => "FW Updating",
             0x04 => "PV On-grid",
             0x08 => "PV Charge",
