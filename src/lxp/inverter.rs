@@ -131,8 +131,7 @@ impl std::fmt::Debug for Serial {
 pub struct Inverter {
     config: ConfigWrapper,
     host: String,
-    channels: Chan
-    nels,
+    channels: Channels,
 }
 
 impl Inverter {

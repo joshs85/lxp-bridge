@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub mod commands;
 
-use lxp::{inverter, packet::{DeviceFunction, TcpFunction}};
+use lxp::{packet::{DeviceFunction, TcpFunction}};
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub enum ChannelData {
