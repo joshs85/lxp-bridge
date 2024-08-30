@@ -505,6 +505,7 @@ impl Coordinator {
             // with the contents. If we got the third (of three) packets, send out the combined
             // MQTT message with all the data.
             if td.device_function == DeviceFunction::ReadInput {
+                debug!("process_inverter_packet: ReadInput {:?}", td);
                 use lxp::packet::{ReadInput, ReadInputs};
 
                 let entry = inputs_store
@@ -513,6 +514,7 @@ impl Coordinator {
 
                 match td.read_input() {
                     Ok(ReadInput::ReadInputAll(r_all)) => {
+                        debug!("process_inverter_packet: ReadInputAll (MQTT Not Sent) {:?}", r_all);
                         // no need for MQTT here, done below
                         self.save_input_all(r_all).await?
                     }
@@ -521,6 +523,7 @@ impl Coordinator {
                     Ok(ReadInput::ReadInput2(r2)) => entry.set_read_input_2(r2),
                     Ok(ReadInput::ReadInput3(r3)) => entry.set_read_input_3(r3),
                     Ok(ReadInput::ReadInput4(r4)) => {
+                        debug!("process_inverter_packet: ReadInput4 {:?}", r4);
                         let datalog = r4.datalog;
 
                         entry.set_read_input_4(r4);
@@ -539,11 +542,12 @@ impl Coordinator {
                             self.save_input_all(Box::new(input)).await?;
                         }
                     }
-                    Err(x) => warn!("ignoring {:?}", x),
+                    Err(x) => warn!("process_inverter_packet: ignoring {:?}", x),
                 }
             } else if td.device_function == DeviceFunction::ReadHold
                 || td.device_function == DeviceFunction::WriteSingle
             {
+                debug!("process_inverter_packet: ReadHold/WriteSingle {:?}", td);
                 let channel_data =
                     register_cache::ChannelData::RegisterData(td.register, td.value());
                 if self.channels.to_register_cache.send(channel_data).is_err() {
