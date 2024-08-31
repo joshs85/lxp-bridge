@@ -1,3 +1,14 @@
+# 0.14.0 - 31th Aug 2024
+
+* Reconnect to inverter after 15 minutes of not receiving any data (#223)
+* Fix max/min cell temperature/voltage decoding as reported from BMS (#227)
+* Add more HA entities: max/min cell temp/voltage, more charge powers (#228)
+* Add ReadInput4 with EG4 18k generator data (#239, @pmccut)
+* Add ReadInput4 keys to HA discovery (#240, @jgulick48)
+* Fix min_chg_curr/max_chg_curr decoding in ReadInputAll packet (#242, @presto8)
+* Add functions and switches for all items in hold register 21.
+
+
 # 0.13.0 - 27th October 2023
 
 * **BREAKING CHANGE**: Simplify scheduler.timesync configuration to appease HA (#209)
