@@ -15,7 +15,7 @@ jobs:
       - name: Login to DockerHub Registry
         uses: docker/login-action@v1
         with:
-          username: celsworth
+          username: joshs85
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Set up QEMU
@@ -30,7 +30,7 @@ jobs:
           context: .
           file: ci/Dockerfile
           push: true
-          tags: celsworth/lxp-bridge:dev
+          tags: joshs85/lxp-bridge:dev
           platforms: |
             linux/amd64
             linux/arm64

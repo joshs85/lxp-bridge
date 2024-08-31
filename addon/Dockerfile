@@ -1,7 +1,7 @@
 ARG BUILD_VERSION
 ARG BUILD_FROM
 
-FROM celsworth/lxp-bridge:${BUILD_VERSION} AS lxp-bridge
+FROM joshs85/lxp-bridge:${BUILD_VERSION} AS lxp-bridge
 
 FROM $BUILD_FROM
 COPY --from=lxp-bridge / /

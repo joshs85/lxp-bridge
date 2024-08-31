@@ -10,7 +10,7 @@ lxp-bridge is a tool to communicate with a LuxPower inverter (commonly used with
 
 It allows you to monitor and control your inverter locally without any dependence on the manufacturer's own servers in China.
 
-Full documentation can be found in the [Wiki](https://github.com/celsworth/lxp-bridge/wiki).
+Full documentation can be found in the [Wiki](https://github.com/joshs85/lxp-bridge/wiki).
 
 
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg

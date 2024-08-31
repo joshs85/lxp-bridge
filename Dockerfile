@@ -1,8 +1,8 @@
-# https://hub.docker.com/repository/docker/celsworth/lxp-bridge
+# https://hub.docker.com/repository/docker/joshs85/lxp-bridge
 #
 # Building/publishing:
-# docker build -t celsworth/lxp-bridge .
-# docker push celsworth/lxp-bridge:latest
+# docker build -t joshs85/lxp-bridge .
+# docker push joshs85/lxp-bridge:latest
 #
 
 FROM rust:latest as builder
