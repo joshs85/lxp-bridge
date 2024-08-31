@@ -213,6 +213,26 @@ impl Message {
             ["set", "discharge_cutoff_soc_limit_pct"] => {
                 DischargeCutoffSocLimit(inverter, self.payload_int()?)
             }
+            ["set", "eps"] => EPS(inverter, self.payload_bool()),
+            ["set", "ovf_load_derate"] => OVFLoadDerate(inverter, self.payload_bool()),
+            ["set", "frequency_active_open_loop_response_time"] => DelayTimeForOverFDerate(inverter, self.payload_int()?),
+            ["set", "ovf_derate_pct_per_hz"] => OVFDeratePctPerHz(inverter, self.payload_int()?),
+            ["set", "ovf_derate_start_hz"] => OVFDerateStart(inverter, self.payload_int()?),
+            ["set", "ovf_derate_end_hz"] => OVFDerateEnd(inverter, self.payload_int()?),
+            ["set", "under_fr_increase_pct_per_hz"] => UnderFrIncreasePctPerHz(inverter, self.payload_int()?),
+            ["set", "under_fr_droop_start_hz"] => UnderFrDroopStart(inverter, self.payload_int()?),
+            ["set", "under_fr_droop_end_hz"] => UnderFrDroopEnd(inverter, self.payload_int()?),
+            ["set", "drms"] => DRMS(inverter, self.payload_bool()),
+            ["set", "lvrt"] => LVRT(inverter, self.payload_bool()),
+            ["set", "anti_island"] => AntiIslanding(inverter, self.payload_bool()),
+            ["set", "neutral_detect"] => NeutralDetect(inverter, self.payload_bool()),
+            ["set", "grid_on_power_ss"] => GridOnPowerSS(inverter, self.payload_bool()),
+            ["set", "sw_seamless"] => SwSeamless(inverter, self.payload_bool()),
+            ["set", "set_to_standby"] => SetToStandby(inverter, self.payload_bool()),
+            ["set", "iso"] => ISO(inverter, self.payload_bool()),
+            ["set", "gfci"] => GFCI(inverter, self.payload_bool()),
+            ["set", "dci"] => DCI(inverter, self.payload_bool()),
+            ["set", "feed_in_grid"] => FeedInGrid(inverter, self.payload_bool()),
 
             [..] => bail!("unhandled: {:?}", self),
         };

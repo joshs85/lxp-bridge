@@ -192,6 +192,13 @@ impl Config {
             ..base.clone()
         };
 
+        let energy_storage = Entity {
+            device_class: Some("energy_storage"),
+            state_class: Some("measurement"),
+            unit_of_measurement: Some("KWh"),
+            ..base.clone()
+        };
+
         let temperature = Entity {
             device_class: Some("temperature"),
             state_class: Some("measurement"),
@@ -401,6 +408,12 @@ impl Config {
                 ..energy.clone()
             },
             Entity {
+                key: "bat_capacity",
+                name: "Battery Capacity",
+                value_template: ValueTemplate::String("{{ float(value_json.bat_capacity) * 51.2 / 1000 }}".to_string()),
+                ..energy_storage.clone()
+            },
+            Entity {
                 key: "e_chg_all",
                 name: "Battery Charge (All time)",
                 ..energy.clone()
@@ -553,9 +566,22 @@ impl Config {
 
     pub fn all(&self) -> Result<Vec<mqtt::Message>> {
         let mut r = vec![
+            self.switch("eps", "Off-grid mode")?,
+            self.switch("ovf_load_derate", "Over Frequency Load Derate")?,
+            self.switch("drms", "Demand Response Mode")?,
+            self.switch("lvrt", "Low Voltage Ride Through")?,
+            self.switch("anti_island", "Anti-Islanding")?,
+            self.switch("neutral_detect", "Zero ground detection")?,
+            self.switch("grid_on_power_ss", "Grid-connected soft start")?,
             self.switch("ac_charge", "AC Charge")?,
-            self.switch("charge_priority", "Charge Priority")?,
+            self.switch("sw_seamless", "Off Grid Seamless Switching")?,
+            self.switch("set_to_standby", "Power On")?,
+            self.switch("charge_priority", "PV Charge Priority")?,
             self.switch("forced_discharge", "Forced Discharge")?,
+            self.switch("iso", "ISO")?,
+            self.switch("gfci", "GFCI")?,
+            self.switch("dci", "DCI")?,
+            self.switch("feed_in_grid", "Grid Sell Back")?,
             self.number_percent(Register::ChargePowerPercentCmd, "System Charge Rate (%)")?,
             self.number_percent(Register::DischgPowerPercentCmd, "System Discharge Rate (%)")?,
             self.number_percent(Register::AcChargePowerCmd, "AC Charge Rate (%)")?,
@@ -564,6 +590,8 @@ impl Config {
             self.number_percent(Register::ChargePrioritySocLimit, "Charge Priority Limit %")?,
             self.number_percent(Register::ForcedDischgSocLimit, "Forced Discharge Limit %")?,
             self.number_percent(Register::DischgCutOffSocEod, "Discharge Cutoff %")?,
+            self.number_percent(Register::OVFDeratePctPerHz, "Over Frequency Derate %/Hz")?,
+            self.number_percent(Register::UnderFrIncreasePctPerHz, "Under Frequency Increase %/Hz")?,
             self.number_percent(
                 Register::EpsDischgCutoffSocEod,
                 "Discharge Cutoff for EPS %",

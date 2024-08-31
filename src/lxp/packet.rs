@@ -558,15 +558,35 @@ pub enum Register {
     EpsDischgCutoffSocEod = 125, // EPS Discharge cut-off SOC (%)
     AcChargeStartSocLimit = 160, // SOC at which AC charging will begin (%)
     AcChargeEndSocLimit = 161,   // SOC at which AC charging will end (%)
+    DelayTimeForOverFDerate = 97, // Open Loop Response time for Frequency Active Power Mode (ms)
+    OVFDerateStart = 115,         // Frequency Active Power Mode Over frequency Droop Start dbOF(Hz)
+    OVFDerateEnd = 124,           // Frequency Active Power Mode Over frequency Droop End (Hz)
+    OVFDeratePctPerHz = 136,      // Frequency Active Power Mode Over frequency Droop kUF (%/Hz) 
+    UnderFrDroopStart = 134,      // Frequency Active Power Mode Under frequency Droop Start dbUF(Hz)
+    UnderFrDroopEnd = 135,        // Frequency Active Power Mode Under frequency Droop End (Hz)
+    UnderFrIncreasePctPerHz = 193,// Frequency Active Power Mode Under frequency Droop kUF (%/Hz)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
 #[repr(u16)]
 pub enum RegisterBit {
     // Register 21
+    EpsEnable = 1 << 0,
+    OVFLoadDerateEnable = 1 << 1,
+    DRMSEnable = 1 << 2,
+    LVRTEnable = 1 << 3,
+    AntiIslandingEnable = 1 << 4,
+    NeutralDetectEnable = 1 << 5,
+    GridOnPowerSSEnable = 1 << 6,
     AcChargeEnable = 1 << 7,
+    SwSeamlessEnable = 1 << 8,
+    SetToStandbyEnable = 1 << 9,
     ForcedDischargeEnable = 1 << 10,
     ChargePriorityEnable = 1 << 11,
+    ISOEnable = 1 << 12,
+    GFCIEnable = 1 << 13,
+    DCIEnable = 1 << 14,
+    FeedInGridEnable = 1 << 15,
 }
 
 // Register21Bits {{{
@@ -581,7 +601,7 @@ pub struct Register21Bits {
     pub grid_on_power_ss_en: String,
     pub ac_charge_en: String,
     pub sw_seamless_en: String,
-    pub set_to_standby: String,
+    pub set_to_standby_en: String,
     pub forced_discharge_en: String,
     pub charge_priority_en: String,
     pub iso_en: String,
@@ -610,7 +630,7 @@ impl Register21Bits {
             grid_on_power_ss_en: Self::is_bit_set(data, 1 << 6),
             ac_charge_en: Self::is_bit_set(data, 1 << 7),
             sw_seamless_en: Self::is_bit_set(data, 1 << 8),
-            set_to_standby: Self::is_bit_set(data, 1 << 9),
+            set_to_standby_en: Self::is_bit_set(data, 1 << 9),
             forced_discharge_en: Self::is_bit_set(data, 1 << 10),
             charge_priority_en: Self::is_bit_set(data, 1 << 11),
             iso_en: Self::is_bit_set(data, 1 << 12),
@@ -624,9 +644,11 @@ impl Register21Bits {
 // Register110Bits {{{
 #[derive(Clone, Debug, Serialize)]
 pub struct Register110Bits {
-    pub ub_pv_grid_off_en: String,
-    pub ub_run_without_grid: String,
-    pub ub_micro_grid_en: String,
+    pub pv_off_grid_en: String,
+    pub fast_zero_export_en: String,
+    pub micro_grid_en: String,
+    pub shared_battery_en: String,
+    pub charge_last_en: String,
 }
 impl Register110Bits {
     fn is_bit_set(data: u16, bit: u16) -> String {
@@ -639,9 +661,11 @@ impl Register110Bits {
 
     pub fn new(data: u16) -> Self {
         Self {
-            ub_pv_grid_off_en: Self::is_bit_set(data, 1 << 0),
-            ub_run_without_grid: Self::is_bit_set(data, 1 << 1),
-            ub_micro_grid_en: Self::is_bit_set(data, 1 << 2),
+            pv_off_grid_en: Self::is_bit_set(data, 1 << 0),
+            fast_zero_export_en: Self::is_bit_set(data, 1 << 1),
+            micro_grid_en: Self::is_bit_set(data, 1 << 2),
+            shared_battery_en: Self::is_bit_set(data, 1 << 3),
+            charge_last_en: Self::is_bit_set(data, 1 << 4),
         }
     }
 } // }}}
@@ -1235,6 +1259,7 @@ impl StatusString {
     pub fn from_value(status: u16) -> &'static str {
         match status {
             0x00 => "Standby",
+            0x01 => "Fault",
             0x02 => "FW Updating",
             0x04 => "PV On-grid",
             0x08 => "PV Charge",
