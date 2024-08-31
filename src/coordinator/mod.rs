@@ -319,7 +319,7 @@ impl Coordinator {
             DischargeCutoffSocLimit(inverter, pct) => {
                 self.set_hold(inverter, Register::DischgCutOffSocEod, pct)
                     .await
-            },
+            }
 
         }
     }
