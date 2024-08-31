@@ -3,7 +3,7 @@ name: Docker Development Build
 on:
   push:
     branches:
-    - master
+    - mainline
 
 jobs:
   docker:
