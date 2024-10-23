@@ -195,7 +195,7 @@ impl Config {
         let energy_storage = Entity {
             device_class: Some("energy_storage"),
             state_class: Some("measurement"),
-            unit_of_measurement: Some("KWh"),
+            unit_of_measurement: Some("kWh"),
             ..base.clone()
         };
 

@@ -6,6 +6,10 @@
 * Add ReadInput4 with EG4 18k generator data (#239, @pmccut)
 
 
+# 0.14.0 - 23th October 2024
+
+* Fixed bug with entity in HA.  Changed KWh to kWh
+
 # 0.13.0 - 27th October 2023
 
 * **BREAKING CHANGE**: Simplify scheduler.timesync configuration to appease HA (#209)
