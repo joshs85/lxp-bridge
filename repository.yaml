@@ -1,3 +1,4 @@
 name: lxp-bridge Home Assistant add-on repository
 url: https://github.com/joshs85/lxp-bridge
 maintainer: Josh Spain <joshs85@users.noreply.github.com>
+description: "LuxPower inverter communication bridge for Home Assistant"

@@ -10,6 +10,10 @@ url: "https://github.com/joshs85/lxp-bridge"
 init: false
 startup: application
 stage: experimental
+homeassistant_api: false
+ingress: false
+ingress_port: 0
+panel_icon: mdi:flash
 options:
   loglevel: info
   inverters:
