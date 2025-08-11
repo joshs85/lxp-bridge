@@ -13,11 +13,10 @@ homeassistant_api: false
 ingress: false
 ingress_port: 0
 panel_icon: mdi:flash
-image: joshs85/lxp-bridge-{arch}
 build_from:
-  aarch64: ghcr.io/hassio-addons/base/aarch64:latest
-  amd64: ghcr.io/hassio-addons/base/amd64:latest
-  armv7: ghcr.io/hassio-addons/base/armv7:latest
+  aarch64: ghcr.io/hassio-addons/base/aarch64:14.0.0
+  amd64: ghcr.io/hassio-addons/base/amd64:14.0.0
+  armv7: ghcr.io/hassio-addons/base/armv7:14.0.0
 options:
   loglevel: info
   inverters:
