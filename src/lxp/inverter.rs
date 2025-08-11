@@ -153,13 +153,22 @@ impl Inverter {
     }
 
     pub async fn start(&self) -> Result<()> {
+        let mut reconnect_delay = std::time::Duration::from_secs(1);
+        const MAX_RECONNECT_DELAY: std::time::Duration = std::time::Duration::from_secs(300); // 5 minutes
+        
         while let Err(e) = self.connect().await {
             error!("inverter {}: {}", self.config().datalog(), e);
-            info!("inverter {}: reconnecting in 5s", self.config().datalog());
+            info!("inverter {}: reconnecting in {:?} (all registers will be re-read on successful reconnection)", self.config().datalog(), reconnect_delay);
             self.channels
                 .from_inverter
                 .send(ChannelData::Disconnect(self.config().datalog()))?; // kill any waiting readers
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            tokio::time::sleep(reconnect_delay).await;
+            
+            // Exponential backoff with maximum delay
+            reconnect_delay = std::cmp::min(
+                reconnect_delay * 2,
+                MAX_RECONNECT_DELAY
+            );
         }
 
         Ok(())
@@ -242,6 +251,13 @@ impl Inverter {
     fn handle_incoming_packet(&self, packet: Packet) -> Result<()> {
         // bytes received are logged in packet_decoder, no need here
         //debug!("inverter {}: RX {:?}", self.config.datalog, packet);
+        debug!("inverter {}: RX packet: {:?}", self.config().datalog(), packet);
+        
+        // Log packet details for debugging
+        if let Packet::TranslatedData(td) = &packet {
+            trace!("inverter {}: RX register: {}, values: {:?}", 
+                self.config().datalog(), td.register, td.values);
+        }
 
         if self.config().heartbeats()
             && packet.tcp_function() == lxp::packet::TcpFunction::Heartbeat
@@ -280,6 +296,8 @@ impl Inverter {
                         //debug!("inverter {}: TX {:?}", self.config.datalog, packet);
                         let bytes = lxp::packet::TcpFrameFactory::build(&packet);
                         debug!("inverter {}: TX {:?}", self.config().datalog(), bytes);
+                        trace!("inverter {}: TX hex: {:02X?}", self.config().datalog(), bytes);
+                        trace!("inverter {}: TX binary: {:?}", self.config().datalog(), bytes.iter().map(|&b| format!("{:08b}", b)).collect::<Vec<String>>());
                         socket.write_all(&bytes).await?
                     }
                 }

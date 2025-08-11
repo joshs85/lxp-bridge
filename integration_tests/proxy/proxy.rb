@@ -19,7 +19,7 @@ loop do
   read_from = rs.first
   buf = read_from.recv(4096)
 
-  if buf.empty?
+  if buf.nil? || buf.empty?
     clients.delete_if { |c| read_from == c }
   else
     clients.reject { |c| read_from == c }.each { |client| client.write(buf) }

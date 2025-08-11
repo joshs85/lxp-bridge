@@ -2,11 +2,8 @@
 
 This is a new experimental idea to add end-to-end testing of lxp-bridge from an external standpoint.
 
-A docker-compose file starts up required services (an inverter, MQTT, maybe soon a database etc) and an instance of lxp-bridge, then a Ruby rspec suite triggers various messages between MQTT and the inverter to check how lxp-bridge handles it.
+A docker-compose file starts up required services (an inverter, MQTT, etc.) and an instance of lxp-bridge, then a Ruby rspec suite triggers various messages between MQTT and the inverter to check how lxp-bridge handles it.
 
-Currently you need to create an SQlite database placeholder in the correct place. lxp-bridge will initialise and run migrations on this empty file.
-
-* `touch tmp/db/lxp.db`
 * `docker-compose up --build`
 * `bundle install`
 * `bundle exec rspec`

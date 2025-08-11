@@ -5,7 +5,6 @@ COPY Cargo.toml .
 COPY Cargo.lock .
 COPY .cargo .cargo
 COPY src src
-COPY db db
 COPY ci ci
 RUN ./ci/docker-buildx-platform-setup.sh $TARGETPLATFORM
 ENV OPENSSL_LIB_DIR /openssl-1.1.1s

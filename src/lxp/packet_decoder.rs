@@ -48,7 +48,10 @@ impl Decoder for PacketDecoder {
         let data = &src[..frame_len].to_owned();
         src.advance(frame_len);
 
+        // Enhanced binary logging for debugging
         debug!("{} bytes in: {:?}", data.len(), data);
+        trace!("Raw binary data (hex): {:02X?}", data);
+        trace!("Raw binary data (binary): {:?}", data.iter().map(|&b| format!("{:08b}", b)).collect::<Vec<String>>());
 
         match lxp::packet::Parser::parse(data) {
             Ok(packet) => Ok(Some(packet)),

@@ -1,5 +1,6 @@
 mod common;
 use common::*;
+use serde_json::json;
 
 pub fn example_serial() -> lxp::inverter::Serial {
     lxp::inverter::Serial::from_str("TESTSERIAL").unwrap()
@@ -49,12 +50,7 @@ fn inverter_publish_holdings_on_connect() {
     assert_eq!(inverter.publish_holdings_on_connect(), true);
 }
 
-#[test]
-fn database_defaults() {
-    let input = json!({ "url": "url" });
-    let database: config::Database = serde_json::from_value(input).unwrap();
-    assert!(database.enabled());
-}
+
 
 #[test]
 fn mqtt_defaults() {
@@ -158,20 +154,46 @@ fn inverters_for_message() {
     assert_eq!(r.len(), 1);
 }
 
+
+
 #[test]
-fn enabled_databases() {
-    let config = Factory::example_config_wrapped();
-
-    config.set_databases(vec![
-        config::Database {
-            enabled: false,
-            url: "sqlite://test.db".to_owned(),
-        },
-        config::Database {
-            enabled: true,
-            url: "sqlite://test.db".to_owned(),
-        },
-    ]);
-
-    assert_eq!(config.enabled_databases().len(), 1);
+fn scheduler_defaults() {
+    // Create a minimal config without scheduler section
+    let config_content = r#"
+loglevel: info
+inverters:
+- enabled: true
+  host: 192.168.0.10
+  port: 8000
+  serial: 5555555555
+  datalog: 2222222222
+  heartbeats: false
+  publish_holdings_on_connect: false
+mqtt:
+  enabled: true
+  host: localhost
+  port: 1883
+  username:
+  password:
+  namespace: lxp
+  homeassistant:
+    enabled: true
+    prefix: homeassistant
+"#;
+    
+    // Write to a temporary file in the current directory
+    let temp_file_path = "temp_test_config.yaml";
+    std::fs::write(temp_file_path, config_content).unwrap();
+    
+    // Test the config
+    let config = ConfigWrapper::new(temp_file_path.to_string()).unwrap();
+    let scheduler = config.scheduler();
+    
+    assert!(scheduler.is_some());
+    let scheduler_ref = scheduler.as_ref().unwrap();
+    assert!(scheduler_ref.enabled());
+    assert_eq!(scheduler_ref.timesync_cron(), &Some("0 0 * * *".to_string()));
+    
+    // Clean up
+    std::fs::remove_file(temp_file_path).unwrap();
 }

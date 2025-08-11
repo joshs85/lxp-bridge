@@ -1,0 +1,276 @@
+
+							<option value="_all">All Event</option>
+							<option value="E000">Fault - Internal communication fault 1</option>
+							
+								<option value="E001">Fault - Model fault</option>
+							
+								<option value="E002">Fault - Battery anti-reverse Mos Fail</option>
+															<option value="E002_NULL">Fault - Internal Event</option>
+							
+								<option value="E003">Fault - Internal CT offset out of range</option>
+							
+								<option value="E003_NULL">Fault - Internal Event</option>
+							
+								<option value="E008">Fault - CAN communication Fault in Parallel System</option>
+							
+								<option value="E009">Fault - Primary Inverter Lost in Parallel System</option>
+							
+								<option value="E010">Fault - Multi Master</option>
+							
+								<option value="E010_12K">Fault - Para Rating Watt Diff</option>
+							
+								<option value="E011">Fault - AC Connection Diff</option>
+							
+								<option value="E011_12K">Fault - Para SPEC Grid Safety Setting Diff</option>
+							
+								<option value="E012">Fault - UPS output short circuit</option>
+							
+								<option value="E013">Fault - UPS output current reversed</option>
+							
+								<option value="E014">Fault - BUS short circuit</option>
+							
+								<option value="E015">Fault - Phase Error in 3 Phase System</option>
+							
+								<option value="E016">Fault - Relay fault</option>
+							
+								<option value="E017">Fault - Internal communication fault 2</option>
+							
+								<option value="E018">Fault - Internal communication fault 3</option>
+							
+								<option value="E019">Fault - Bus voltage high</option>
+							
+								<option value="E020">Fault - EPS connection fault</option>
+							
+								<option value="E021">Fault - PV voltage high</option>
+							
+								<option value="E022">Fault - Over current protected by TZ</option>
+							
+								<option value="E023">Fault - Neutral fault</option>
+							
+								<option value="E024">Fault - PV short</option>
+							
+								<option value="E025">Fault - Temperature over range</option>
+							
+								<option value="E026">Fault - Internal Fault</option>
+							
+								<option value="E027">Fault - Sample inconsistent between main and slave CPU</option>
+							
+								<option value="E028">Fault - Sync signal lost in parallel system</option>
+							
+								<option value="E028_12K">Fault - Para Gen connection unAccord</option>
+							
+								<option value="E029">Fault - Sync trigger signal lost in parallel system</option>
+							
+								<option value="E030">Fault - E030</option>
+							
+								<option value="E030_12K">Fault - Grid Boss Breaker Open</option>
+							
+								<option value="E031">Fault - Internal communication fault 4</option>
+							
+								<option value="W000">Notice - Communication failure with battery</option>
+							
+								<option value="W001">Notice - AFCI communication fault</option>
+							
+								<option value="W001_NULL">Notice - Internal Event</option>
+							
+								<option value="W002">Notice - AFCI high</option>
+							
+								<option value="W002_NULL">Notice - Internal Event</option>
+							
+								<option value="W003">Notice - Communication failure with meters</option>
+							
+								<option value="W004">Notice - Battery status check</option>
+							
+								<option value="W005">Notice - AutoTest failure</option>
+							
+								<option value="W006">Notice - RSD active</option>
+							
+								<option value="W006_NULL">Notice - Internal Event</option>
+							
+								<option value="W007">Notice - LCD communication fault</option>
+							
+								<option value="W007_NULL">Notice - Internal Event</option>
+							
+								<option value="W008">Notice - Software mismatch</option>
+							
+								<option value="W009">Notice - Fan Stuck</option>
+							
+								<option value="W010">Notice - AC over load</option>
+							
+								<option value="W011">Notice - Slave overflow</option>
+							
+								<option value="W011_NULL">Notice - Internal Event</option>
+							
+								<option value="W012">Notice - Battery On Mos</option>
+							
+								<option value="W012_12K">Notice - Phase loss for parallel system</option>
+							
+								<option value="W013">Notice - Over temperature</option>
+							
+								<option value="W013_12K">Notice - No master setting for parallel system</option>
+							
+								<option value="W014">Notice - Multi-Master set in parallel system</option>
+							
+								<option value="W015">Notice - Battery Reverse</option>
+							
+								<option value="W016">Notice - No AC Connection</option>
+							
+								<option value="W017">Notice - AC Voltage out of range</option>
+							
+								<option value="W018">Notice - AC Frequency out of range</option>
+							
+								<option value="W019">Notice - AC inconsistent in parallel system2</option>
+							
+								<option value="W020">Notice - PV Isolation low</option>
+							
+								<option value="W021">Notice - Leakage I high</option>
+							
+								<option value="W022">Notice - DC injection high</option>
+							
+								<option value="W023">Notice - PV short circuit</option>
+							
+								<option value="W024">Notice - W024</option>
+							
+								<option value="W025">Notice - Battery voltage high</option>
+							
+								<option value="W026">Notice - Battery voltage low</option>
+							
+								<option value="W027">Notice - Battery open</option>
+							
+								<option value="W028">Notice - EPS Over load</option>
+							
+								<option value="W029">Notice - EPS voltage high</option>
+							
+								<option value="W030">Notice - Check meter connection</option>
+							
+								<option value="W030_12K">Notice - Grid Boss CAN Loss</option>
+							
+								<option value="W031">Notice - EPS DCV high</option>
+							
+								<option value="LSP_BAT_FAULT_000">LSP Bat Fault - BDC Over Curr Fault</option>
+							
+								<option value="LSP_BAT_FAULT_001">LSP Bat Fault - BDC No Balance Fault</option>
+							
+								<option value="LSP_BAT_FAULT_002">LSP Bat Fault - BDC Over Temp Fault</option>
+							
+								<option value="LSP_BAT_FAULT_003">LSP Bat Fault - Lithium Battery Open</option>
+							
+								<option value="LSP_BAT_FAULT_004">LSP Bat Fault - BMS Not Ready</option>
+							
+								<option value="LSP_BAT_FAULT_005">LSP Bat Fault - Soft Start Fail</option>
+							
+								<option value="LSP_BAT_FAULT_006">LSP Bat Fault - Battery Voltage High</option>
+							
+								<option value="LSP_BAT_FAULT_007">LSP Bat Fault - Battery Voltage Low</option>
+							
+								<option value="LSP_BAT_FAULT_008">LSP Bat Fault - BMS Error</option>
+							
+								<option value="LSP_BAT_FAULT_009">LSP Bat Fault - BMS COM Fault</option>
+							
+								<option value="LSP_BAT_FAULT_010">LSP Bat Fault - Battery Sleep</option>
+							
+								<option value="LSP_BAT_FAULT_011">LSP Bat Fault - Lead-acid Battery NTC Open</option>
+							
+								<option value="LSP_BAT_FAULT_012">LSP Bat Fault - Battery Overload</option>
+							
+								<option value="LSP_BAT_FAULT_013">LSP Bat Fault - Battery Temp Over Range</option>
+							
+								<option value="LSP_BAT_FAULT_014">LSP Bat Fault - Battery Relay Fault</option>
+							
+								<option value="LSP_BAT_FAULT_015">LSP Bat Fault - Battery Reversed</option>
+							
+								<option value="LSP_MDSP_FAULT_001">LSP MDSP Fault - MRX ARM Fault</option>
+							
+								<option value="LSP_MDSP_FAULT_002">LSP MDSP Fault - MDSP Bus OVP</option>
+							
+								<option value="LSP_MDSP_FAULT_003">LSP MDSP Fault - MDSP Bus UVP</option>
+							
+								<option value="LSP_MDSP_FAULT_004">LSP MDSP Fault - Aging Mode Error</option>
+							
+								<option value="LSP_MDSP_FAULT_005">LSP MDSP Fault - PID Fault</option>
+							
+								<option value="LSP_MDSP_WARNING_008">LSP MDSP Warn - PVout OVP</option>
+							
+								<option value="LSP_MDSP_WARNING_009">LSP MDSP Warn - PVout OCP</option>
+							
+								<option value="LSP_MDSP_WARNING_010">LSP MDSP Warn - PVout Short</option>
+							
+								<option value="LSP_MDSP_WARNING_011">LSP MDSP Warn - PVout OTP</option>
+							
+								<option value="LSP_SDSP_FAULT_001">LSP SDSP Fault - SRX ARM Fault</option>
+							
+								<option value="LSP_SDSP_FAULT_002">LSP SDSP Fault - SDSP Bus OVP</option>
+							
+								<option value="LSP_SDSP_FAULT_003">LSP SDSP Fault - SDSP Bus UVP</option>
+							
+								<option value="LSP_SDSP_FAULT_004">LSP SDSP Fault - PV ISO Fault</option>
+							
+								<option value="LSP_SDSP_FAULT_005">LSP SDSP Fault - BTsink OTP</option>
+							
+								<option value="LSP_SDSP_FAULT_006">LSP SDSP Fault - BusN Fault</option>
+							
+								<option value="LSP_SDSP_FAULT_007">LSP SDSP Fault - PV Restart</option>
+							
+								<option value="LSP_SDSP_WARNING_008">LSP SDSP Warn - PVin OVP</option>
+							
+								<option value="LSP_SDSP_WARNING_009">LSP SDSP Warn - PVin OCP</option>
+							
+								<option value="LSP_SDSP_WARNING_010">LSP SDSP Warn - PVin Short</option>
+							
+								<option value="LSP_SDSP_WARNING_011">LSP SDSP Warn - PVin OTP</option>
+							
+								<option value="LSP_SDSP_WARNING_012">LSP SDSP Warn - PVin UVP</option>
+							
+								<option value="LSP_SDSP_WARNING_013">LSP SDSP Warn - SPD Warning</option>
+							
+								<option value="LSP_SDSP_WARNING_014">LSP SDSP Warn - PVIN Reverse</option>
+							
+								<option value="LSP_ARM_FAULT_000">LSP ARM Fault - DSP_M3 FW Unmatch</option>
+							
+								<option value="LSP_ARM_FAULT_001">LSP ARM Fault - RXS DSP Fault</option>
+							
+								<option value="LSP_ARM_FAULT_002">LSP ARM Fault - RXM DSP Fault</option>
+							
+								<option value="LSP_ARM_FAULT_003">LSP ARM Fault - Force SDSP Standby</option>
+							
+								<option value="LSP_ARM_FAULT_004">LSP ARM Fault - Force MDSP Standby</option>
+							
+								<option value="LSP_ARM_WARNING_008">LSP ARM Warn - BMS Warning</option>
+							
+								<option value="LSP_ARM_WARNING_009">LSP ARM Warn - Meter Comm Loss</option>
+							
+								<option value="LSP_ARM_WARNING_010">LSP ARM Warn - Fan Fail</option>
+							
+								<option value="LSP_ARM_WARNING_011">LSP ARM Warn - LCD Com Fail</option>
+							
+								<option value="MIDBOX_FAULT_004">Fault - 12K is the old firmware</option>
+							
+								<option value="MIDBOX_FAULT_005">Fault - NEC protection</option>
+							
+								<option value="MIDBOX_FAULT_006">Fault - Grid port over current</option>
+							
+								<option value="MIDBOX_FAULT_007">Fault - Load port Over current</option>
+							
+								<option value="MIDBOX_FAULT_008">Fault - GEN port over current</option>
+							
+								<option value="MIDBOX_FAULT_009">Fault - UPS port over current</option>
+							
+								<option value="MIDBOX_FAULT_010">Fault - Smart port 1 over current</option>
+							
+								<option value="MIDBOX_FAULT_011">Fault - Smart Port 2 over current</option>
+							
+								<option value="MIDBOX_FAULT_012">Fault - Smart Port 3 over current</option>
+							
+								<option value="MIDBOX_FAULT_013">Fault - Smart Port 4 over current</option>
+							
+								<option value="MIDBOX_WARNING_000">Notice - Parallel communication abnormality</option>
+							
+								<option value="MIDBOX_WARNING_003">Notice - Load shedding overload</option>
+							
+								<option value="MIDBOX_WARNING_006">Notice - Parallel communication RSD alarm</option>
+							
+								<option value="MIDBOX_WARNING_015">Notice - GEN voltage and frequency abnormality</option>
+							
+								<option value="MIDBOX_WARNING_016">Notice - Grid voltage over/under voltage abnormality</option>
+							
+								<option value="MIDBOX_WARNING_018">Notice - Grid frequency abnormality</option><option value="MIDBOX_WARNING_017">Notice - Grid voltage abnormality</option>

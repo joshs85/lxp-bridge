@@ -103,7 +103,7 @@ settings, apply your changes to individual bits, and set the new value back.
 70 AC_CHARGE_START_HOUR_1 / AC_CHARGE_START_MINUTE_1
 71 AC_CHARGE_END_HOUR_1 / AC_CHARGE_END_MINUTE_1
 72 AC_CHARGE_START_HOUR_2 / AC_CHARGE_START_MINUTE_2
-73 AC_CHARGE_END_HOUR_2 / AC_CHARGE_END_MINUTE_2
+73 AC_CHARGE_END_HOUR_2 / AC_CHARGE_END_MINUTE_2
 74 FORCED_CHG_POWER_CMD
 75 FORCED_CHG_SOC_LIMIT
 76 FORCED_CHARGE_START_HOUR / FORCED_CHARGE_START_MINUTE
@@ -174,3 +174,94 @@ settings, apply your changes to individual bits, and set the new value back.
 168 AC_CHARGE_BATTERY_CURRENT
 169 ON_GRID_EOD_VOLTAGE
 177 MAX_GENERATOR_INPUT_POWER
+
+// Advanced Grid Support Features (Volt-Watt, Volt-Var, QP Priority)
+181 VoltWatt_V1 (0.1 V) - Volt-Watt curve voltage point 1
+182 VoltWatt_V2 (0.1 V) - Volt-Watt curve voltage point 2  
+183 VoltWatt_DelayTime (ms/cycles) - Volt-Watt response delay
+184 VoltWatt_P2 (%) - Volt-Watt power reduction at V2
+185 Vref_QV (0.1 V) - Volt-Var reference voltage
+186 Vref_filtertime (s) - Volt-Var voltage filter time
+187 Q3_QV (%) - Volt-Var reactive power at V3
+188 Q4_QV (%) - Volt-Var reactive power at V4
+189 P1_QP (%) - QP priority point 1 power level
+190 P2_QP (%) - QP priority point 2 power level
+191 P3_QP (%) - QP priority point 3 power level
+192 P4_QP (%) - QP priority point 4 power level
+
+// Generator Charging Support
+194 GenChgStartVolt (0.1 V) - Generator charging start voltage
+195 GenChgEndVolt (0.1 V) - Generator charging end voltage
+196 GenChgStartSOC (%) - Generator charging start SOC
+197 GenChgEndSOC (%) - Generator charging end SOC
+
+// Additional Grid Support Parameters
+198 UnderFrIncreasePctPerHz (%) - Under frequency power increase per Hz
+199 OverFrDecreasePctPerHz (%) - Over frequency power decrease per Hz
+200 UnderVoltIncreasePctPerV (%) - Under voltage power increase per volt
+201 OverVoltDecreasePctPerV (%) - Over voltage power decrease per volt
+
+// Advanced Time-of-Use Settings
+202 TOU_Enable - Time-of-Use enable flag
+203 TOU_Period1_Start - TOU period 1 start time
+204 TOU_Period1_End - TOU period 1 end time
+205 TOU_Period1_ChargePct - TOU period 1 charge power percentage
+206 TOU_Period1_DischargePct - TOU period 1 discharge power percentage
+207 TOU_Period2_Start - TOU period 2 start time
+208 TOU_Period2_End - TOU period 2 end time
+209 TOU_Period2_ChargePct - TOU period 2 charge power percentage
+210 TOU_Period2_DischargePct - TOU period 2 discharge power percentage
+
+// Battery Management Advanced Settings
+211 BatteryTempCompensation - Battery temperature compensation coefficient
+212 BatteryTempCompensationRef - Battery temperature compensation reference
+213 BatteryEqualizationVoltage - Battery equalization voltage
+214 BatteryEqualizationTime - Battery equalization time
+215 BatteryEqualizationInterval - Battery equalization interval
+216 BatteryEqualizationSOC - Battery equalization SOC threshold
+
+// Grid Stability and Protection
+217 GridVoltageRideThrough - Grid voltage ride-through capability
+218 GridFrequencyRideThrough - Grid frequency ride-through capability
+219 AntiIslandingEnable - Anti-islanding protection enable
+220 AntiIslandingTimeout - Anti-islanding protection timeout
+221 GridLossDetectionTime - Grid loss detection time
+222 GridReconnectionDelay - Grid reconnection delay
+
+// Load Management
+223 LoadSheddingEnable - Load shedding enable
+224 LoadSheddingPriority - Load shedding priority
+225 LoadSheddingVoltage - Load shedding voltage threshold
+226 LoadSheddingSOC - Load shedding SOC threshold
+227 LoadSheddingPower - Load shedding power threshold
+
+// Communication and Monitoring
+228 ModbusTimeout - Modbus communication timeout
+229 ModbusRetryCount - Modbus communication retry count
+230 DataLoggingInterval - Data logging interval
+231 AlarmEnable - Alarm system enable
+232 AlarmReset - Alarm system reset
+233 SystemStatus - System status indicator
+
+// Advanced Inverter Settings
+234 InverterEfficiency - Inverter efficiency optimization
+235 PowerFactorControl - Power factor control mode
+236 ReactivePowerCompensation - Reactive power compensation
+237 HarmonicCompensation - Harmonic compensation
+238 GridSynchronization - Grid synchronization parameters
+239 IslandModeOperation - Island mode operation settings
+
+// Safety and Protection
+240 OverTemperatureProtection - Over temperature protection
+241 OverCurrentProtection - Over current protection
+242 OverVoltageProtection - Over voltage protection
+243 UnderVoltageProtection - Under voltage protection
+244 ShortCircuitProtection - Short circuit protection
+245 GroundFaultProtection - Ground fault protection
+
+// Maintenance and Diagnostics
+246 MaintenanceMode - Maintenance mode enable
+247 SelfTestInterval - Self test interval
+248 ErrorLogSize - Error log size
+249 DiagnosticMode - Diagnostic mode enable
+250 FirmwareVersion - Firmware version information

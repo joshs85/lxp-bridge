@@ -1,14 +1,13 @@
 mod common;
 use common::*;
 
+
 #[tokio::test]
 async fn publishes_read_hold_mqtt() {
     common_setup();
 
     // setup config with only mqtt enabled
     let config = Factory::example_config_wrapped();
-    config.influx_mut().enabled = false;
-    config.databases_mut()[0].enabled = false;
 
     let inverter = &config.inverters()[0].clone();
 
@@ -17,9 +16,7 @@ async fn publishes_read_hold_mqtt() {
     let coordinator = Coordinator::new(config, channels.clone());
 
     let tf = async {
-        let mut to_influx = channels.to_influx.subscribe();
         let mut to_mqtt = channels.to_mqtt.subscribe();
-        let mut to_db = channels.to_database.subscribe();
 
         // simulate ReadHold in from inverter
         let packet = Packet::TranslatedData(lxp::packet::TranslatedData {
@@ -42,9 +39,7 @@ async fn publishes_read_hold_mqtt() {
                 payload: "1558".to_owned()
             })
         );
-        // verify nothing sent to influx or database
-        assert_eq!(to_influx.try_recv(), Err(TryRecvError::Empty));
-        assert_eq!(to_db.try_recv(), Err(TryRecvError::Empty));
+
 
         coordinator.stop();
 
@@ -60,8 +55,6 @@ async fn handles_read_input_all() {
     common_setup();
 
     let config = Factory::example_config_wrapped();
-    config.influx_mut().enabled = true;
-    config.databases_mut()[0].enabled = true;
     let inverter = config.inverters()[0].clone();
 
     let channels = Channels::new();
@@ -69,9 +62,7 @@ async fn handles_read_input_all() {
     let coordinator = Coordinator::new(config, channels.clone());
 
     let tf = async {
-        let mut to_influx = channels.to_influx.subscribe();
         let mut to_mqtt = channels.to_mqtt.subscribe();
-        let mut to_database = channels.to_database.subscribe();
 
         // simulate ReadHold in from inverter
         let packet = Packet::TranslatedData(lxp::packet::TranslatedData {
@@ -95,13 +86,7 @@ async fn handles_read_input_all() {
             })
         );
 
-        // verify influx and database output
-        let d = unwrap_influx_channeldata_input_data(to_influx.recv().await?);
-        assert_eq!(d["soc"], 1);
-        assert_eq!(d["v_pv_1"], 25.7);
-        let d = unwrap_database_channeldata_read_input_all(to_database.recv().await?);
-        assert_eq!(d.soc, 1);
-        assert_eq!(d.v_pv_1, 25.7);
+
 
         coordinator.stop();
 

@@ -1,6 +1,5 @@
-// simple wrapper around a DateTime so we can support converting to
-// influxdb::Timestamp with a preset precision - to the second is more
-// than good enough and should let Influx store it more efficiently.
+// simple wrapper around a DateTime with preset precision - to the second is more
+// than good enough for our use cases and provides efficient storage.
 
 use crate::utils::Utils;
 

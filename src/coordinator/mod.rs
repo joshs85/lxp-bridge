@@ -38,12 +38,25 @@ impl Coordinator {
 
     async fn mqtt_receiver(&self) -> Result<()> {
         let mut receiver = self.channels.from_mqtt.subscribe();
+        let mut health_check_interval = tokio::time::interval(std::time::Duration::from_secs(30));
 
         loop {
-            match receiver.recv().await? {
-                mqtt::ChannelData::Shutdown => break,
-                mqtt::ChannelData::Message(message) => {
-                    let _ = self.process_message(message).await;
+            tokio::select! {
+                message = receiver.recv() => {
+                    match message {
+                        Ok(mqtt::ChannelData::Shutdown) => break,
+                        Ok(mqtt::ChannelData::Message(message)) => {
+                            let _ = self.process_message(message).await;
+                        }
+                        Err(e) => {
+                            error!("MQTT receiver error: {}", e);
+                            // Continue processing instead of failing
+                        }
+                    }
+                }
+                _ = health_check_interval.tick() => {
+                    // Periodic health check
+                    self.channels.check_channel_health();
                 }
             }
         }
@@ -65,8 +78,9 @@ impl Coordinator {
                         retain: false,
                         payload: if result.is_ok() { "OK" } else { "FAIL" }.to_string(),
                     });
-                    if self.channels.to_mqtt.send(reply).is_err() {
-                        bail!("send(to_mqtt) failed - channel closed?");
+                    if let Err(e) = self.channels.to_mqtt.send(reply) {
+                        error!("Failed to send MQTT reply: {}", e);
+                        // Continue processing other messages instead of failing
                     }
                 }
                 Err(err) => {
@@ -530,8 +544,9 @@ impl Coordinator {
                             if self.config.mqtt().enabled() {
                                 let message = mqtt::Message::for_input_all(&input, datalog)?;
                                 let channel_data = mqtt::ChannelData::Message(message);
-                                if self.channels.to_mqtt.send(channel_data).is_err() {
-                                    bail!("send(to_mqtt) failed - channel closed?");
+                                if let Err(e) = self.channels.to_mqtt.send(channel_data) {
+                                    error!("Failed to send MQTT input_all message: {}", e);
+                                    // Continue processing other messages instead of failing
                                 }
                             }
 
@@ -551,8 +566,9 @@ impl Coordinator {
                 Ok(messages) => {
                     for message in messages {
                         let message = mqtt::ChannelData::Message(message);
-                        if self.channels.to_mqtt.send(message).is_err() {
-                            bail!("send(to_mqtt) failed - channel closed?");
+                        if let Err(e) = self.channels.to_mqtt.send(message) {
+                            error!("Failed to send MQTT packet message: {}", e);
+                            // Continue processing other messages instead of failing
                         }
                     }
                 }
@@ -578,19 +594,31 @@ impl Coordinator {
         };
 
         if !inverter.publish_holdings_on_connect() {
+            info!("Skipping register read for inverter {} (publish_holdings_on_connect disabled)", datalog);
             return Ok(());
         }
 
-        info!("Reading holding registers for inverter {}", datalog);
+        info!("Reading all holding registers for inverter {} (registers 0-279)", datalog);
 
-        // We can only read holding registers in blocks of 40. Provisionally,
-        // there are 6 pages of 40 values.
+        // We can only read holding registers in blocks of 40. Based on LXP_REGISTERS.txt,
+        // there are registers up to at least 250, so we need to read 7 pages of 40 values
+        // to ensure we cover all available registers.
+        info!("Reading registers 0-39 for inverter {}", datalog);
         self.read_hold(inverter.clone(), 0_u16, 40).await?;
+        info!("Reading registers 40-79 for inverter {}", datalog);
         self.read_hold(inverter.clone(), 40_u16, 40).await?;
+        info!("Reading registers 80-119 for inverter {}", datalog);
         self.read_hold(inverter.clone(), 80_u16, 40).await?;
+        info!("Reading registers 120-159 for inverter {}", datalog);
         self.read_hold(inverter.clone(), 120_u16, 40).await?;
+        info!("Reading registers 160-199 for inverter {}", datalog);
         self.read_hold(inverter.clone(), 160_u16, 40).await?;
+        info!("Reading registers 200-239 for inverter {}", datalog);
         self.read_hold(inverter.clone(), 200_u16, 40).await?;
+        info!("Reading registers 240-279 for inverter {}", datalog);
+        self.read_hold(inverter.clone(), 240_u16, 40).await?;
+
+        info!("Completed reading all holding registers for inverter {}", datalog);
 
         // Also send any special interpretive topics which are derived from
         // the holding registers.
@@ -603,41 +631,13 @@ impl Coordinator {
                 commands::time_register_ops::Action::AcCharge(*num),
             )
             .await?;
-            self.read_time_register(
-                inverter.clone(),
-                commands::time_register_ops::Action::ChargePriority(*num),
-            )
-            .await?;
-            self.read_time_register(
-                inverter.clone(),
-                commands::time_register_ops::Action::ForcedDischarge(*num),
-            )
-            .await?;
-            self.read_time_register(
-                inverter.clone(),
-                commands::time_register_ops::Action::AcFirst(*num),
-            )
-            .await?;
         }
 
         Ok(())
     }
 
-    async fn save_input_all(&self, input: Box<lxp::packet::ReadInputAll>) -> Result<()> {
-        if self.config.influx().enabled() {
-            let channel_data = influx::ChannelData::InputData(serde_json::to_value(&input)?);
-            if self.channels.to_influx.send(channel_data).is_err() {
-                bail!("send(to_influx) failed - channel closed?");
-            }
-        }
-
-        if self.config.have_enabled_database() {
-            let channel_data = database::ChannelData::ReadInputAll(input);
-            if self.channels.to_database.send(channel_data).is_err() {
-                bail!("send(to_database) failed - channel closed?");
-            }
-        }
-
+    async fn save_input_all(&self, _input: Box<lxp::packet::ReadInputAll>) -> Result<()> {
+        // Database functionality removed - no longer storing data
         Ok(())
     }
 

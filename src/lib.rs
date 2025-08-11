@@ -2,9 +2,7 @@ pub mod channels;
 pub mod command;
 pub mod config;
 pub mod coordinator;
-pub mod database;
 pub mod home_assistant;
-pub mod influx;
 pub mod lxp;
 pub mod mqtt;
 pub mod options;
@@ -46,7 +44,6 @@ pub async fn app() -> Result<()> {
 
     let scheduler = Scheduler::new(config.clone(), channels.clone());
     let mqtt = Mqtt::new(config.clone(), channels.clone());
-    let influx = Influx::new(config.clone(), channels.clone());
     let coordinator = Coordinator::new(config.clone(), channels.clone());
 
     let inverters = config
@@ -55,31 +52,18 @@ pub async fn app() -> Result<()> {
         .map(|inverter| Inverter::new(config.clone(), &inverter, channels.clone()))
         .collect();
 
-    let databases = config
-        .enabled_databases()
-        .into_iter()
-        .map(|database| Database::new(database, channels.clone()))
-        .collect();
-
     futures::try_join!(
-        start_databases(databases),
         start_inverters(inverters),
         scheduler.start(),
         mqtt.start(),
-        influx.start(),
-        coordinator.start()
+        coordinator.start(),
+        health_monitor(config.clone(), channels.clone())
     )?;
 
     Ok(())
 }
 
-async fn start_databases(databases: Vec<Database>) -> Result<()> {
-    let futures = databases.iter().map(|d| d.start());
 
-    futures::future::join_all(futures).await;
-
-    Ok(())
-}
 
 async fn start_inverters(inverters: Vec<Inverter>) -> Result<()> {
     let futures = inverters.iter().map(|i| i.start());
@@ -87,4 +71,21 @@ async fn start_inverters(inverters: Vec<Inverter>) -> Result<()> {
     futures::future::join_all(futures).await;
 
     Ok(())
+}
+
+async fn health_monitor(config: ConfigWrapper, channels: Channels) -> Result<()> {
+    let mut interval = tokio::time::interval(std::time::Duration::from_secs(60)); // Check every minute
+    
+    loop {
+        interval.tick().await;
+        
+        // Check channel health
+        channels.check_channel_health();
+        
+        // Log system status
+        info!("Health check: {} enabled inverters, MQTT: {}",
+            config.enabled_inverters().len(),
+            if config.mqtt().enabled() { "enabled" } else { "disabled" }
+        );
+    }
 }

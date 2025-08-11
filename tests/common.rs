@@ -2,7 +2,7 @@
 
 pub use lxp_bridge::prelude::*;
 
-pub use {crate::broadcast::error::TryRecvError, mockito::*, serde_json::json};
+
 
 pub struct Factory();
 impl Factory {
@@ -12,6 +12,12 @@ impl Factory {
 
     pub fn example_config_wrapped() -> config::ConfigWrapper {
         ConfigWrapper::new("config.yaml.example".to_owned()).unwrap()
+    }
+
+    pub fn config_with_individual_input_enabled() -> config::ConfigWrapper {
+        let mut config = Self::example_config();
+        config.mqtt.publish_individual_input = Some(true);
+        ConfigWrapper::new_from_config(config)
     }
 
     pub fn inverter() -> config::Inverter {
@@ -245,21 +251,7 @@ pub fn unwrap_inverter_channeldata_packet(i: lxp::inverter::ChannelData) -> lxp:
     panic!()
 }
 
-pub fn unwrap_influx_channeldata_input_data(i: influx::ChannelData) -> serde_json::Value {
-    if let influx::ChannelData::InputData(i) = i {
-        return i;
-    }
-    panic!()
-}
 
-pub fn unwrap_database_channeldata_read_input_all(
-    i: database::ChannelData,
-) -> lxp::packet::ReadInputAll {
-    if let database::ChannelData::ReadInputAll(i) = i {
-        return *i;
-    }
-    panic!()
-}
 
 pub fn type_of<T>(_: &T) -> &str {
     std::any::type_name::<T>()

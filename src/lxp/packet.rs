@@ -186,7 +186,6 @@ pub struct ReadInputAll {
 
     // 14 bytes I'm not sure what they are; possibly generator stuff
     #[nom(SkipBefore(14))]
-    // following are for influx capability only
     #[nom(Parse = "Utils::current_time_for_nom")]
     pub time: UnixTime,
     #[nom(Ignore)]
@@ -386,7 +385,6 @@ pub struct ReadInput3 {
     #[nom(Parse = "Utils::le_u16_div10")]
     pub vbat_inv: f64,
 
-    // following are for influx capability only
     #[nom(Parse = "Utils::current_time_for_nom")]
     pub time: UnixTime,
     #[nom(Ignore)]
@@ -1293,42 +1291,58 @@ impl WarningCodeString {
             .unwrap()
     }
 
+    // New method for multi-bit reporting
+    pub fn from_value_all_bits(value: u32) -> Vec<&'static str> {
+        if value == 0 {
+            return vec!["OK"];
+        }
+
+        (0..=31)
+            .filter_map(|i| {
+                if value & (1 << i) > 0 {
+                    Some(Self::from_bit(i))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
     fn from_bit(bit: usize) -> &'static str {
         match bit {
-            0 => "W000: Battery communication failure",
-            1 => "W001: AFCI communication failure",
+            0 => "W000: Communication failure with battery",
+            1 => "W001: AFCI communication fault",
             2 => "W002: AFCI high",
-            3 => "W003: Meter communication failure",
-            4 => "W004: Both charge and discharge forbidden by battery",
-            5 => "W005: Auto test failed",
-            6 => "W006: Reserved",
-            7 => "W007: LCD communication failure",
-            8 => "W008: FW version mismatch",
-            9 => "W009: Fan stuck",
-            10 => "W010: Reserved",
-            11 => "W011: Parallel number out of range",
-            12 => "W012: Bat On Mos",
-            13 => "W013: Overtemperature (NTC reading is too high)",
-            14 => "W014: Reserved",
-            15 => "W015: Battery reverse connection",
-            16 => "W016: Grid power outage",
-            17 => "W017: Grid voltage out of range",
-            18 => "W018: Grid frequency out of range",
-            19 => "W019: Reserved",
-            20 => "W020: PV insulation low",
-            21 => "W021: Leakage current high",
-            22 => "W022: DCI high",
-            23 => "W023: PV short",
-            24 => "W024: Reserved",
+            3 => "W003: Communication failure with meters",
+            4 => "W004: Battery status check",
+            5 => "W005: AutoTest failure",
+            6 => "W006: RSD active",
+            7 => "W007: LCD communication fault",
+            8 => "W008: Software mismatch",
+            9 => "W009: Fan Stuck",
+            10 => "W010: AC over load",
+            11 => "W011: Slave overflow",
+            12 => "W012: Battery On Mos",
+            13 => "W013: Over temperature",
+            14 => "W014: Multi-Master set in parallel system",
+            15 => "W015: Battery Reverse",
+            16 => "W016: No AC Connection",
+            17 => "W017: AC Voltage out of range",
+            18 => "W018: AC Frequency out of range",
+            19 => "W019: AC inconsistent in parallel system2",
+            20 => "W020: PV Isolation low",
+            21 => "W021: Leakage I high",
+            22 => "W022: DC injection high",
+            23 => "W023: PV short circuit",
+            24 => "W024: W024",
             25 => "W025: Battery voltage high",
             26 => "W026: Battery voltage low",
-            27 => "W027: Battery open circuit",
-            28 => "W028: EPS overload",
+            27 => "W027: Battery open",
+            28 => "W028: EPS Over load",
             29 => "W029: EPS voltage high",
-            30 => "W030: Meter reverse connection",
-            31 => "W031: DCV high",
-
-            _ => todo!("Unknown Warning"),
+            30 => "W030: Check meter connection",
+            31 => "W031: EPS DCV high",
+            _ => "Unknown Warning",
         }
     }
 }
@@ -1346,41 +1360,379 @@ impl FaultCodeString {
             .unwrap()
     }
 
+    // New method for multi-bit reporting
+    pub fn from_value_all_bits(value: u32) -> Vec<&'static str> {
+        if value == 0 {
+            return vec!["OK"];
+        }
+
+        (0..=31)
+            .filter_map(|i| {
+                if value & (1 << i) > 0 {
+                    Some(Self::from_bit(i))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
     fn from_bit(bit: usize) -> &'static str {
         match bit {
             0 => "E000: Internal communication fault 1",
             1 => "E001: Model fault",
-            2 => "E002: BatOnMosFail",
-            3 => "E003: CT Fail",
+            2 => "E002: Battery anti-reverse Mos Fail",
+            3 => "E003: Internal CT offset out of range",
             4 => "E004: Reserved",
             5 => "E005: Reserved",
             6 => "E006: Reserved",
             7 => "E007: Reserved",
-            8 => "E008: CAN communication error in parallel system",
-            9 => "E009: master lost in parallel system",
-            10 => "E010: multiple master units in parallel system",
-            11 => "E011: AC input inconsistent in parallel system",
-            12 => "E012: UPS short",
-            13 => "E013: Reverse current on UPS output",
-            14 => "E014: Bus short",
-            15 => "E015: Phase error in three phase system",
-            16 => "E016: Relay check fault",
+            8 => "E008: CAN communication Fault in Parallel System",
+            9 => "E009: Primary Inverter Lost in Parallel System",
+            10 => "E010: Multi Master",
+            11 => "E011: AC Connection Diff",
+            12 => "E012: UPS output short circuit",
+            13 => "E013: UPS output current reversed",
+            14 => "E014: BUS short circuit",
+            15 => "E015: Phase Error in 3 Phase System",
+            16 => "E016: Relay fault",
             17 => "E017: Internal communication fault 2",
             18 => "E018: Internal communication fault 3",
             19 => "E019: Bus voltage high",
             20 => "E020: EPS connection fault",
             21 => "E021: PV voltage high",
-            22 => "E022: Over current protection",
+            22 => "E022: Over current protected by TZ",
             23 => "E023: Neutral fault",
             24 => "E024: PV short",
-            25 => "E025: Radiator temperature over range",
-            26 => "E026: Internal fault",
-            27 => "E027: Sample inconsistent between Main CPU and redundant CPU",
-            28 => "E028: Reserved",
-            29 => "E029: Reserved",
-            30 => "E030: Reserved",
+            25 => "E025: Temperature over range",
+            26 => "E026: Internal Fault",
+            27 => "E027: Sample inconsistent between main and slave CPU",
+            28 => "E028: Sync signal lost in parallel system",
+            29 => "E029: Sync trigger signal lost in parallel system",
+            30 => "E030: E030",
             31 => "E031: Internal communication fault 4",
-            _ => todo!("Unknown Fault"),
+            _ => "Unknown Fault",
+        }
+    }
+}
+
+pub struct BmsFaultCodeString;
+impl BmsFaultCodeString {
+    pub fn from_value(value: u16) -> &'static str {
+        if value == 0 {
+            return "OK";
+        }
+
+        (0..=15)
+            .find(|i| value & (1 << i) > 0)
+            .map(Self::from_bit)
+            .unwrap()
+    }
+
+    // New method for multi-bit reporting
+    pub fn from_value_all_bits(value: u16) -> Vec<&'static str> {
+        if value == 0 {
+            return vec!["OK"];
+        }
+
+        (0..=15)
+            .filter_map(|i| {
+                if value & (1 << i) > 0 {
+                    Some(Self::from_bit(i))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    fn from_bit(bit: usize) -> &'static str {
+        match bit {
+            0 => "LSP_BAT_FAULT_000: BDC Over Curr Fault",
+            1 => "LSP_BAT_FAULT_001: BDC No Balance Fault",
+            2 => "LSP_BAT_FAULT_002: BDC Over Temp Fault",
+            3 => "LSP_BAT_FAULT_003: Lithium Battery Open",
+            4 => "LSP_BAT_FAULT_004: BMS Not Ready",
+            5 => "LSP_BAT_FAULT_005: Soft Start Fail",
+            6 => "LSP_BAT_FAULT_006: Battery Voltage High",
+            7 => "LSP_BAT_FAULT_007: Battery Voltage Low",
+            8 => "LSP_BAT_FAULT_008: BMS Error",
+            9 => "LSP_BAT_FAULT_009: BMS COM Fault",
+            10 => "LSP_BAT_FAULT_010: Battery Sleep",
+            11 => "LSP_BAT_FAULT_011: Lead-acid Battery NTC Open",
+            12 => "LSP_BAT_FAULT_012: Battery Overload",
+            13 => "LSP_BAT_FAULT_013: Battery Temp Over Range",
+            14 => "LSP_BAT_FAULT_014: Battery Relay Fault",
+            15 => "LSP_BAT_FAULT_015: Battery Reversed",
+            _ => "Unknown BMS Fault",
+        }
+    }
+}
+
+pub struct BmsWarningCodeString;
+impl BmsWarningCodeString {
+    pub fn from_value(value: u16) -> &'static str {
+        if value == 0 {
+            return "OK";
+        }
+
+        (0..=15)
+            .find(|i| value & (1 << i) > 0)
+            .map(Self::from_bit)
+            .unwrap()
+    }
+
+    // New method for multi-bit reporting
+    pub fn from_value_all_bits(value: u16) -> Vec<&'static str> {
+        if value == 0 {
+            return vec!["OK"];
+        }
+
+        (0..=15)
+            .filter_map(|i| {
+                if value & (1 << i) > 0 {
+                    Some(Self::from_bit(i))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    fn from_bit(bit: usize) -> &'static str {
+        match bit {
+            0 => "LSP_MDSP_WARNING_000: Reserved",
+            1 => "LSP_MDSP_WARNING_001: Reserved",
+            2 => "LSP_MDSP_WARNING_002: Reserved",
+            3 => "LSP_MDSP_WARNING_003: Reserved",
+            4 => "LSP_MDSP_WARNING_004: Reserved",
+            5 => "LSP_MDSP_WARNING_005: Reserved",
+            6 => "LSP_MDSP_WARNING_006: Reserved",
+            7 => "LSP_MDSP_WARNING_007: Reserved",
+            8 => "LSP_MDSP_WARNING_008: PVout OVP",
+            9 => "LSP_MDSP_WARNING_009: PVout OCP",
+            10 => "LSP_MDSP_WARNING_010: PVout Short",
+            11 => "LSP_MDSP_WARNING_011: PVout OTP",
+            12 => "LSP_MDSP_WARNING_012: Reserved",
+            13 => "LSP_MDSP_WARNING_013: Reserved",
+            14 => "LSP_MDSP_WARNING_014: Reserved",
+            15 => "LSP_MDSP_WARNING_015: Reserved",
+            _ => "Unknown BMS Warning",
+        }
+    }
+}
+
+pub struct MidboxFaultCodeString;
+impl MidboxFaultCodeString {
+    pub fn from_value(value: u16) -> &'static str {
+        if value == 0 {
+            return "OK";
+        }
+
+        (0..=15)
+            .find(|i| value & (1 << i) > 0)
+            .map(Self::from_bit)
+            .unwrap()
+    }
+
+    // New method for multi-bit reporting
+    pub fn from_value_all_bits(value: u16) -> Vec<&'static str> {
+        if value == 0 {
+            return vec!["OK"];
+        }
+
+        (0..=15)
+            .filter_map(|i| {
+                if value & (1 << i) > 0 {
+                    Some(Self::from_bit(i))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    fn from_bit(bit: usize) -> &'static str {
+        match bit {
+            0 => "MIDBOX_FAULT_000: Reserved",
+            1 => "MIDBOX_FAULT_001: Reserved",
+            2 => "MIDBOX_FAULT_002: Reserved",
+            3 => "MIDBOX_FAULT_003: Reserved",
+            4 => "MIDBOX_FAULT_004: 12K is the old firmware",
+            5 => "MIDBOX_FAULT_005: NEC protection",
+            6 => "MIDBOX_FAULT_006: Grid port over current",
+            7 => "MIDBOX_FAULT_007: Load port Over current",
+            8 => "MIDBOX_FAULT_008: GEN port over current",
+            9 => "MIDBOX_FAULT_009: UPS port over current",
+            10 => "MIDBOX_FAULT_010: Smart port 1 over current",
+            11 => "MIDBOX_FAULT_011: Smart Port 2 over current",
+            12 => "MIDBOX_FAULT_012: Smart Port 3 over current",
+            13 => "MIDBOX_FAULT_013: Smart Port 4 over current",
+            14 => "MIDBOX_FAULT_014: Reserved",
+            15 => "MIDBOX_FAULT_015: Reserved",
+            _ => "Unknown Midbox Fault",
+        }
+    }
+}
+
+pub struct MidboxWarningCodeString;
+impl MidboxWarningCodeString {
+    pub fn from_value(value: u16) -> &'static str {
+        if value == 0 {
+            return "OK";
+        }
+
+        (0..=15)
+            .find(|i| value & (1 << i) > 0)
+            .map(Self::from_bit)
+            .unwrap()
+    }
+
+    // New method for multi-bit reporting
+    pub fn from_value_all_bits(value: u16) -> Vec<&'static str> {
+        if value == 0 {
+            return vec!["OK"];
+        }
+
+        (0..=15)
+            .filter_map(|i| {
+                if value & (1 << i) > 0 {
+                    Some(Self::from_bit(i))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    fn from_bit(bit: usize) -> &'static str {
+        match bit {
+            0 => "MIDBOX_WARNING_000: Parallel communication abnormality",
+            1 => "MIDBOX_WARNING_001: Reserved",
+            2 => "MIDBOX_WARNING_002: Reserved",
+            3 => "MIDBOX_WARNING_003: Load shedding overload",
+            4 => "MIDBOX_WARNING_004: Reserved",
+            5 => "MIDBOX_WARNING_005: Reserved",
+            6 => "MIDBOX_WARNING_006: Parallel communication RSD alarm",
+            7 => "MIDBOX_WARNING_007: Reserved",
+            8 => "MIDBOX_WARNING_008: Reserved",
+            9 => "MIDBOX_WARNING_009: Reserved",
+            10 => "MIDBOX_WARNING_010: Reserved",
+            11 => "MIDBOX_WARNING_011: Reserved",
+            12 => "MIDBOX_WARNING_012: Reserved",
+            13 => "MIDBOX_WARNING_013: Reserved",
+            14 => "MIDBOX_WARNING_014: Reserved",
+            15 => "MIDBOX_WARNING_015: GEN voltage and frequency abnormality",
+            16 => "MIDBOX_WARNING_016: Grid voltage over/under voltage abnormality",
+            17 => "MIDBOX_WARNING_017: Grid voltage abnormality",
+            18 => "MIDBOX_WARNING_018: Grid frequency abnormality",
+            _ => "Unknown Midbox Warning",
+        }
+    }
+}
+
+pub struct BmsEvent1String;
+impl BmsEvent1String {
+    pub fn from_value(value: u16) -> &'static str {
+        if value == 0 {
+            return "OK";
+        }
+
+        (0..=15)
+            .find(|i| value & (1 << i) > 0)
+            .map(Self::from_bit)
+            .unwrap()
+    }
+
+    // New method for multi-bit reporting
+    pub fn from_value_all_bits(value: u16) -> Vec<&'static str> {
+        if value == 0 {
+            return vec!["OK"];
+        }
+
+        (0..=15)
+            .filter_map(|i| {
+                if value & (1 << i) > 0 {
+                    Some(Self::from_bit(i))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    fn from_bit(bit: usize) -> &'static str {
+        match bit {
+            0 => "BMS_FAULT_0: Battery management system fault 0",
+            1 => "BMS_FAULT_1: Battery management system fault 1",
+            2 => "BMS_FAULT_2: Battery management system fault 2",
+            3 => "BMS_FAULT_3: Battery management system fault 3",
+            4 => "BMS_FAULT_4: Battery management system fault 4",
+            5 => "BMS_FAULT_5: Battery management system fault 5",
+            6 => "BMS_FAULT_6: Battery management system fault 6",
+            7 => "BMS_FAULT_7: Battery management system fault 7",
+            8 => "BMS_FAULT_8: Battery management system fault 8",
+            9 => "BMS_FAULT_9: Battery management system fault 9",
+            10 => "BMS_FAULT_10: Battery management system fault 10",
+            11 => "BMS_FAULT_11: Battery management system fault 11",
+            12 => "BMS_FAULT_12: Battery management system fault 12",
+            13 => "BMS_FAULT_13: Battery management system fault 13",
+            14 => "BMS_FAULT_14: Battery management system fault 14",
+            15 => "BMS_FAULT_15: Battery management system fault 15",
+            _ => "Unknown BMS fault",
+        }
+    }
+}
+
+pub struct BmsEvent2String;
+impl BmsEvent2String {
+    pub fn from_value(value: u16) -> &'static str {
+        if value == 0 {
+            return "OK";
+        }
+
+        (0..=15)
+            .find(|i| value & (1 << i) > 0)
+            .map(Self::from_bit)
+            .unwrap()
+    }
+
+    // New method for multi-bit reporting
+    pub fn from_value_all_bits(value: u16) -> Vec<&'static str> {
+        if value == 0 {
+            return vec!["OK"];
+        }
+
+        (0..=15)
+            .filter_map(|i| {
+                if value & (1 << i) > 0 {
+                    Some(Self::from_bit(i))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    fn from_bit(bit: usize) -> &'static str {
+        match bit {
+            0 => "BMS_WARNING_0: Battery management system warning 0",
+            1 => "BMS_WARNING_1: Battery management system warning 1",
+            2 => "BMS_WARNING_2: Battery management system warning 2",
+            3 => "BMS_WARNING_3: Battery management system warning 3",
+            4 => "BMS_WARNING_4: Battery management system warning 4",
+            5 => "BMS_WARNING_5: Battery management system warning 5",
+            6 => "BMS_WARNING_6: Battery management system warning 6",
+            7 => "BMS_WARNING_7: Battery management system warning 7",
+            8 => "BMS_WARNING_8: Battery management system warning 8",
+            9 => "BMS_WARNING_9: Battery management system warning 9",
+            10 => "BMS_WARNING_10: Battery management system warning 10",
+            11 => "BMS_WARNING_11: Battery management system warning 11",
+            12 => "BMS_WARNING_12: Battery management system warning 12",
+            13 => "BMS_WARNING_13: Battery management system warning 13",
+            14 => "BMS_WARNING_14: Battery management system warning 14",
+            15 => "BMS_WARNING_15: Battery management system warning 15",
+            _ => "Unknown BMS warning",
         }
     }
 }

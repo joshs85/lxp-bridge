@@ -10,7 +10,6 @@ WORKDIR /usr/src/lxp-bridge
 COPY Cargo.toml .
 COPY Cargo.lock .
 COPY src src
-COPY db db
 RUN cargo install --path .
 
 

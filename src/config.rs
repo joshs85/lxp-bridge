@@ -9,11 +9,6 @@ pub struct Config {
     pub inverters: Vec<Inverter>,
     //#[serde_as(deserialize_as = "OneOrMany<_>")]
     pub mqtt: Mqtt,
-    //#[serde_as(deserialize_as = "OneOrMany<_>")]
-    pub influx: Influx,
-    #[serde(default = "Vec::new")]
-    pub databases: Vec<Database>,
-
     pub scheduler: Option<Scheduler>,
 
     #[serde(default = "Config::default_loglevel")]
@@ -98,7 +93,9 @@ pub struct Mqtt {
     #[serde(default = "Config::default_enabled")]
     pub enabled: bool,
 
+    #[serde(default = "Config::default_mqtt_host")]
     pub host: String,
+
     #[serde(default = "Config::default_mqtt_port")]
     pub port: u16,
     pub username: Option<String>,
@@ -111,6 +108,19 @@ pub struct Mqtt {
     pub homeassistant: HomeAssistant,
 
     pub publish_individual_input: Option<bool>,
+
+    // Reliability settings
+    #[serde(default = "Config::default_mqtt_max_retries")]
+    pub max_retries: u32,
+    
+    #[serde(default = "Config::default_mqtt_circuit_breaker_threshold")]
+    pub circuit_breaker_threshold: u32,
+    
+    #[serde(default = "Config::default_mqtt_reconnect_delay")]
+    pub reconnect_delay_secs: u64,
+    
+    #[serde(default = "Config::default_mqtt_max_reconnect_delay")]
+    pub max_reconnect_delay_secs: u64,
 }
 impl Mqtt {
     pub fn enabled(&self) -> bool {
@@ -144,59 +154,25 @@ impl Mqtt {
     pub fn publish_individual_input(&self) -> bool {
         self.publish_individual_input == Some(true)
     }
-} // }}}
 
-// Influx {{{
-#[derive(Clone, Debug, Deserialize)]
-pub struct Influx {
-    #[serde(default = "Config::default_enabled")]
-    pub enabled: bool,
-
-    pub url: String,
-    pub username: Option<String>,
-    pub password: Option<String>,
-
-    pub database: String,
-}
-impl Influx {
-    pub fn enabled(&self) -> bool {
-        self.enabled
+    pub fn max_retries(&self) -> u32 {
+        self.max_retries
     }
 
-    pub fn url(&self) -> &str {
-        &self.url
+    pub fn circuit_breaker_threshold(&self) -> u32 {
+        self.circuit_breaker_threshold
     }
 
-    pub fn username(&self) -> &Option<String> {
-        &self.username
+    pub fn reconnect_delay_secs(&self) -> u64 {
+        self.reconnect_delay_secs
     }
 
-    pub fn password(&self) -> &Option<String> {
-        &self.password
-    }
-
-    pub fn database(&self) -> &str {
-        &self.database
+    pub fn max_reconnect_delay_secs(&self) -> u64 {
+        self.max_reconnect_delay_secs
     }
 } // }}}
 
-// Database {{{
-#[derive(Clone, Debug, Deserialize)]
-pub struct Database {
-    #[serde(default = "Config::default_enabled")]
-    pub enabled: bool,
 
-    pub url: String,
-}
-impl Database {
-    pub fn enabled(&self) -> bool {
-        self.enabled
-    }
-
-    pub fn url(&self) -> &str {
-        &self.url
-    }
-} // }}}
 
 // Scheduler {{{
 #[derive(Clone, Debug, Deserialize)]
@@ -204,6 +180,7 @@ pub struct Scheduler {
     #[serde(default = "Config::default_enabled")]
     pub enabled: bool,
 
+    #[serde(default = "Config::default_timesync_cron")]
     pub timesync_cron: Option<String>,
 }
 impl Scheduler {
@@ -234,6 +211,12 @@ impl ConfigWrapper {
         let config = Rc::new(RefCell::new(Config::new(file)?));
 
         Ok(Self { config })
+    }
+
+    pub fn new_from_config(config: Config) -> Self {
+        Self {
+            config: Rc::new(RefCell::new(config)),
+        }
     }
 
     pub fn inverters(&self) -> Ref<Vec<Inverter>> {
@@ -289,38 +272,7 @@ impl ConfigWrapper {
         Ref::map(self.config.borrow(), |b| &b.mqtt)
     }
 
-    pub fn influx(&self) -> Ref<Influx> {
-        Ref::map(self.config.borrow(), |b| &b.influx)
-    }
 
-    pub fn influx_mut(&self) -> RefMut<Influx> {
-        RefMut::map(self.config.borrow_mut(), |b: &mut Config| &mut b.influx)
-    }
-
-    pub fn databases(&self) -> Ref<Vec<Database>> {
-        Ref::map(self.config.borrow(), |b| &b.databases)
-    }
-
-    pub fn set_databases(&self, new: Vec<Database>) {
-        let mut c = self.config.borrow_mut();
-        c.databases = new;
-    }
-
-    pub fn databases_mut(&self) -> RefMut<Vec<Database>> {
-        RefMut::map(self.config.borrow_mut(), |b: &mut Config| &mut b.databases)
-    }
-
-    pub fn have_enabled_database(&self) -> bool {
-        self.databases().iter().any(|database| database.enabled)
-    }
-
-    pub fn enabled_databases(&self) -> Vec<Database> {
-        self.databases()
-            .iter()
-            .filter(|database| database.enabled)
-            .cloned()
-            .collect()
-    }
 
     pub fn scheduler(&self) -> Ref<Option<Scheduler>> {
         Ref::map(self.config.borrow(), |b| &b.scheduler)
@@ -336,7 +288,21 @@ impl Config {
         let content = std::fs::read_to_string(&file)
             .map_err(|err| anyhow!("error reading {}: {}", file, err))?;
 
-        Ok(serde_yaml::from_str(&content)?)
+        let mut config: Config = serde_yaml::from_str(&content)?;
+        
+        // Set default scheduler if none provided
+        if config.scheduler.is_none() {
+            config.scheduler = Some(Scheduler {
+                enabled: true,
+                timesync_cron: Some("0 0 * * *".to_string()),
+            });
+        }
+
+        Ok(config)
+    }
+
+    fn default_mqtt_host() -> String {
+        "localhost".to_string()
     }
 
     fn default_mqtt_port() -> u16 {
@@ -348,13 +314,29 @@ impl Config {
 
     fn default_mqtt_homeassistant() -> HomeAssistant {
         HomeAssistant {
-            enabled: Self::default_enabled(),
-            prefix: Self::default_mqtt_homeassistant_prefix(),
+            enabled: true,
+            prefix: "homeassistant".to_string(),
         }
     }
 
     fn default_mqtt_homeassistant_prefix() -> String {
         "homeassistant".to_string()
+    }
+
+    fn default_mqtt_max_retries() -> u32 {
+        3
+    }
+
+    fn default_mqtt_circuit_breaker_threshold() -> u32 {
+        5
+    }
+
+    fn default_mqtt_reconnect_delay() -> u64 {
+        1
+    }
+
+    fn default_mqtt_max_reconnect_delay() -> u64 {
+        300
     }
 
     fn default_enabled() -> bool {
@@ -363,6 +345,10 @@ impl Config {
 
     fn default_loglevel() -> String {
         "debug".to_string()
+    }
+
+    fn default_timesync_cron() -> Option<String> {
+        Some("0 0 * * *".to_string())
     }
 }
 
@@ -373,3 +359,4 @@ where
     let raw = String::deserialize(deserializer)?;
     raw.parse().map_err(serde::de::Error::custom)
 }
+

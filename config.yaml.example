@@ -2,25 +2,20 @@ loglevel: info
 
 inverters:
 - enabled: true
-  host: 192.168.0.10
+  host: localhost
   port: 8000
   serial: 5555555555
   datalog: 2222222222
   heartbeats: false
-  publish_holdings_on_connect: false
+  publish_holdings_on_connect: true
+  read_timeout: 300                  # ⚠️ OPTIMIZED: 5 minutes - inverter sends data only when values change
 - enabled: false
   host: 192.168.0.163
   port: 8000
   serial: 9999999999
   datalog: 3333333333
   heartbeats: false
-  publish_holdings_on_connect: false
-
-databases:
-- enabled: false
-  url: postgres://lxp:lxp@localhost/lxp
-  # url: mysql://lxp:lxp@localhost/lxp
-  # url: sqlite://lxp.db
+  publish_holdings_on_connect: true
 
 mqtt:
   enabled: true
@@ -29,17 +24,17 @@ mqtt:
   username:
   password:
   namespace: lxp
+  publish_individual_input: true
   homeassistant:
     enabled: true
     prefix: homeassistant
-
-influx:
-  enabled: true
-  url: http://localhost:8086
-  username:
-  password:
-  database: lxp
+  
+  # Reliability settings - IMPROVED to prevent restarts
+  max_retries: 10                   # Increased from 3 for better resilience
+  circuit_breaker_threshold: 20     # Increased from 5 to be more tolerant
+  reconnect_delay_secs: 5           # Increased from 1 to reduce rapid reconnection attempts
+  max_reconnect_delay_secs: 600     # Increased to 10 minutes for better stability
 
 scheduler:
-  enabled: false
+  enabled: true
   timesync_cron: "0 0 * * *"

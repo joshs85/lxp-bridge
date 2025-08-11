@@ -1,2 +1,5 @@
-vendor
-tmp/db/lxp.db
+tmp/
+.bundle/
+./integration_tests/vendor/
+mosquitto.conf
+docker-compose.yaml

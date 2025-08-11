@@ -102,7 +102,7 @@ async fn for_hold_110() {
     assert_eq!(
         mqtt::Message::for_hold(packet).unwrap(),
         vec![mqtt::Message { topic: "2222222222/hold/110".to_owned(), retain: true, payload: "1033".to_owned() },
-             mqtt::Message { topic: "2222222222/hold/110/bits".to_owned(), retain: true, payload: "{\"ub_pv_grid_off_en\":\"ON\",\"ub_run_without_grid\":\"OFF\",\"ub_micro_grid_en\":\"OFF\"}".to_owned() }
+             mqtt::Message { topic: "2222222222/hold/110/bits".to_owned(), retain: true, payload: "{\"pv_off_grid_en\":\"ON\",\"fast_zero_export_en\":\"OFF\",\"micro_grid_en\":\"OFF\",\"shared_battery_en\":\"ON\",\"charge_last_en\":\"OFF\"}".to_owned() }
         ]
     );
 }

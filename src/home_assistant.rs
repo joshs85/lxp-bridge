@@ -59,7 +59,7 @@ pub struct Entity<'a> {
     #[serde(skip)]
     key: &'a str, // for example, soc
 
-    unique_id: &'a str, // lxp_XXXX_soc
+    unique_id: &'a str, // {namespace}_{datalog}_{name}
     name: &'a str,      // really more of a label? for example, "State of Charge"
 
     state_topic: &'a str,
@@ -253,6 +253,110 @@ impl Config {
                 ),
                 value_template: ValueTemplate::None,
                 icon: Some("mdi:alert-outline"),
+                ..base.clone()
+            },
+            Entity {
+                key: "all_faults",
+                name: "All Active Faults",
+                entity_category: Some("diagnostic"),
+                state_topic: &format!(
+                    "{}/{}/input/fault_code/all",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ value | join(', ') }}".to_string()),
+                icon: Some("mdi:alert-circle"),
+                ..base.clone()
+            },
+            Entity {
+                key: "all_warnings",
+                name: "All Active Warnings",
+                entity_category: Some("diagnostic"),
+                state_topic: &format!(
+                    "{}/{}/input/warning_code/all",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ value | join(', ') }}".to_string()),
+                icon: Some("mdi:alert-outline"),
+                ..base.clone()
+            },
+            Entity {
+                key: "faults_json",
+                name: "Faults (Machine Readable)",
+                entity_category: Some("diagnostic"),
+                state_topic: &format!(
+                    "{}/{}/input/fault_code/json",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+                icon: Some("mdi:code-json"),
+                ..base.clone()
+            },
+            Entity {
+                key: "warnings_json",
+                name: "Warnings (Machine Readable)",
+                entity_category: Some("diagnostic"),
+                state_topic: &format!(
+                    "{}/{}/input/warning_code/json",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+                icon: Some("mdi:code-json"),
+                ..base.clone()
+            },
+            Entity {
+                key: "bms_event_1",
+                name: "BMS Fault Code",
+                entity_category: Some("diagnostic"),
+                state_topic: &format!(
+                    "{}/{}/input/bms_event_1/parsed",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+                icon: Some("mdi:battery-alert"),
+                ..base.clone()
+            },
+            Entity {
+                key: "bms_event_2",
+                name: "BMS Warning Code",
+                entity_category: Some("diagnostic"),
+                state_topic: &format!(
+                    "{}/{}/input/bms_event_2/parsed",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+                icon: Some("mdi:battery-alert-outline"),
+                ..base.clone()
+            },
+            Entity {
+                key: "all_bms_faults",
+                name: "All Active BMS Faults",
+                entity_category: Some("diagnostic"),
+                state_topic: &format!(
+                    "{}/{}/input/bms_event_1/all",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ value | join(', ') }}".to_string()),
+                icon: Some("mdi:battery-alert"),
+                ..base.clone()
+            },
+            Entity {
+                key: "all_bms_warnings",
+                name: "All Active BMS Warnings",
+                entity_category: Some("diagnostic"),
+                state_topic: &format!(
+                    "{}/{}/input/bms_event_2/all",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ value | join(', ') }}".to_string()),
+                icon: Some("mdi:battery-alert-outline"),
                 ..base.clone()
             },
             Entity {
@@ -625,9 +729,10 @@ impl Config {
 
     fn ha_discovery_topic(&self, kind: &str, name: &str) -> String {
         format!(
-            "{}/{}/lxp_{}/{}/config",
+            "{}/{}/{}_{}/{}/config",
             self.mqtt_config.homeassistant().prefix(),
             kind,
+            self.mqtt_config.namespace(),
             self.inverter.datalog(),
             // The forward slash is used in some names (e.g. ac_charge/1) but
             // has semantic meaning in MQTT, so must be changed
@@ -649,7 +754,7 @@ impl Config {
                 self.inverter.datalog(),
                 name
             ),
-            unique_id: format!("lxp_{}_{}", self.inverter.datalog(), name),
+            unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
             name: label.to_string(),
             device: self.device(),
             availability: self.availability(),
@@ -678,7 +783,7 @@ impl Config {
                 register as u16,
             ),
             value_template: "{{ float(value) }}".to_string(),
-            unique_id: format!("lxp_{}_number_{:?}", self.inverter.datalog(), register),
+            unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
             device: self.device(),
             availability: self.availability(),
             min: 0.0,
@@ -712,7 +817,7 @@ impl Config {
             ),
             command_template: r#"{% set parts = value.split("-") %}{"start":"{{ parts[0] }}", "end":"{{ parts[1] }}"}"#.to_string(),
             value_template: r#"{{ value_json["start"] }}-{{ value_json["end"] }}"#.to_string(),
-            unique_id: format!("lxp_{}_text_{}", self.inverter.datalog(), name),
+            unique_id: format!("{}_{}_text_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
             device: self.device(),
             availability: self.availability(),
             pattern: r"([01]?[0-9]|2[0-3]):[0-5][0-9]-([01]?[0-9]|2[0-3]):[0-5][0-9]".to_string(),
@@ -726,14 +831,14 @@ impl Config {
     }
 
     fn unique_id(&self, name: &str) -> String {
-        format!("lxp_{}_{}", self.inverter.datalog(), name)
+        format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name)
     }
 
     fn device(&self) -> Device {
         Device {
-            identifiers: [format!("lxp_{}", self.inverter.datalog())],
+            identifiers: [format!("{}_{}", self.mqtt_config.namespace(), self.inverter.datalog())],
             manufacturer: "LuxPower".to_owned(),
-            name: format!("lxp_{}", self.inverter.datalog()),
+            name: format!("{}_{}", self.mqtt_config.namespace(), self.inverter.datalog()),
         }
     }
 
