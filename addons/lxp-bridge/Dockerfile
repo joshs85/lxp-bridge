@@ -1,16 +1,12 @@
-ARG BUILD_VERSION
 ARG BUILD_FROM
-
-FROM joshs85/lxp-bridge:${BUILD_VERSION} AS lxp-bridge
-
 FROM $BUILD_FROM
-COPY --from=lxp-bridge / /
 
-RUN echo "$MIRROR/alpine/edge/community" >> /etc/apk/repositories
-RUN apk update
-RUN apk add yq
+# Install required packages
+RUN apk add --no-cache yq
 
+# Copy the binary and scripts
 COPY run.sh /
 RUN chmod a+x /run.sh
 
+# Set the entrypoint
 CMD [ "/run.sh" ]
