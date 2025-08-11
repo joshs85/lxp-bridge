@@ -3,6 +3,6 @@ config.yaml
 docker-compose.yaml
 !/addon/config.yaml
 !/addon.dev/config.yaml
-!/addons/lxp-bridge/config.yaml
-!/addons/lxp-bridge-dev/config.yaml
+!/lxp-bridge/config.yaml
+!/lxp-bridge-dev/config.yaml
 config_real_system_debug.yaml
