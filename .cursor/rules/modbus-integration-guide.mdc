@@ -1,0 +1,40 @@
+# Modbus Integration Guide
+
+## Overview
+This guide covers the Modbus TCP integration between lxp-bridge and Luxpower inverters.
+
+## Modbus Protocol Implementation
+
+### Packet Structure
+- **Header**: Transaction ID, protocol identifier, length
+- **Function Code**: Read/Write operations for registers
+- **Data**: Register addresses and values
+- **CRC**: Error detection and validation
+
+### Register Types
+- **Input Registers**: Read-only real-time data (0-119)
+- **Holding Registers**: Read/write configuration data (0-279)
+- **Parameter Registers**: Special configuration parameters
+
+## Data Processing Pipeline
+
+1. **Raw Data Reception**: Receive Modbus packets from inverter
+2. **Packet Validation**: Verify CRC and packet structure
+3. **Register Extraction**: Parse register values from packet data
+4. **Data Validation**: Check values against expected ranges
+5. **Unit Conversion**: Convert raw values to appropriate units
+6. **Publishing**: MQTT messages for data distribution
+
+## Error Handling
+
+- **CRC Validation**: Ensure packet integrity
+- **Timeout Handling**: Manage unresponsive inverters
+- **Retry Logic**: Automatic retry for failed operations
+- **Connection Recovery**: Automatic reconnection on failure
+
+## Performance Considerations
+
+- **Batch Operations**: Group multiple register reads
+- **Connection Pooling**: Efficient connection management
+- **Rate Limiting**: Prevent inverter overload
+- **Caching**: Store frequently accessed values

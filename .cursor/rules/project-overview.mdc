@@ -1,0 +1,21 @@
+# LXP Bridge Project Overview
+
+## Core Components
+
+- **Main Application** ([src/main.rs](mdc:src/main.rs)): Entry point and application lifecycle
+- **Configuration** ([src/config.rs](mdc:src/config.rs)): YAML-based configuration management
+- **MQTT Client** ([src/mqtt.rs](mdc:src/mqtt.rs)): MQTT communication and message handling
+- **Home Assistant Integration** ([src/home_assistant.rs](mdc:src/home_assistant.rs)): HA device discovery and state management
+- **Inverter Communication** ([src/lxp/](mdc:src/lxp/)): Modbus TCP communication with Luxpower inverters
+- **Command Processing** ([src/command.rs](mdc:src/command.rs)): Command routing and execution
+- **Coordinator** ([src/coordinator/](mdc:src/coordinator/)): Central orchestration and data flow management
+- **Scheduler** ([src/scheduler.rs](mdc:src/scheduler.rs)): Time-based task scheduling (e.g., time synchronization)
+
+## Key Features
+
+- Support for multiple inverters
+- MQTT-based data publishing
+- Home Assistant device discovery
+- Modbus TCP communication
+- Configurable time synchronization
+- Reliable MQTT communication with retry logic and circuit breaker patterns

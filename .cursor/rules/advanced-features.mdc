@@ -1,0 +1,92 @@
+# Advanced Inverter Features
+
+## Grid Support Functions (Registers 181-250)
+
+### Volt-Watt Control (Registers 181-184)
+**Purpose**: Reduce PV power output based on grid voltage
+**Implementation**:
+- **V1** (181): Start voltage for power reduction (0.1V)
+- **V2** (182): Full reduction voltage (0.1V)
+- **Delay Time** (183): Response delay in ms/cycles
+- **P2** (184): Power reduction percentage at V2
+
+### Volt-Var Control (Registers 185-188)
+**Purpose**: Adjust reactive power based on grid voltage
+**Parameters**:
+- **Vref** (185): Reference voltage for reactive power control
+- **Filter Time** (186): Voltage filtering time in seconds
+- **Q3/Q4** (187-188): Reactive power at voltage points 3 and 4
+
+### QP Priority Control (Registers 189-192)
+**Purpose**: Prioritize power quality over energy production
+**Power Levels**:
+- **P1-P4** (189-192): Power percentage at priority points
+- Used for grid stability and power quality management
+
+## Time-of-Use (TOU) Settings (Registers 202-210)
+**Purpose**: Optimize energy usage based on time periods
+**Configuration**:
+- **Enable Flag** (202): TOU functionality on/off
+- **Period 1** (203-206): Start/end times and charge/discharge rates
+- **Period 2** (207-210): Second time period settings
+**Use Cases**:
+- Peak/off-peak rate optimization
+- Grid demand response
+- Battery optimization strategies
+
+## Battery Management Advanced (Registers 211-216)
+**Temperature Compensation**:
+- **Coefficient** (211): Temperature compensation factor
+- **Reference** (212): Reference temperature for compensation
+**Equalization**:
+- **Voltage** (213): Equalization charge voltage
+- **Time** (214): Equalization duration
+- **Interval** (215): Time between equalization cycles
+- **SOC Threshold** (216): Minimum SOC for equalization
+
+## Grid Stability Features
+**Ride-Through Capability**:
+- **Voltage Ride-Through** (217): Grid voltage fluctuation tolerance
+- **Frequency Ride-Through** (218): Grid frequency variation tolerance
+**Protection Systems**:
+- **Anti-Islanding** (219-220): Grid loss detection and timeout
+- **Grid Loss Detection** (221): Time to detect grid loss
+- **Reconnection Delay** (222): Delay before reconnecting to grid
+
+## Load Management (Registers 223-227)
+**Load Shedding**:
+- **Enable** (223): Load shedding functionality
+- **Priority** (224): Load shedding priority levels
+- **Voltage Threshold** (225): Voltage level for load shedding
+- **SOC Threshold** (226): Battery level for load shedding
+- **Power Threshold** (227): Power level for load shedding
+
+## Implementation Guidelines
+
+### Feature Configuration
+- Read current settings before modifying
+- Validate parameter ranges against hardware limits
+- Implement gradual changes for critical parameters
+- Log all configuration modifications
+
+### Grid Support Coordination
+- Coordinate Volt-Watt and Volt-Var functions
+- Implement proper hysteresis for voltage-based controls
+- Monitor grid conditions for optimal response
+- Balance power quality with energy production
+
+### Safety Considerations
+- Implement failsafe values for critical parameters
+- Monitor system response to configuration changes
+- Provide manual override capabilities
+- Alert operators to significant parameter changes
+
+### Performance Optimization
+- Use appropriate polling rates for different features
+- Implement caching for frequently accessed parameters
+- Monitor feature performance and efficiency
+- Optimize response times for grid support functions
+description:
+globs:
+alwaysApply: false
+---

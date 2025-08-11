@@ -1,0 +1,32 @@
+# Testing Guidelines
+
+## Test Structure
+- Unit tests are in [tests/](mdc:tests/) directory
+- Integration tests are in [integration_tests/](mdc:integration_tests/)
+- Use [tests/common.rs](mdc:tests/common.rs) for shared test utilities
+
+## Test Patterns
+- Use `#[tokio::test]` for async tests
+- Mock external dependencies using the `mocks` feature
+- Test error conditions and edge cases
+- Verify graceful error handling without task termination
+
+## Reliability Testing
+- Test MQTT disconnection and reconnection scenarios
+- Verify circuit breaker behavior under failure conditions
+- Test channel overflow scenarios
+- Validate exponential backoff implementations
+
+## Test Data
+- Use fixtures from [integration_tests/fixtures/](mdc:integration_tests/fixtures/)
+- Test with realistic packet data from [integration_tests/fixtures/](mdc:integration_tests/fixtures/)
+- Verify packet decoding with known good data
+
+## Performance Testing
+- Test channel performance under high message volumes
+- Verify memory usage patterns
+- Test reconnection timing and backoff behavior
+description:
+globs:
+alwaysApply: false
+---

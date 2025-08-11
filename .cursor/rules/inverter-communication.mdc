@@ -1,0 +1,35 @@
+# Inverter Communication Guide
+
+## Overview
+This guide covers the communication patterns between lxp-bridge and Luxpower inverters using Modbus TCP protocol.
+
+## Communication Flow
+
+1. **Connection**: Establish TCP connection to inverter
+2. **Authentication**: Send serial number and datalog credentials
+3. **Data Reading**: Poll input registers for real-time data
+4. **Command Processing**: Handle MQTT commands for inverter control
+5. **Channel Publishing**: Send processed data to MQTT
+6. **Home Assistant Integration**: Publish device discovery and state updates
+
+## Key Components
+
+- **Inverter Module** ([src/lxp/inverter.rs](mdc:src/lxp/inverter.rs)): Manages individual inverter connections
+- **Packet Handling** ([src/lxp/packet.rs](mdc:src/lxp/packet.rs)): Modbus packet encoding/decoding
+- **Command Processing** ([src/command.rs](mdc:src/command.rs)): MQTT command routing
+- **Coordinator** ([src/coordinator/](mdc:src/coordinator/)): Orchestrates communication flow
+
+## Data Flow
+
+1. Inverter broadcasts input register data
+2. lxp-bridge receives and decodes packets
+3. Data is processed and formatted for MQTT
+4. Messages are published to configured MQTT topics
+5. Home Assistant receives device state updates
+
+## Error Handling
+
+- Automatic reconnection on connection loss
+- Timeout handling for unresponsive inverters
+- Graceful degradation when communication fails
+- Comprehensive logging for debugging

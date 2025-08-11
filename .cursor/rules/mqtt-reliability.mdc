@@ -1,0 +1,30 @@
+# MQTT Reliability Patterns
+
+## Connection Management
+- Implement automatic reconnection with exponential backoff
+- Handle `Incoming::Disconnect` events gracefully
+- Use configurable reconnection delays from [src/config.rs](mdc:src/config.rs)
+
+## Circuit Breaker Implementation
+- Use the `CircuitBreaker` struct to prevent cascading failures
+- Monitor failure counts and implement state transitions
+- Reject requests when circuit is open to protect system resources
+
+## Error Recovery
+- Implement retry logic with configurable `max_retries`
+- Track consecutive failures and trigger circuit breaker when threshold is exceeded
+- Use exponential backoff for retry attempts
+
+## Message Publishing
+- Handle publish failures gracefully without terminating the sender loop
+- Log errors and continue processing other messages
+- Implement proper QoS handling for message delivery guarantees
+
+## Health Monitoring
+- Expose circuit breaker status through `get_circuit_breaker_info()`
+- Monitor channel health to prevent buffer overflows
+- Log health status for debugging and monitoring
+description:
+globs:
+alwaysApply: false
+---

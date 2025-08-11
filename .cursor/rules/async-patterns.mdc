@@ -1,0 +1,30 @@
+# Async Programming Patterns
+
+## Channel Communication
+- Use `tokio::sync::broadcast` channels for inter-component communication
+- Buffer size is 8192 messages - monitor for overflow warnings
+- Implement channel health checks in [src/channels.rs](mdc:src/channels.rs)
+
+## Task Management
+- Use `futures::try_join!` for concurrent task execution
+- Implement graceful shutdown with proper error handling
+- Use `tokio::time::interval` for periodic tasks
+
+## Error Handling in Async Contexts
+- Avoid blocking operations in async functions
+- Use `tokio::time::timeout` for operations that might hang
+- Implement proper error propagation through Result types
+
+## Reconnection Patterns
+- Implement exponential backoff for network reconnections
+- Use `tokio::time::sleep` for delays between attempts
+- Handle connection failures gracefully without terminating tasks
+
+## Resource Management
+- Use `Arc<Mutex<T>>` or `Arc<RwLock<T>>` for shared state
+- Implement proper cleanup in async contexts
+- Monitor resource usage to prevent memory leaks
+description:
+globs:
+alwaysApply: false
+---
