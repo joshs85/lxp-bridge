@@ -5,7 +5,7 @@
 # docker push joshs85/lxp-bridge:latest
 #
 
-FROM rust:latest as builder
+FROM rust:1.82 AS builder
 WORKDIR /usr/src/lxp-bridge
 COPY Cargo.toml .
 COPY Cargo.lock .

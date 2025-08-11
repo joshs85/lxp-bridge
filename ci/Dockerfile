@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM rust:1.71.1 as builder
+FROM --platform=$BUILDPLATFORM rust:1.82 AS builder
 ARG TARGETPLATFORM
 WORKDIR /usr/src/lxp-bridge
 COPY Cargo.toml .
@@ -7,8 +7,8 @@ COPY .cargo .cargo
 COPY src src
 COPY ci ci
 RUN ./ci/docker-buildx-platform-setup.sh $TARGETPLATFORM
-ENV OPENSSL_LIB_DIR /openssl-1.1.1s
-ENV OPENSSL_INCLUDE_DIR /openssl-1.1.1s/include
+ENV OPENSSL_LIB_DIR=/openssl-1.1.1s
+ENV OPENSSL_INCLUDE_DIR=/openssl-1.1.1s/include
 RUN rustup target add $(cat /rust_target.txt)
 RUN cargo install --path . --target $(cat /rust_target.txt)
 
