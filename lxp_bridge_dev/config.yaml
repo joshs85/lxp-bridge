@@ -56,9 +56,8 @@ schema:
     username: str
     password: password
     namespace: str
-    homeassistant:
-      enabled: bool
-      prefix: str
+    homeassistant_enabled: bool
+    homeassistant_prefix: str
     publish_individual_input: bool
     max_retries: int
     circuit_breaker_threshold: int
