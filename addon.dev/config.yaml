@@ -1,18 +1,14 @@
-name: lxp-bridge (dev version)
-version: dev
-slug: lxp-bridge-dev
-description: Allows local communication with Luxpower inverters and bridges it to MQTT
+name: "lxp-bridge-dev"
+version: "0.15.0-dev"
+slug: "lxp-bridge-dev"
+description: "Allows local communication with Luxpower inverters and bridges it to MQTT"
 arch:
-- armv7
-- aarch64
-- amd64
+  - aarch64
+  - amd64
+  - armv7
 url: "https://github.com/joshs85/lxp-bridge"
 init: false
-startup: application
-homeassistant_api: false
-ingress: false
-ingress_port: 0
-panel_icon: mdi:flash
+legacy: true
 options:
   loglevel: info
   inverters:
