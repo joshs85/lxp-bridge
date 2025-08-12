@@ -26,7 +26,7 @@ jobs:
 
       - name: Get the version
         id: vars
-        run: echo tag=$(echo ${{github.ref_name}} | sed 's/^v//') >> $GITHUB_OUTPUT
+        run: echo tag=$(echo ${{github.ref_name}}) >> $GITHUB_OUTPUT
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -34,13 +34,8 @@ jobs:
           context: .
           file: ci/Dockerfile
           push: true
-          tags: |
-            joshs85/lxp-bridge:latest
-            joshs85/lxp-bridge:${{steps.vars.outputs.tag}}
-            joshs85/lxp-bridge:v${{steps.vars.outputs.tag}}
+          tags: joshs85/lxp-bridge:latest,joshs85/lxp-bridge:${{steps.vars.outputs.tag}}
           platforms: |
             linux/amd64
             linux/arm64
             linux/arm/v7
-          cache-from: type=gha
-          cache-to: type=gha,mode=max

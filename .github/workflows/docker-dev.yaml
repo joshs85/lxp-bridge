@@ -30,11 +30,8 @@ jobs:
           context: .
           file: ci/Dockerfile
           push: true
-          tags: |
-            joshs85/lxp-bridge:dev
+          tags: joshs85/lxp-bridge:dev
           platforms: |
             linux/amd64
             linux/arm64
             linux/arm/v7
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
