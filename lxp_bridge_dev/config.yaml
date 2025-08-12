@@ -1,6 +1,6 @@
-name: "lxp-bridge-dev"
-version: "0.15.0-dev"
-slug: "lxp-bridge-dev"
+name: "LXP Bridge (dev)"
+version: "dev"
+slug: "lxp_bridge_dev"
 description: "Allows local communication with Luxpower inverters and bridges it to MQTT"
 arch:
   - aarch64

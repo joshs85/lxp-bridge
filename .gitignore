@@ -1,6 +1,6 @@
 /target
 config.yaml
 docker-compose.yaml
-!/addon/config.yaml
-!/addon.dev/config.yaml
+!/lxp_bridge/config.yaml
+!/lxp_bridge_dev/config.yaml
 config_real_system_debug.yaml
