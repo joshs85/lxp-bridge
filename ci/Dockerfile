@@ -1,19 +1,26 @@
-FROM --platform=$BUILDPLATFORM rust:1.82 AS builder
-ARG TARGETPLATFORM
+FROM --platform=$BUILDPLATFORM rust:1.89-slim AS builder
 WORKDIR /usr/src/lxp-bridge
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY Cargo.toml .
 COPY Cargo.lock .
 COPY .cargo .cargo
 COPY src src
 COPY ci ci
-RUN ./ci/docker-buildx-platform-setup.sh $TARGETPLATFORM
-ENV OPENSSL_LIB_DIR=/openssl-1.1.1s
-ENV OPENSSL_INCLUDE_DIR=/openssl-1.1.1s/include
-RUN rustup target add $(cat /rust_target.txt)
-RUN cargo install --path . --target $(cat /rust_target.txt)
 
+# Build natively for the current platform
+RUN cargo install --path .
 
-FROM debian:bullseye-slim
-RUN apt-get update && apt-get install -y libssl1.1 && rm -rf /var/lib/apt/lists/*
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y \
+    libssl3 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/cargo/bin/lxp-bridge /usr/local/bin/lxp-bridge
 ENTRYPOINT ["lxp-bridge", "-c", "/etc/config.yaml"]

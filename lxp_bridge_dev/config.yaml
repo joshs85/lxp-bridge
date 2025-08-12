@@ -6,19 +6,24 @@ arch:
   - aarch64
   - amd64
   - armv7
+build_from:
+  aarch64: "ghcr.io/home-assistant/aarch64-base:latest"
+  amd64: "ghcr.io/home-assistant/amd64-base:latest"
+  armv7: "ghcr.io/home-assistant/armv7-base:latest"
 url: "https://github.com/joshs85/lxp-bridge"
 init: false
 legacy: true
+startup: application
 options:
   loglevel: info
   inverters:
-  - enabled: true
-    host: ""
-    port: 8000
-    serial: ""
-    datalog: ""
-    heartbeats: false
-    publish_holdings_on_connect: true
+    - enabled: true
+      host: ""
+      port: 8000
+      serial: ""
+      datalog: ""
+      heartbeats: false
+      publish_holdings_on_connect: true
 
   mqtt:
     enabled: true

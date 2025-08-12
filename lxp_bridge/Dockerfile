@@ -1,15 +1,19 @@
-ARG BUILD_VERSION
 ARG BUILD_FROM
-
-FROM joshs85/lxp-bridge:${BUILD_VERSION} AS lxp-bridge
+ARG BUILD_VERSION
+ARG BUILD_ARCH
 
 FROM $BUILD_FROM
-COPY --from=lxp-bridge / /
 
-RUN echo "$MIRROR/alpine/edge/community" >> /etc/apk/repositories
-RUN apk update
-RUN apk add yq
+# Copy the lxp-bridge binary from the published image with version
+# Use BUILD_VERSION if set, otherwise default to 'latest'
+COPY --from=joshs85/lxp-bridge:${BUILD_VERSION:-latest} /usr/local/bin/lxp-bridge /usr/local/bin/lxp-bridge
 
+# Install required packages (Alpine uses apk, not apt)
+RUN \
+  apk add --no-cache \
+    yq
+
+# Copy add-on files
 COPY run.sh /
 RUN chmod a+x /run.sh
 
