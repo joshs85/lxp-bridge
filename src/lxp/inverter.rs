@@ -297,7 +297,7 @@ impl Inverter {
                         let bytes = lxp::packet::TcpFrameFactory::build(&packet);
                         debug!("inverter {}: TX {:?}", self.config().datalog(), bytes);
                         trace!("inverter {}: TX hex: {:02X?}", self.config().datalog(), bytes);
-                        trace!("inverter {}: TX binary: {:?}", self.config().datalog(), bytes.iter().map(|&b| format!("{:08b}", b)).collect::<Vec<String>>());
+                                                 trace!("inverter {}: TX binary: {:?}", self.config().datalog(), bytes.iter().map(|&b| format!("{b:08b}")).collect::<Vec<String>>());
                         socket.write_all(&bytes).await?
                     }
                 }

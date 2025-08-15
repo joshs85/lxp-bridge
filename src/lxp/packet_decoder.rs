@@ -51,7 +51,7 @@ impl Decoder for PacketDecoder {
         // Enhanced binary logging for debugging
         debug!("{} bytes in: {:?}", data.len(), data);
         trace!("Raw binary data (hex): {:02X?}", data);
-        trace!("Raw binary data (binary): {:?}", data.iter().map(|&b| format!("{:08b}", b)).collect::<Vec<String>>());
+        trace!("Raw binary data (binary): {:?}", data.iter().map(|&b| format!("{b:08b}")).collect::<Vec<String>>());
 
         match lxp::packet::Parser::parse(data) {
             Ok(packet) => Ok(Some(packet)),

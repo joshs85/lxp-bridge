@@ -67,7 +67,7 @@ impl Message {
         datalog: lxp::inverter::Serial,
     ) -> Result<Message> {
         Ok(mqtt::Message {
-            topic: format!("{}/inputs/all", datalog),
+            topic: format!("{datalog}/inputs/all"),
             retain: false,
             payload: serde_json::to_string(&inputs)?,
         })
@@ -213,15 +213,22 @@ impl Message {
             ["set", "discharge_cutoff_soc_limit_pct"] => {
                 DischargeCutoffSocLimit(inverter, self.payload_int()?)
             }
+            // Register 110 switches
+            ["set", "pv_off_grid"] => PvOffGrid(inverter, self.payload_bool()),
+            ["set", "fast_zero_export"] => FastZeroExport(inverter, self.payload_bool()),
+            ["set", "micro_grid"] => MicroGrid(inverter, self.payload_bool()),
+            ["set", "shared_battery"] => SharedBattery(inverter, self.payload_bool()),
+            ["set", "charge_last"] => ChargeLast(inverter, self.payload_bool()),
+
             ["set", "eps"] => EPS(inverter, self.payload_bool()),
             ["set", "ovf_load_derate"] => OVFLoadDerate(inverter, self.payload_bool()),
             ["set", "frequency_active_open_loop_response_time"] => DelayTimeForOverFDerate(inverter, self.payload_int()?),
             ["set", "ovf_derate_pct_per_hz"] => OVFDeratePctPerHz(inverter, self.payload_int()?),
-            ["set", "ovf_derate_start_hz"] => OVFDerateStart(inverter, self.payload_int()?),
-            ["set", "ovf_derate_end_hz"] => OVFDerateEnd(inverter, self.payload_int()?),
+            ["set", "ovf_derate_start_hz"] => OVFDerateStart(inverter, self.payload_frequency_hz()?),
+            ["set", "ovf_derate_end_hz"] => OVFDerateEnd(inverter, self.payload_frequency_hz()?),
             ["set", "under_fr_increase_pct_per_hz"] => UnderFrIncreasePctPerHz(inverter, self.payload_int()?),
-            ["set", "under_fr_droop_start_hz"] => UnderFrDroopStart(inverter, self.payload_int()?),
-            ["set", "under_fr_droop_end_hz"] => UnderFrDroopEnd(inverter, self.payload_int()?),
+            ["set", "under_fr_droop_start_hz"] => UnderFrDroopStart(inverter, self.payload_frequency_hz()?),
+            ["set", "under_fr_droop_end_hz"] => UnderFrDroopEnd(inverter, self.payload_frequency_hz()?),
             ["set", "drms"] => DRMS(inverter, self.payload_bool()),
             ["set", "lvrt"] => LVRT(inverter, self.payload_bool()),
             ["set", "anti_island"] => AntiIslanding(inverter, self.payload_bool()),
@@ -233,6 +240,7 @@ impl Message {
             ["set", "gfci"] => GFCI(inverter, self.payload_bool()),
             ["set", "dci"] => DCI(inverter, self.payload_bool()),
             ["set", "feed_in_grid"] => FeedInGrid(inverter, self.payload_bool()),
+            ["restart"] => RestartInverter(inverter),
 
             [..] => bail!("unhandled: {:?}", self),
         };
@@ -298,6 +306,17 @@ impl Message {
             .parse()
             .map_err(|err| anyhow!("payload_int: {}", err))
     }
+
+    fn payload_frequency_hz(&self) -> Result<u16> {
+        // Parse as float first, then multiply by 100 and convert to integer
+        // This handles cases where user enters 59.99 Hz -> sends 5999 to inverter
+        let freq: f64 = self.payload
+            .parse()
+            .map_err(|err| anyhow!("payload_frequency_hz: {}", err))?;
+        Ok((freq * 100.0).round() as u16)
+    }
+
+
 
     fn payload_bool(&self) -> bool {
         matches!(
@@ -400,7 +419,7 @@ impl Mqtt {
                 )
                 .await?;
 
-            if self.config.mqtt().homeassistant().enabled() {
+            if self.config.mqtt().homeassistant_enabled() {
                 let ha = home_assistant::Config::new(&inverter, &self.config.mqtt());
                 for msg in ha.all()?.into_iter() {
                     let _ = client

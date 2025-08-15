@@ -20,7 +20,7 @@ pub async fn app() -> Result<()> {
 
     let config = ConfigWrapper::new(options.config_file).unwrap_or_else(|err| {
         // no logging available yet, so eprintln! will have to do
-        eprintln!("Error: {:?}", err);
+        eprintln!("Error: {err:?}");
         std::process::exit(255);
     });
 

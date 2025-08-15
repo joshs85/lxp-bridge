@@ -541,7 +541,7 @@ pub enum DeviceFunction {
     // WriteMultiError = 144
 } // }}}
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
 #[repr(u16)]
 pub enum Register {
     Register21 = 21,             // not sure of a better name for this one..
@@ -563,6 +563,7 @@ pub enum Register {
     UnderFrDroopStart = 134,      // Frequency Active Power Mode Under frequency Droop Start dbUF(Hz)
     UnderFrDroopEnd = 135,        // Frequency Active Power Mode Under frequency Droop End (Hz)
     UnderFrIncreasePctPerHz = 193,// Frequency Active Power Mode Under frequency Droop kUF (%/Hz)
+    ResetSetting = 11,              // Reset settings register (bit 7 = InvReboot)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
@@ -585,6 +586,24 @@ pub enum RegisterBit {
     GFCIEnable = 1 << 13,
     DCIEnable = 1 << 14,
     FeedInGridEnable = 1 << 15,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[repr(u16)]
+pub enum Register110Bit {
+    // Register 110
+    PvOffGridEnable = 1 << 0,
+    FastZeroExportEnable = 1 << 1,
+    MicroGridEnable = 1 << 2,
+    SharedBatteryEnable = 1 << 3,
+    ChargeLastEnable = 1 << 4,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[repr(u16)]
+pub enum Register11Bit {
+    // Register 11 - Reset settings
+    InvReboot = 1 << 7,            // Inverter reboot bit
 }
 
 // Register21Bits {{{
@@ -665,6 +684,72 @@ impl Register110Bits {
             shared_battery_en: Self::is_bit_set(data, 1 << 3),
             charge_last_en: Self::is_bit_set(data, 1 << 4),
         }
+    }
+} // }}}
+
+// SystemInfo {{{
+#[derive(Clone, Debug, Serialize)]
+pub struct SystemInfo {
+    pub model: String,
+    pub serial_number: String,
+    pub firmware_version: String,
+}
+
+impl SystemInfo {
+    pub fn new(model_reg0: u16, model_reg1: u16, serial_regs: [u16; 5], firmware_reg: u16) -> Self {
+        // Decode model information from registers 0-1
+        let model = Self::decode_model(model_reg0, model_reg1);
+        
+        // Decode serial number from registers 2-6
+        let serial_number = Self::decode_serial_number(serial_regs);
+        
+        // Decode firmware version from register 7
+        let firmware_version = Self::decode_firmware(firmware_reg);
+        
+        Self {
+            model,
+            serial_number,
+            firmware_version,
+        }
+    }
+    
+    fn decode_model(reg0: u16, reg1: u16) -> String {
+        // Extract individual fields from model registers
+        let lithium_type = (reg0 >> 12) & 0x0F;
+        let power_rating = (reg0 >> 8) & 0x0F;
+        let lead_acid_type = (reg0 >> 4) & 0x0F;
+        let _rule_mask = reg0 & 0x0F;
+        let battery_type = (reg1 >> 12) & 0x0F;
+        let meter_brand = (reg1 >> 8) & 0x0F;
+        let _measurement = (reg1 >> 4) & 0x0F;
+        let _rule = reg1 & 0x0F;
+        
+        format!("EG4-{power_rating}kW-LV (Li:{lithium_type}, Pb:{lead_acid_type}, Bat:{battery_type}, Meter:{meter_brand})")
+    }
+    
+    fn decode_serial_number(regs: [u16; 5]) -> String {
+        // Combine 5 registers into a serial number string
+        let mut serial = String::new();
+        for reg in regs.iter() {
+            // Each register contains 2 ASCII characters
+            let high_byte = ((reg >> 8) & 0xFF) as u8;
+            let low_byte = (reg & 0xFF) as u8;
+            
+            if (32..=126).contains(&high_byte) {
+                serial.push(high_byte as char);
+            }
+            if (32..=126).contains(&low_byte) {
+                serial.push(low_byte as char);
+            }
+        }
+        serial
+    }
+    
+    fn decode_firmware(reg: u16) -> String {
+        // Decode firmware version from register 7
+        let major = (reg >> 8) & 0xFF;
+        let minor = reg & 0xFF;
+        format!("v{major}.{minor}")
     }
 } // }}}
 

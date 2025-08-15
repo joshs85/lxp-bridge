@@ -338,6 +338,67 @@ impl Coordinator {
                 self.set_hold(inverter, Register::DischgCutOffSocEod, pct)
                     .await
             }
+            // Register 110 switches
+            PvOffGrid(inverter, enable) => {
+                self.update_hold_register110(
+                    inverter,
+                    110_u16,
+                    lxp::packet::Register110Bit::PvOffGridEnable,
+                    enable,
+                )
+                .await?;
+                Ok(())
+            }
+            FastZeroExport(inverter, enable) => {
+                self.update_hold_register110(
+                    inverter,
+                    110_u16,
+                    lxp::packet::Register110Bit::FastZeroExportEnable,
+                    enable,
+                )
+                .await?;
+                Ok(())
+            }
+            MicroGrid(inverter, enable) => {
+                self.update_hold_register110(
+                    inverter,
+                    110_u16,
+                    lxp::packet::Register110Bit::MicroGridEnable,
+                    enable,
+                )
+                .await?;
+                Ok(())
+            }
+            SharedBattery(inverter, enable) => {
+                self.update_hold_register110(
+                    inverter,
+                    110_u16,
+                    lxp::packet::Register110Bit::SharedBatteryEnable,
+                    enable,
+                )
+                .await?;
+                Ok(())
+            }
+            ChargeLast(inverter, enable) => {
+                self.update_hold_register110(
+                    inverter,
+                    110_u16,
+                    lxp::packet::Register110Bit::ChargeLastEnable,
+                    enable,
+                )
+                .await?;
+                Ok(())
+            }
+            RestartInverter(inverter) => {
+                // Set bit 7 of register 11 to 1 to restart the inverter
+                self.update_hold_register11(
+                    inverter,
+                    Register::ResetSetting.into(),
+                    lxp::packet::Register11Bit::InvReboot,
+                    true,
+                )
+                .await
+            }
         }
     }
 
@@ -474,6 +535,55 @@ impl Coordinator {
         Ok(())
     }
 
+    async fn update_hold_register110(
+        &self,
+        inverter: config::Inverter,
+        register: u16,
+        bit: lxp::packet::Register110Bit,
+        enable: bool,
+    ) -> Result<()> {
+        commands::update_hold_register110::UpdateHoldRegister110::new(
+            self.channels.clone(),
+            inverter.clone(),
+            register,
+            bit,
+            enable,
+        )
+        .run()
+        .await?;
+        Ok(())
+    }
+
+    async fn update_hold_register11(
+        &self,
+        inverter: config::Inverter,
+        register: u16,
+        bit: lxp::packet::Register11Bit,
+        enable: bool,
+    ) -> Result<()> {
+        // For register 11, we need to read the current value, modify the bit, then write it back
+        let bit_value = bit as u16;
+        
+        // Read the current value from the register
+        let packet = commands::read_hold::ReadHold::new(
+            self.channels.clone(),
+            inverter.clone(),
+            register,
+            1,
+        )
+        .run()
+        .await?;
+        
+        let current_value = packet.value();
+        let new_value = if enable {
+            current_value | bit_value
+        } else {
+            current_value & !bit_value
+        };
+        
+        self.set_hold(inverter, register, new_value).await
+    }
+
     async fn inverter_receiver(&self) -> Result<()> {
         use lxp::inverter::ChannelData::*;
 
@@ -521,11 +631,11 @@ impl Coordinator {
             // with the contents. If we got the third (of three) packets, send out the combined
             // MQTT message with all the data.
             if td.device_function == DeviceFunction::ReadInput {
-                use lxp::packet::{ReadInput, ReadInputs};
+                use lxp::packet::ReadInput;
 
                 let entry = inputs_store
                     .entry(td.datalog)
-                    .or_insert_with(ReadInputs::default);
+                    .or_default();
 
                 match td.read_input() {
                     Ok(ReadInput::ReadInputAll(r_all)) => {

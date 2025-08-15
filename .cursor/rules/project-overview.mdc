@@ -1,21 +1,47 @@
 # LXP Bridge Project Overview
 
-## Core Components
+## Project Purpose
+LXP Bridge is a Rust-based application that provides local communication with LuxPower inverters, enabling monitoring and control without dependence on manufacturer servers. It integrates with Home Assistant and MQTT for home automation.
 
-- **Main Application** ([src/main.rs](mdc:src/main.rs)): Entry point and application lifecycle
-- **Configuration** ([src/config.rs](mdc:src/config.rs)): YAML-based configuration management
-- **MQTT Client** ([src/mqtt.rs](mdc:src/mqtt.rs)): MQTT communication and message handling
-- **Home Assistant Integration** ([src/home_assistant.rs](mdc:src/home_assistant.rs)): HA device discovery and state management
-- **Inverter Communication** ([src/lxp/](mdc:src/lxp/)): Modbus TCP communication with Luxpower inverters
-- **Command Processing** ([src/command.rs](mdc:src/command.rs)): Command routing and execution
-- **Coordinator** ([src/coordinator/](mdc:src/coordinator/)): Central orchestration and data flow management
-- **Scheduler** ([src/scheduler.rs](mdc:src/scheduler.rs)): Time-based task scheduling (e.g., time synchronization)
+## System Architecture
+The application follows a modular, async architecture:
+
+1. **Main Entry Point** ([src/main.rs](mdc:src/main.rs)): Handles signals and starts the application
+2. **Core Application** ([src/lib.rs](mdc:src/lib.rs)): Orchestrates all components
+3. **Coordinator** ([src/coordinator/mod.rs](mdc:src/coordinator/mod.rs)): Central hub for inverter and MQTT communication
+4. **LXP Protocol** ([src/lxp/](mdc:src/lxp/)): Handles inverter communication protocol
+5. **MQTT Integration** ([src/mqtt.rs](mdc:src/mqtt.rs)): External communication layer
+6. **Home Assistant** ([src/home_assistant.rs](mdc:src/home_assistant.rs)): HA add-on integration
 
 ## Key Features
+- **Local Communication**: Direct inverter communication without cloud dependencies
+- **MQTT Integration**: Publish/subscribe messaging for external systems
+- **Home Assistant**: Native add-on with automatic device discovery
+- **Async Architecture**: High-performance async/await patterns with Tokio
+- **Protocol Support**: Modbus-based communication with LuxPower inverters
+- **Configuration Driven**: YAML-based configuration with environment overrides
 
-- Support for multiple inverters
-- MQTT-based data publishing
-- Home Assistant device discovery
-- Modbus TCP communication
-- Configurable time synchronization
-- Reliable MQTT communication with retry logic and circuit breaker patterns
+## Protocol Documentation
+**Essential References for Inverter Communication**:
+- **[doc/MODBUS_PROTOCOL.md](mdc:doc/MODBUS_PROTOCOL.md)** - Complete Modbus RTU protocol specification
+- **[doc/HOLD_REGISTERS.md](mdc:doc/HOLD_REGISTERS.md)** - All read/write hold registers
+- **[doc/INPUT_REGISTERS.md](mdc:doc/INPUT_REGISTERS.md)** - All read-only input registers  
+- **[doc/REGISTER_MAPPING.md](mdc:doc/REGISTER_MAPPING.md)** - Quick reference and implementation guide
+
+## Development Workflow
+- **Testing**: Unit tests in [tests/](mdc:tests/), integration tests in [integration_tests/](mdc:integration_tests/)
+- **Docker**: Multi-stage builds for development and production
+- **Deployment**: Docker images, systemd service, and Home Assistant add-on
+- **Documentation**: Protocol specs, register mappings, and configuration guides
+
+## Technology Stack
+- **Language**: Rust 2021 edition
+- **Async Runtime**: Tokio with multi-threaded runtime
+- **Protocol Parsing**: Nom for binary protocol handling
+- **Serialization**: Serde with YAML/JSON support
+- **MQTT**: Rumqttc client
+- **Networking**: TCP/UDP communication for inverters
+description:
+globs:
+alwaysApply: false
+---

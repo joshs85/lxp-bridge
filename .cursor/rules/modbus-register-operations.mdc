@@ -1,0 +1,43 @@
+# Modbus Register Operations
+
+## Essential Documentation
+**ALWAYS** reference these files before implementing inverter communication:
+- **[doc/MODBUS_PROTOCOL.md](mdc:doc/MODBUS_PROTOCOL.md)** - Complete protocol specification
+- **[doc/HOLD_REGISTERS.md](mdc:doc/HOLD_REGISTERS.md)** - Read/write registers (0x03, 0x06, 0x10)
+- **[doc/INPUT_REGISTERS.md](mdc:doc/INPUT_REGISTERS.md)** - Read-only registers (0x04)
+- **[doc/REGISTER_MAPPING.md](mdc:doc/REGISTER_MAPPING.md)** - Quick reference guide
+
+## Function Codes
+- **0x03**: Read Hold Registers (multiple)
+- **0x04**: Read Input Registers (multiple)
+- **0x06**: Write Single Hold Register
+- **0x10**: Write Multiple Hold Registers
+
+## Critical Protocol Rules
+- **Maximum Registers**: 40 registers per query
+- **Group Boundaries**: Must start at 0, 40, 80, 120, 160, etc.
+- **Cross-Group Queries**: Split into multiple queries if crossing boundaries
+- **Example**: To read registers 38-40, use two queries: 38-39 and 40
+
+## Data Format
+- **Byte Order**: Little-endian
+- **Register Width**: 2 bytes (16-bit)
+- **16-bit Integers**: High and low byte order is reversed
+- **32-bit Integers**: High and low word order is reversed, byte order within each word is reversed
+
+## Common Register Groups
+- **System State**: Registers 0-9 (input registers)
+- **Power Monitoring**: Registers 10-19 (input registers)
+- **Function Control**: Register 21 (hold register)
+- **BMS Parameters**: Registers 81-106 (input registers)
+- **Advanced Control**: Register 110 (hold register)
+
+## Error Handling
+- Implement proper CRC16 validation
+- Handle communication timeouts
+- Retry failed operations with exponential backoff
+- Log all communication errors for debugging
+description:
+globs:
+alwaysApply: false
+---

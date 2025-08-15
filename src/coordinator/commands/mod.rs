@@ -5,4 +5,5 @@ pub mod set_hold;
 pub mod time_register_ops;
 pub mod timesync;
 pub mod update_hold;
+pub mod update_hold_register110;
 pub mod write_param;

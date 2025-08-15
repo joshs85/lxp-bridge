@@ -1,0 +1,48 @@
+# Coordinator and Command Patterns
+
+## Coordinator Architecture
+The [src/coordinator/mod.rs](mdc:src/coordinator/mod.rs) is the central orchestrator that:
+- Manages communication between inverters and MQTT
+- Processes commands and routes them to appropriate inverters
+- Maintains system health and monitoring
+
+## Command Processing
+- Commands are defined in [src/command.rs](mdc:src/command.rs)
+- Command implementations are in [src/coordinator/commands/](mdc:src/coordinator/commands/)
+- Use the `Command` enum for type-safe command handling
+- Implement `to_command()` method on MQTT messages for parsing
+
+## Command Module Structure
+- Each command type has its own module in [src/coordinator/commands/](mdc:src/coordinator/commands/)
+- Commands should implement proper error handling and validation
+- Use async functions for inverter communication
+- Return appropriate results that can be converted to MQTT responses
+
+## Channel Management
+- Use typed channel data with enums for different message types
+- Implement proper error handling for channel operations
+- Use health checks to monitor channel status
+- Handle shutdown signals gracefully
+
+## Inverter Communication
+- Commands should work with the inverter abstraction in [src/lxp/inverter.rs](mdc:src/lxp/inverter.rs)
+- Use proper serialization for register operations
+- Handle timeouts and connection failures
+- Implement retry logic where appropriate
+
+## Modbus Register Operations
+**CRITICAL**: All inverter communication must follow the Modbus protocol specifications:
+- **Protocol Reference**: [doc/MODBUS_PROTOCOL.md](mdc:doc/MODBUS_PROTOCOL.md) - Complete protocol specification
+- **Hold Registers**: [doc/HOLD_REGISTERS.md](mdc:doc/HOLD_REGISTERS.md) - For read/write operations (0x03, 0x06, 0x10)
+- **Input Registers**: [doc/INPUT_REGISTERS.md](mdc:doc/INPUT_REGISTERS.md) - For read-only monitoring (0x04)
+- **Quick Reference**: [doc/REGISTER_MAPPING.md](mdc:doc/REGISTER_MAPPING.md) - Overview and implementation notes
+
+## Register Query Rules
+- **Maximum Registers**: 40 registers per query
+- **Group Boundaries**: Must start at 0, 40, 80, 120, etc.
+- **Cross-Group Queries**: Split into multiple queries if crossing boundaries
+- **Example**: To read registers 38-40, use two queries: 38-39 and 40
+description:
+globs:
+alwaysApply: false
+---

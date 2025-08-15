@@ -120,3 +120,121 @@ async fn all_has_time_range_ac_charge_1() {
         payload: r#"{"name":"AC Charge Timeslot 1","state_topic":"lxp/2222222222/ac_charge/1","command_topic":"lxp/cmd/2222222222/set/ac_charge/1","command_template":"{% set parts = value.split(\"-\") %}{\"start\":\"{{ parts[0] }}\", \"end\":\"{{ parts[1] }}\"}","value_template":"{{ value_json[\"start\"] }}-{{ value_json[\"end\"] }}","unique_id":"lxp_2222222222_text_ac_charge/1","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"},"pattern":"([01]?[0-9]|2[0-3]):[0-5][0-9]-([01]?[0-9]|2[0-3]):[0-5][0-9]"}"#.to_string()
     }));
 }
+
+#[test]
+fn all_has_under_frequency_controls() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let ha = home_assistant::Config::new(&config.inverters[0], &config.mqtt);
+
+    let messages = ha.all().unwrap();
+
+    // Check that under frequency droop start control is present
+    let under_fr_start = messages
+        .iter()
+        .find(|m| m.topic.contains("UnderFrDroopStart"))
+        .expect("Under Frequency Droop Start control should be present");
+
+    assert!(under_fr_start.payload.contains("Under Frequency Droop Start (Hz)"));
+    assert!(under_fr_start.payload.contains("Hz"));
+    assert!(under_fr_start.payload.contains("0.0"));
+    assert!(under_fr_start.payload.contains("100.0"));
+    assert!(under_fr_start.payload.contains("0.01"));
+
+    // Check that under frequency droop end control is present
+    let under_fr_end = messages
+        .iter()
+        .find(|m| m.topic.contains("UnderFrDroopEnd"))
+        .expect("Under Frequency Droop End control should be present");
+
+    assert!(under_fr_end.payload.contains("Under Frequency Droop End (Hz)"));
+    assert!(under_fr_end.payload.contains("Hz"));
+    assert!(under_fr_end.payload.contains("0.0"));
+    assert!(under_fr_end.payload.contains("100.0"));
+    assert!(under_fr_end.payload.contains("0.01"));
+
+    // Verify both controls use the same configuration pattern as OVF controls
+    let ovf_start = messages
+        .iter()
+        .find(|m| m.topic.contains("OVFDerateStart"))
+        .expect("OVF Derate Start control should be present");
+
+    // Both should have similar configurations
+    assert_eq!(under_fr_start.payload.contains("Hz"), ovf_start.payload.contains("Hz"));
+    assert_eq!(under_fr_start.payload.contains("0.0"), ovf_start.payload.contains("0.0"));
+    assert_eq!(under_fr_start.payload.contains("100.0"), ovf_start.payload.contains("100.0"));
+    assert_eq!(under_fr_start.payload.contains("0.01"), ovf_start.payload.contains("0.01"));
+}
+
+#[test]
+fn under_frequency_controls_have_correct_topics() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let ha = home_assistant::Config::new(&config.inverters[0], &config.mqtt);
+
+    let messages = ha.all().unwrap();
+
+    // Check under frequency droop start topics
+    let under_fr_start = messages
+        .iter()
+        .find(|m| m.topic.contains("UnderFrDroopStart"))
+        .unwrap();
+
+    let payload: serde_json::Value = serde_json::from_str(&under_fr_start.payload).unwrap();
+    
+    // State topic should read from hold register
+    assert!(payload["state_topic"].as_str().unwrap().contains("hold/134"));
+    
+    // Command topic should send to set/hold register
+    assert!(payload["command_topic"].as_str().unwrap().contains("cmd"));
+    assert!(payload["command_topic"].as_str().unwrap().contains("set/hold/134"));
+
+    // Check under frequency droop end topics
+    let under_fr_end = messages
+        .iter()
+        .find(|m| m.topic.contains("UnderFrDroopEnd"))
+        .unwrap();
+
+    let payload: serde_json::Value = serde_json::from_str(&under_fr_end.payload).unwrap();
+    
+    // State topic should read from hold register
+    assert!(payload["state_topic"].as_str().unwrap().contains("hold/135"));
+    
+    // Command topic should send to set/hold register
+    assert!(payload["command_topic"].as_str().unwrap().contains("cmd"));
+    assert!(payload["command_topic"].as_str().unwrap().contains("set/hold/135"));
+}
+
+#[test]
+fn under_frequency_controls_have_correct_value_template() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let ha = home_assistant::Config::new(&config.inverters[0], &config.mqtt);
+
+    let messages = ha.all().unwrap();
+
+    // Check under frequency droop start value template
+    let under_fr_start = messages
+        .iter()
+        .find(|m| m.topic.contains("UnderFrDroopStart"))
+        .unwrap();
+
+    let payload: serde_json::Value = serde_json::from_str(&under_fr_start.payload).unwrap();
+    
+    // Value template should divide by 100 to convert from centi-Hz to Hz
+    assert_eq!(payload["value_template"], "{{ float(value) / 100 }}");
+
+    // Check under frequency droop end value template
+    let under_fr_end = messages
+        .iter()
+        .find(|m| m.topic.contains("UnderFrDroopEnd"))
+        .unwrap();
+
+    let payload: serde_json::Value = serde_json::from_str(&under_fr_end.payload).unwrap();
+    
+    // Value template should divide by 100 to convert from centi-Hz to Hz
+    assert_eq!(payload["value_template"], "{{ float(value) / 100 }}");
+}

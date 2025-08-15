@@ -63,10 +63,10 @@ fn mqtt_defaults() {
 
 #[test]
 fn homeassistant_defaults() {
-    let input = json!({});
-    let ha: config::HomeAssistant = serde_json::from_value(input).unwrap();
-    assert!(ha.enabled());
-    assert_eq!(ha.prefix(), "homeassistant");
+    let config = Factory::example_config_wrapped();
+    let mqtt = config.mqtt();
+    assert!(mqtt.homeassistant_enabled());
+    assert_eq!(mqtt.homeassistant_prefix(), "homeassistant");
 }
 
 #[test]

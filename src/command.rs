@@ -44,6 +44,14 @@ pub enum Command {
     AcChargeRate(config::Inverter, u16),
     AcChargeSocLimit(config::Inverter, u16),
     DischargeCutoffSocLimit(config::Inverter, u16),
+    // Register 110 switches
+    PvOffGrid(config::Inverter, bool),
+    FastZeroExport(config::Inverter, bool),
+    MicroGrid(config::Inverter, bool),
+    SharedBattery(config::Inverter, bool),
+    ChargeLast(config::Inverter, bool),
+    // System control
+    RestartInverter(config::Inverter),
 }
 
 impl Command {
@@ -123,8 +131,16 @@ impl Command {
             DischargeCutoffSocLimit(inverter, _) => {
                 format!("{}/set/discharge_cutoff_soc_limit_pct", inverter.datalog())
             }
+            // Register 110 switches
+            PvOffGrid(inverter, _) => format!("{}/set/pv_off_grid", inverter.datalog()),
+            FastZeroExport(inverter, _) => format!("{}/set/fast_zero_export", inverter.datalog()),
+            MicroGrid(inverter, _) => format!("{}/set/micro_grid", inverter.datalog()),
+            SharedBattery(inverter, _) => format!("{}/set/shared_battery", inverter.datalog()),
+            ChargeLast(inverter, _) => format!("{}/set/charge_last", inverter.datalog()),
+            // System control
+            RestartInverter(inverter) => format!("{}/restart", inverter.datalog()),
         };
 
-        format!("result/{}", rest)
+        format!("result/{rest}")
     }
 }

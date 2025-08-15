@@ -1,5 +1,5 @@
 name: "LXP Bridge"
-version: "0.15.0"
+version: "v0.16.0"
 slug: "lxp_bridge"
 description: "Allows local communication with Luxpower inverters and bridges it to MQTT"
 arch:
@@ -27,9 +27,8 @@ options:
     username: ""
     password: ""
     namespace: lxp
-    homeassistant:
-      enabled: true
-      prefix: homeassistant
+    homeassistant_enabled: true
+    homeassistant_prefix: "homeassistant"
     publish_individual_input: true
     max_retries: 3
     circuit_breaker_threshold: 5

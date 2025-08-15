@@ -1,0 +1,39 @@
+# LXP Bridge Rust Project Structure
+
+This is a Rust-based bridge application for communicating with LuxPower inverters. The project follows async/await patterns and has a modular architecture.
+
+## Entry Points
+- Main binary: [src/main.rs](mdc:src/main.rs) - Entry point with signal handling
+- Library: [src/lib.rs](mdc:src/lib.rs) - Core application logic and module organization
+
+## Core Architecture
+- **Coordinator**: [src/coordinator/mod.rs](mdc:src/coordinator/mod.rs) - Central orchestrator for inverter and MQTT communication
+- **LXP Protocol**: [src/lxp/mod.rs](mdc:src/lxp/mod.rs) - Inverter communication protocol implementation
+- **Channels**: [src/channels.rs](mdc:src/channels.rs) - Async communication channels between components
+- **MQTT**: [src/mqtt.rs](mdc:src/mqtt.rs) - MQTT client for external communication
+- **Home Assistant**: [src/home_assistant.rs](mdc:src/home_assistant.rs) - Home Assistant integration
+
+## Protocol Documentation
+**CRITICAL**: The following documentation files contain the complete Modbus protocol specification:
+- **[doc/MODBUS_PROTOCOL.md](mdc:doc/MODBUS_PROTOCOL.md)** - Complete Modbus RTU protocol specification
+- **[doc/HOLD_REGISTERS.md](mdc:doc/HOLD_REGISTERS.md)** - All read/write hold registers (0x03, 0x06, 0x10)
+- **[doc/INPUT_REGISTERS.md](mdc:doc/INPUT_REGISTERS.md)** - All read-only input registers (0x04)
+- **[doc/REGISTER_MAPPING.md](mdc:doc/REGISTER_MAPPING.md)** - Overview and quick reference guide
+
+## Key Patterns
+- Use `anyhow::Result` for error handling
+- Async/await with Tokio runtime
+- Broadcast channels for inter-component communication
+- Command pattern for inverter operations
+- Configuration-driven behavior via [src/config.rs](mdc:src/config.rs)
+
+## Dependencies
+- **Async Runtime**: Tokio with multi-threaded runtime
+- **Serialization**: Serde with YAML/JSON support
+- **Networking**: TCP/UDP communication for inverters
+- **MQTT**: Rumqttc for MQTT protocol
+- **Parsing**: Nom for binary protocol parsing
+description:
+globs:
+alwaysApply: false
+---

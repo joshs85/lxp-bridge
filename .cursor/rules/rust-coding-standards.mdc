@@ -1,0 +1,35 @@
+# Rust Coding Standards
+
+## Error Handling
+- Use `anyhow::Result` for application-level errors
+- Use `?` operator for propagating errors
+- Log errors with appropriate log levels: `error!`, `warn!`, `info!`, `debug!`, `trace!`
+- Handle errors gracefully in async contexts
+
+## Async/Await Patterns
+- Use `tokio::select!` for handling multiple async operations
+- Prefer `futures::try_join!` for concurrent operations that can fail
+- Use `futures::future::join_all` for concurrent operations that don't need error handling
+- Implement proper shutdown handling with signal handlers
+
+## Module Organization
+- Keep modules focused and single-purpose
+- Use `pub mod` declarations in [src/lib.rs](mdc:src/lib.rs)
+- Export commonly used types through [src/prelude.rs](mdc:src/prelude.rs)
+- Use `use crate::prelude::*;` for standard imports
+
+## Channel Communication
+- Use `tokio::sync::broadcast` channels for one-to-many communication
+- Implement proper channel health checking
+- Handle channel send/recv errors gracefully
+- Use typed channel data with enums
+
+## Testing
+- Place tests in [tests/](mdc:tests/) directory
+- Use `#[cfg(test)]` for test-only code
+- Mock external dependencies when possible
+- Test both success and error paths
+description:
+globs:
+alwaysApply: false
+---

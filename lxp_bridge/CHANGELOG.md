@@ -1,3 +1,27 @@
+# 0.16.0 - 12th August 2025
+
+* Added Home Assistant controls for Over Frequency Derate, Under Frequency Droop, Percent Per HZ for both.
+* Added switches for PV Off Grid Enable, Fast Zero Export Enable, Micro Grid Enable, Shared Battery Enable, Charge Last Enable
+
+# 0.15.0 - 11th August 2025
+
+* **BREAKING CHANGE**: Complete removal of database functionality (InfluxDB, MySQL, PostgreSQL, SQLite)
+* **BREAKING CHANGE**: Simplified configuration to focus on MQTT and Home Assistant only
+* **IMPROVEMENT**: Enhanced MQTT functionality
+  * Added `publish_individual_input` configuration option for granular input register publishing
+  * Improved MQTT reconnection logic and error handling
+  * Enhanced Home Assistant discovery and entity management
+* **IMPROVEMENT**: Code quality and reliability enhancements
+  * Improved error handling and logging
+  * Added health monitoring functionality
+* **IMPROVEMENT**: Updated dependencies and build system
+  * Updated serde dependencies to latest versions
+  * Enhanced Tokio runtime features for better performance
+  * Updated Docker build process
+* **IMPROVEMENT**: Enhanced integration testing
+  * Fixed mock inverter proxy reliability issues
+  * Added comprehensive test fixtures and examples
+  
 # 0.14.0 - 28th October 2024
 
 * Fixed bug with entity in HA.  Changed KWh to kWh

@@ -66,26 +66,7 @@ impl Inverter {
     }
 } // }}}
 
-// HomeAssistant {{{
-#[serde_as]
-#[derive(Clone, Debug, Deserialize)]
-pub struct HomeAssistant {
-    #[serde(default = "Config::default_enabled")]
-    pub enabled: bool,
 
-    #[serde(default = "Config::default_mqtt_homeassistant_prefix")]
-    pub prefix: String,
-}
-
-impl HomeAssistant {
-    pub fn enabled(&self) -> bool {
-        self.enabled
-    }
-
-    pub fn prefix(&self) -> &str {
-        &self.prefix
-    }
-} // }}}
 
 // Mqtt {{{
 #[derive(Clone, Debug, Deserialize)]
@@ -104,8 +85,11 @@ pub struct Mqtt {
     #[serde(default = "Config::default_mqtt_namespace")]
     pub namespace: String,
 
-    #[serde(default = "Config::default_mqtt_homeassistant")]
-    pub homeassistant: HomeAssistant,
+    #[serde(default = "Config::default_mqtt_homeassistant_enabled")]
+    pub homeassistant_enabled: bool,
+
+    #[serde(default = "Config::default_mqtt_homeassistant_prefix")]
+    pub homeassistant_prefix: String,
 
     pub publish_individual_input: Option<bool>,
 
@@ -147,8 +131,12 @@ impl Mqtt {
         &self.namespace
     }
 
-    pub fn homeassistant(&self) -> &HomeAssistant {
-        &self.homeassistant
+    pub fn homeassistant_enabled(&self) -> bool {
+        self.homeassistant_enabled
+    }
+
+    pub fn homeassistant_prefix(&self) -> &str {
+        &self.homeassistant_prefix
     }
 
     pub fn publish_individual_input(&self) -> bool {
@@ -219,7 +207,7 @@ impl ConfigWrapper {
         }
     }
 
-    pub fn inverters(&self) -> Ref<Vec<Inverter>> {
+    pub fn inverters(&self) -> Ref<'_, Vec<Inverter>> {
         Ref::map(self.config.borrow(), |b| &b.inverters)
     }
 
@@ -268,13 +256,13 @@ impl ConfigWrapper {
         Ok(r)
     }
 
-    pub fn mqtt(&self) -> Ref<Mqtt> {
+    pub fn mqtt(&self) -> Ref<'_, Mqtt> {
         Ref::map(self.config.borrow(), |b| &b.mqtt)
     }
 
 
 
-    pub fn scheduler(&self) -> Ref<Option<Scheduler>> {
+    pub fn scheduler(&self) -> Ref<'_, Option<Scheduler>> {
         Ref::map(self.config.borrow(), |b| &b.scheduler)
     }
 
@@ -312,11 +300,8 @@ impl Config {
         "lxp".to_string()
     }
 
-    fn default_mqtt_homeassistant() -> HomeAssistant {
-        HomeAssistant {
-            enabled: true,
-            prefix: "homeassistant".to_string(),
-        }
+    fn default_mqtt_homeassistant_enabled() -> bool {
+        true
     }
 
     fn default_mqtt_homeassistant_prefix() -> String {

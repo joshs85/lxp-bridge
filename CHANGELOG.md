@@ -1,41 +1,26 @@
 # Unreleased
 
+* Added Home Assistant controls for Over Frequency Derate, Under Frequency Droop, Percent Per HZ for both.
+* Added switches for PV Off Grid Enable, Fast Zero Export Enable, Micro Grid Enable, Shared Battery Enable, Charge Last Enable
+
 # 0.15.0 - 11th August 2025
 
 * **BREAKING CHANGE**: Complete removal of database functionality (InfluxDB, MySQL, PostgreSQL, SQLite)
-  * Removed all database-related dependencies (rinfluxdb, sqlx)
-  * Removed database migration files for all supported databases
-  * Removed database.rs and influx.rs modules
-  * Removed database configuration options
-  * Removed database-related tests
-  * Updated build.rs to remove database migration handling
-  * Updated Dockerfiles to remove database directory references
 * **BREAKING CHANGE**: Simplified configuration to focus on MQTT and Home Assistant only
-  * Removed database configuration sections from config files
-  * Updated addon configurations to remove database references
-  * Simplified integration test setup (removed Sequel/SQLite dependencies)
 * **IMPROVEMENT**: Enhanced MQTT functionality
   * Added `publish_individual_input` configuration option for granular input register publishing
   * Improved MQTT reconnection logic and error handling
   * Enhanced Home Assistant discovery and entity management
 * **IMPROVEMENT**: Code quality and reliability enhancements
-  * Fixed all Rust compiler warnings in test files
-  * Added comprehensive reliability test suite
   * Improved error handling and logging
   * Added health monitoring functionality
 * **IMPROVEMENT**: Updated dependencies and build system
   * Updated serde dependencies to latest versions
   * Enhanced Tokio runtime features for better performance
-  * Modernized Docker build process
+  * Updated Docker build process
 * **IMPROVEMENT**: Enhanced integration testing
   * Fixed mock inverter proxy reliability issues
-  * Improved test environment setup and configuration
   * Added comprehensive test fixtures and examples
-* **DOCUMENTATION**: Updated documentation to reflect database removal
-  * Removed database setup instructions
-  * Updated configuration examples
-  * Simplified deployment documentation
-
 # 0.14.0 - 23th October 2024
 
 * Fixed bug with entity in HA.  Changed KWh to kWh

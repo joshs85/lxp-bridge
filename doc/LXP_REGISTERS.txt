@@ -38,7 +38,7 @@ settings, apply your changes to individual bits, and set the new value back.
    bit 6 = grid on power ss
    bit 5 = neutral detect
    bit 4 = anti island
-   bit 3 = ? can't see any effect. normally off..
+   bit 3 = Low Voltage Ride Through Enable
    bit 2 = drms
    bit 1 = ovf load derate
    bit 0 = eps
@@ -47,11 +47,11 @@ settings, apply your changes to individual bits, and set the new value back.
    bit 7 = feed in grid
    bit 6 = DCI
    bit 5 = GFCI
-   bit 4 = ? can't see any effect. normally on.
+   bit 4 = ISO
    bit 3 = charge priority (charge before supplying load)
    bit 2 = forced discharge
    bit 1 = normal/standby (does not appear to save any power anyway)
-   bit 0 = seamless eps switching
+   bit 0 = off grid seamless eps switching
 22 START_PV_VOLT
 23 CONNECT_TIME
 24 RECONNECT_TIME
@@ -85,10 +85,10 @@ settings, apply your changes to individual bits, and set the new value back.
 52 GRID_FREQ_LIMIT3_LOW_TIME
 53 GRID_FREQ_LIMIT3_HIGH_TIME
 54 MAX_Q_PERCENT_FOR_QV
-55 V1L
-56 V2L
-57 V1H
-58 V2H
+55 V1L Q(V) curve undervoltage 1
+56 V2L Q(V) curve undervoltage 2
+57 V1H Q(V) curve overvoltage1
+58 V2H Q(V) curve overvoltage 2
 59 REACTIVE_POWER_CMD_TYPE
 60 ACTIVE_POWER_PERCENT_CMD
 61 REACTIVE_POWER_PERCENT_CMD
@@ -134,9 +134,13 @@ settings, apply your changes to individual bits, and set the new value back.
 109 LEAD_ACID_TEMPR_UPPER_LIMIT_CHG
 110 FUNC_PV_GRID_OFF_EN / FUNC_RUN_WITHOUT_GRID / FUNC_MICRO_GRID_EN?
     ## LEAST SIGNIFICANT BYTE
+    bit 11-13 = PV CT Sample Ratio (0=1/1000, 1=1/3000)
+    bit 5-6 = CT Sample Ratio (0=1/1000, 1=1/3000)
+    bit 4 = Chg Last
+    bit 3 = shared battery
     bit 2 = micro grid enable
     bit 1 = fast zero export
-    bit 0 = ? - setting fails with error 3 (134 in dataframe second byte)
+    bit 0 = FunctionEn1.ubPVGridOffEn 
     ## MOST SIGNIFICANT BYTE
 112 SET_MASTER_OR_SLAVE
 113 SET_COMPOSED_PHASE

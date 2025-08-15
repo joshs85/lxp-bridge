@@ -12,7 +12,7 @@ pub enum ValueTemplate {
 }
 impl ValueTemplate {
     pub fn from_default(key: &str) -> Self {
-        Self::String(format!("{{{{ value_json.{} }}}}", key))
+        Self::String(format!("{{{{ value_json.{key} }}}}"))
     }
     pub fn is_none(&self) -> bool {
         *self == Self::None
@@ -92,6 +92,16 @@ pub struct Switch {
     state_topic: String,
     command_topic: String,
     value_template: String,
+    unique_id: String,
+    device: Device,
+    availability: Availability,
+}
+
+// https://www.home-assistant.io/integrations/button.mqtt/
+#[derive(Debug, Serialize)]
+pub struct Button {
+    name: String,
+    command_topic: String,
     unique_id: String,
     device: Device,
     availability: Availability,
@@ -637,6 +647,46 @@ impl Config {
                 name: "Max Cell Temperature (BMS)",
                 ..temperature.clone()
             },
+            // System Information Sensors
+            Entity {
+                key: "model",
+                name: "Inverter Model",
+                state_topic: &format!(
+                    "{}/{}/hold/0",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                entity_category: Some("diagnostic"),
+                value_template: ValueTemplate::None,
+                icon: Some("mdi:information"),
+                ..base.clone()
+            },
+            Entity {
+                key: "firmware",
+                name: "Firmware Version",
+                state_topic: &format!(
+                    "{}/{}/hold/7",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                entity_category: Some("diagnostic"),
+                value_template: ValueTemplate::None,
+                icon: Some("mdi:chip"),
+                ..base.clone()
+            },
+            Entity {
+                key: "serial_number",
+                name: "Serial Number",
+                state_topic: &format!(
+                    "{}/{}/hold/2",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                entity_category: Some("diagnostic"),
+                value_template: ValueTemplate::None,
+                icon: Some("mdi:barcode"),
+                ..base.clone()
+            },
             Entity {
                 key: "runtime",
                 name: "Total Runtime",
@@ -670,7 +720,7 @@ impl Config {
 
     pub fn all(&self) -> Result<Vec<mqtt::Message>> {
         let mut r = vec![
-            self.switch("eps", "Off-grid mode")?,
+            self.switch("eps", "Battery Backup")?,
             self.switch("ovf_load_derate", "Over Frequency Load Derate")?,
             self.switch("drms", "Demand Response Mode")?,
             self.switch("lvrt", "Low Voltage Ride Through")?,
@@ -686,6 +736,14 @@ impl Config {
             self.switch("gfci", "GFCI")?,
             self.switch("dci", "DCI")?,
             self.switch("feed_in_grid", "Grid Sell Back")?,
+            // System control
+            self.button("restart", "Restart Inverter")?,
+            // Register 110 switches
+            self.switch_register110("pv_off_grid", "PV Off Grid Enable")?,
+            self.switch_register110("fast_zero_export", "Fast Zero Export Enable")?,
+            self.switch_register110("micro_grid", "Micro Grid Enable")?,
+            self.switch_register110("shared_battery", "Shared Battery Enable")?,
+            self.switch_register110("charge_last", "Charge Last Enable")?,
             self.number_percent(Register::ChargePowerPercentCmd, "System Charge Rate (%)")?,
             self.number_percent(Register::DischgPowerPercentCmd, "System Discharge Rate (%)")?,
             self.number_percent(Register::AcChargePowerCmd, "AC Charge Rate (%)")?,
@@ -694,8 +752,17 @@ impl Config {
             self.number_percent(Register::ChargePrioritySocLimit, "Charge Priority Limit %")?,
             self.number_percent(Register::ForcedDischgSocLimit, "Forced Discharge Limit %")?,
             self.number_percent(Register::DischgCutOffSocEod, "Discharge Cutoff %")?,
-            self.number_percent(Register::OVFDeratePctPerHz, "Over Frequency Derate %/Hz")?,
-            self.number_percent(Register::UnderFrIncreasePctPerHz, "Under Frequency Increase %/Hz")?,
+            // OVF Derate Frequency Controls
+            self.number_hz(Register::OVFDerateStart, "Over Frequency Derate Start (Hz)")?,
+            self.number_hz(Register::OVFDerateEnd, "Over Frequency Derate End (Hz)")?,
+            // UVF Derate Frequency Controls
+            self.number_hz(Register::UnderFrDroopStart, "Under Frequency Droop Start (Hz)")?,
+            self.number_hz(Register::UnderFrDroopEnd, "Under Frequency Droop End (Hz)")?,
+            // Frequency Response Rate Controls
+            self.number_percent_per_hz(Register::OVFDeratePctPerHz, "Over Frequency Derate Rate (%/Hz)")?,
+            self.number_percent_per_hz(Register::UnderFrIncreasePctPerHz, "Under Frequency Increase Rate (%/Hz)")?,
+            // Frequency Response Timing Control
+            self.number_ms(Register::DelayTimeForOverFDerate, "Frequency Response Delay Time (ms)")?,
             self.number_percent(
                 Register::EpsDischgCutoffSocEod,
                 "Discharge Cutoff for EPS %",
@@ -730,7 +797,7 @@ impl Config {
     fn ha_discovery_topic(&self, kind: &str, name: &str) -> String {
         format!(
             "{}/{}/{}_{}/{}/config",
-            self.mqtt_config.homeassistant().prefix(),
+            self.mqtt_config.homeassistant_prefix(),
             kind,
             self.mqtt_config.namespace(),
             self.inverter.datalog(),
@@ -742,7 +809,7 @@ impl Config {
 
     fn switch(&self, name: &str, label: &str) -> Result<mqtt::Message> {
         let config = Switch {
-            value_template: format!("{{{{ value_json.{}_en }}}}", name),
+            value_template: format!("{{{{ value_json.{name}_en }}}}"),
             state_topic: format!(
                 "{}/{}/hold/21/bits",
                 self.mqtt_config.namespace(),
@@ -767,6 +834,64 @@ impl Config {
         })
     }
 
+    fn switch_register110(&self, name: &str, label: &str) -> Result<mqtt::Message> {
+        let config = Switch {
+            value_template: format!("{{{{ value_json.{name}_en }}}}"),
+            state_topic: format!(
+                "{}/{}/hold/110/bits",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            command_topic: format!(
+                "{}/cmd/{}/set/hold/110/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                name
+            ),
+            unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
+            name: label.to_string(),
+            device: self.device(),
+            availability: self.availability(),
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("switch", name),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
+    fn button(&self, name: &str, label: &str) -> Result<mqtt::Message> {
+        let config = Button {
+            name: label.to_string(),
+            command_topic: format!(
+                "{}/cmd/{}/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                name
+            ),
+            unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
+            device: self.device(),
+            availability: self.availability(),
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("button", name),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
+    /// Send cleanup message to remove old entity with the given name
+    /// This is used when renaming entities to ensure Home Assistant removes the old one
+    fn cleanup_old_entity(&self, name: &str) -> Result<mqtt::Message> {
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("switch", name),
+            retain: true,
+            payload: "".to_string(), // Empty payload tells Home Assistant to remove the entity
+        })
+    }
+
     fn number_percent(&self, register: Register, label: &str) -> Result<mqtt::Message> {
         let config = Number {
             name: label.to_string(),
@@ -774,13 +899,13 @@ impl Config {
                 "{}/{}/hold/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
-                register as u16,
+                register.clone() as u16,
             ),
             command_topic: format!(
                 "{}/cmd/{}/set/hold/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
-                register as u16,
+                register.clone() as u16,
             ),
             value_template: "{{ float(value) }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
@@ -793,7 +918,103 @@ impl Config {
         };
 
         Ok(mqtt::Message {
-            topic: self.ha_discovery_topic("number", &format!("{:?}", register)),
+            topic: self.ha_discovery_topic("number", &format!("{register:?}")),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
+    fn number_hz(&self, register: Register, label: &str) -> Result<mqtt::Message> {
+        let config = Number {
+            name: label.to_string(),
+            state_topic: format!(
+                "{}/{}/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16,
+            ),
+            command_topic: format!(
+                "{}/cmd/{}/set/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16,
+            ),
+            value_template: "{{ float(value) / 100 }}".to_string(),
+            unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            device: self.device(),
+            availability: self.availability(),
+            min: 0.0,
+            max: 100.0,
+            step: 0.01,
+            unit_of_measurement: "Hz".to_string(),
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("number", &format!("{register:?}")),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
+    fn number_percent_per_hz(&self, register: Register, label: &str) -> Result<mqtt::Message> {
+        let config = Number {
+            name: label.to_string(),
+            state_topic: format!(
+                "{}/{}/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16,
+            ),
+            command_topic: format!(
+                "{}/cmd/{}/set/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16,
+            ),
+            value_template: "{{ value }}".to_string(),
+            unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            device: self.device(),
+            availability: self.availability(),
+            min: 0.0,
+            max: 100.0,
+            step: 1.0,
+            unit_of_measurement: "%/Hz".to_string(),
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("number", &format!("{register:?}")),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
+    fn number_ms(&self, register: Register, label: &str) -> Result<mqtt::Message> {
+        let config = Number {
+            name: label.to_string(),
+            state_topic: format!(
+                "{}/{}/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16,
+            ),
+            command_topic: format!(
+                "{}/cmd/{}/set/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16,
+            ),
+            value_template: "{{ float(value) }}".to_string(),
+            unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            device: self.device(),
+            availability: self.availability(),
+            min: 0.0,
+            max: 1000.0,
+            step: 1.0,
+            unit_of_measurement: "ms".to_string(),
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("number", &format!("{register:?}")),
             retain: true,
             payload: serde_json::to_string(&config)?,
         })

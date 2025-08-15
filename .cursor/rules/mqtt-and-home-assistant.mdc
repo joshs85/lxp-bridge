@@ -1,0 +1,37 @@
+# MQTT and Home Assistant Integration
+
+## MQTT Client
+The MQTT implementation in [src/mqtt.rs](mdc:src/mqtt.rs) handles:
+- Connection management to MQTT brokers
+- Message publishing and subscription
+- Topic routing and message handling
+- Connection health monitoring
+
+## Home Assistant Integration
+The Home Assistant module in [src/home_assistant.rs](mdc:src/home_assistant.rs) provides:
+- Automatic device discovery
+- Entity state management
+- Configuration validation
+- Integration with HA add-on system
+
+## Message Patterns
+- Use typed message structures for MQTT communication
+- Implement proper topic hierarchies for organization
+- Support message retention where appropriate
+- Handle QoS levels appropriately
+
+## Discovery and Configuration
+- Implement Home Assistant MQTT discovery protocol
+- Provide device and entity metadata
+- Support configuration updates
+- Handle entity state changes
+
+## Error Handling
+- Implement connection retry logic
+- Handle MQTT broker failures gracefully
+- Log connection issues appropriately
+- Provide fallback behavior when possible
+description:
+globs:
+alwaysApply: false
+---

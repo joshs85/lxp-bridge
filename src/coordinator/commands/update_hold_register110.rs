@@ -5,20 +5,20 @@ use lxp::{
     packet::{DeviceFunction, TranslatedData},
 };
 
-pub struct UpdateHold {
+pub struct UpdateHoldRegister110 {
     channels: Channels,
     inverter: config::Inverter,
     register: u16,
-    bit: lxp::packet::RegisterBit,
+    bit: lxp::packet::Register110Bit,
     enable: bool,
 }
 
-impl UpdateHold {
+impl UpdateHoldRegister110 {
     pub fn new<U>(
         channels: Channels,
         inverter: config::Inverter,
         register: U,
-        bit: lxp::packet::RegisterBit,
+        bit: lxp::packet::Register110Bit,
         enable: bool,
     ) -> Self
     where

@@ -50,10 +50,10 @@ impl Action {
         use Action::*;
         // no need to be defensive about n here, we checked it already in register()
         match self {
-            AcCharge(n) => format!("{}/ac_charge/{}", datalog, n),
-            AcFirst(n) => format!("{}/ac_first/{}", datalog, n),
-            ChargePriority(n) => format!("{}/charge_priority/{}", datalog, n),
-            ForcedDischarge(n) => format!("{}/forced_discharge/{}", datalog, n),
+            AcCharge(n) => format!("{datalog}/ac_charge/{n}"),
+            AcFirst(n) => format!("{datalog}/ac_first/{n}"),
+            ChargePriority(n) => format!("{datalog}/charge_priority/{n}"),
+            ForcedDischarge(n) => format!("{datalog}/forced_discharge/{n}"),
         }
     }
 }
