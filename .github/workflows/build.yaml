@@ -36,7 +36,6 @@ jobs:
       - name: Install required cargo
         run: |
           cargo install clippy-sarif sarif-fmt
-          cargo install cargo-clippy
 
       - name: Run rust-clippy
         run: |
