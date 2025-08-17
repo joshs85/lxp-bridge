@@ -1003,7 +1003,7 @@ impl Config {
                 self.inverter.datalog()
             ),
             command_topic: format!(
-                "{}/cmd/{}/set/hold/110/{}",
+                "{}/cmd/{}/set/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
                 name
@@ -1066,6 +1066,43 @@ impl Config {
         max: f64,
         step: f64,
     ) -> Result<mqtt::Message> {
+        // Map register to command name for proper MQTT routing
+        let command_topic = match register {
+            Register::AcChargePowerCmd => format!(
+                "{}/cmd/{}/set/ac_charge_rate_pct",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            Register::AcChargeSocLimit => format!(
+                "{}/cmd/{}/set/ac_charge_soc_limit_pct",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            Register::ChargePowerPercentCmd => format!(
+                "{}/cmd/{}/set/charge_rate_pct",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            Register::DischgPowerPercentCmd => format!(
+                "{}/cmd/{}/set/discharge_rate_pct",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            Register::DischgCutOffSocEod => format!(
+                "{}/cmd/{}/set/discharge_cutoff_soc_limit_pct",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            // These registers don't have named commands, use raw register format
+            Register::ChargePriorityPowerCmd | Register::ChargePrioritySocLimit | Register::ForcedDischgSocLimit | Register::AcChargeStartSocLimit | Register::AcChargeEndSocLimit | Register::EpsDischgCutoffSocEod => format!(
+                "{}/cmd/{}/set/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16
+            ),
+            _ => return Err(anyhow!("number_percent: unsupported register {:?}", register)),
+        };
+
         let config = Number {
             name: label.to_string(),
             state_topic: format!(
@@ -1074,12 +1111,7 @@ impl Config {
                 self.inverter.datalog(),
                 register.clone() as u16,
             ),
-            command_topic: format!(
-                "{}/cmd/{}/set/hold/{}",
-                self.mqtt_config.namespace(),
-                self.inverter.datalog(),
-                register.clone() as u16,
-            ),
+            command_topic,
             value_template: "{{ float(value) }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
             entity_category: Some("config".to_string()), // System control numbers
@@ -1099,6 +1131,15 @@ impl Config {
     }
 
     fn number_hz(&self, register: Register, label: &str) -> Result<mqtt::Message> {
+        // Map register to command name for proper MQTT routing
+        let command_name = match register {
+            Register::OVFDerateStart => "ovf_derate_start_hz",
+            Register::OVFDerateEnd => "ovf_derate_end_hz",
+            Register::UnderFrDroopStart => "under_fr_droop_start_hz",
+            Register::UnderFrDroopEnd => "under_fr_droop_end_hz",
+            _ => return Err(anyhow!("number_hz: unsupported register {:?}", register)),
+        };
+
         let config = Number {
             name: label.to_string(),
             state_topic: format!(
@@ -1108,10 +1149,10 @@ impl Config {
                 register.clone() as u16,
             ),
             command_topic: format!(
-                "{}/cmd/{}/set/hold/{}",
+                "{}/cmd/{}/set/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
-                register.clone() as u16,
+                command_name,
             ),
             value_template: "{{ float(value) / 100 }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
@@ -1132,6 +1173,13 @@ impl Config {
     }
 
     fn number_percent_per_hz(&self, register: Register, label: &str) -> Result<mqtt::Message> {
+        // Map register to command name for proper MQTT routing
+        let command_name = match register {
+            Register::OVFDeratePctPerHz => "ovf_derate_pct_per_hz",
+            Register::UnderFrIncreasePctPerHz => "under_fr_increase_pct_per_hz",
+            _ => return Err(anyhow!("number_percent_per_hz: unsupported register {:?}", register)),
+        };
+
         let config = Number {
             name: label.to_string(),
             state_topic: format!(
@@ -1141,10 +1189,10 @@ impl Config {
                 register.clone() as u16,
             ),
             command_topic: format!(
-                "{}/cmd/{}/set/hold/{}",
+                "{}/cmd/{}/set/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
-                register.clone() as u16,
+                command_name,
             ),
             value_template: "{{ value }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
@@ -1165,6 +1213,12 @@ impl Config {
     }
 
     fn number_ms(&self, register: Register, label: &str) -> Result<mqtt::Message> {
+        // Map register to command name for proper MQTT routing
+        let command_name = match register {
+            Register::DelayTimeForOverFDerate => "frequency_active_open_loop_response_time",
+            _ => return Err(anyhow!("number_ms: unsupported register {:?}", register)),
+        };
+
         let config = Number {
             name: label.to_string(),
             state_topic: format!(
@@ -1174,10 +1228,10 @@ impl Config {
                 register.clone() as u16,
             ),
             command_topic: format!(
-                "{}/cmd/{}/set/hold/{}",
+                "{}/cmd/{}/set/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
-                register.clone() as u16,
+                command_name,
             ),
             value_template: "{{ value }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),

@@ -222,7 +222,7 @@ impl Message {
 
             ["set", "eps"] => EPS(inverter, self.payload_bool()),
             ["set", "ovf_load_derate"] => OVFLoadDerate(inverter, self.payload_bool()),
-            ["set", "frequency_active_open_loop_response_time"] => DelayTimeForOverFDerate(inverter, self.payload_int()?),
+            ["set", "frequency_active_open_loop_response_time"] => DelayTimeForOverFDerate(inverter, self.payload_ms()?),
             ["set", "ovf_derate_pct_per_hz"] => OVFDeratePctPerHz(inverter, self.payload_int()?),
             ["set", "ovf_derate_start_hz"] => OVFDerateStart(inverter, self.payload_frequency_hz()?),
             ["set", "ovf_derate_end_hz"] => OVFDerateEnd(inverter, self.payload_frequency_hz()?),
@@ -326,6 +326,19 @@ impl Message {
         Ok((freq * 100.0).round() as u16)
     }
 
+    fn payload_ms(&self) -> Result<u16> {
+        if self.payload.is_empty() {
+            bail!("payload_ms: empty payload");
+        }
+        
+        // Parse as float and round to nearest integer
+        // This handles cases where user enters 61.99 ms -> sends 62 to inverter
+        let ms: f64 = self.payload
+            .trim()
+            .parse()
+            .map_err(|err| anyhow!("payload_ms: cannot parse '{}' as milliseconds: {}", self.payload, err))?;
+        Ok(ms.round() as u16)
+    }
 
 
     fn payload_bool(&self) -> bool {
