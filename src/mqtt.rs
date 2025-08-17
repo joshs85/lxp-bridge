@@ -302,17 +302,27 @@ impl Message {
     }
 
     fn payload_int(&self) -> Result<u16> {
+        if self.payload.is_empty() {
+            bail!("payload_int: empty payload");
+        }
+        
         self.payload
+            .trim()
             .parse()
-            .map_err(|err| anyhow!("payload_int: {}", err))
+            .map_err(|err| anyhow!("payload_int: cannot parse '{}' as integer: {}", self.payload, err))
     }
 
     fn payload_frequency_hz(&self) -> Result<u16> {
+        if self.payload.is_empty() {
+            bail!("payload_frequency_hz: empty payload");
+        }
+        
         // Parse as float first, then multiply by 100 and convert to integer
         // This handles cases where user enters 59.99 Hz -> sends 5999 to inverter
         let freq: f64 = self.payload
+            .trim()
             .parse()
-            .map_err(|err| anyhow!("payload_frequency_hz: {}", err))?;
+            .map_err(|err| anyhow!("payload_frequency_hz: cannot parse '{}' as frequency: {}", self.payload, err))?;
         Ok((freq * 100.0).round() as u16)
     }
 

@@ -162,32 +162,60 @@ impl Coordinator {
                 .await
             }
             DelayTimeForOverFDerate(inverter, delay_time) => {
-                self.set_hold(inverter, Register::DelayTimeForOverFDerate, delay_time)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::DelayTimeForOverFDerate, delay_time).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::DelayTimeForOverFDerate, 1).await;
+                }
+                result
             }
             OVFDerateStart(inverter, hz) => {
-                self.set_hold(inverter, Register::OVFDerateStart, hz)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::OVFDerateStart, hz).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::OVFDerateStart, 1).await;
+                }
+                result
             }
             OVFDerateEnd(inverter, hz) => {
-                self.set_hold(inverter, Register::OVFDerateEnd, hz)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::OVFDerateEnd, hz).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::OVFDerateEnd, 1).await;
+                }
+                result
             }
             OVFDeratePctPerHz(inverter, pct) => {
-                self.set_hold(inverter, Register::OVFDeratePctPerHz, pct)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::OVFDeratePctPerHz, pct).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::OVFDeratePctPerHz, 1).await;
+                }
+                result
             }
             UnderFrDroopStart(inverter, hz) => {
-                self.set_hold(inverter, Register::UnderFrDroopStart, hz)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::UnderFrDroopStart, hz).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::UnderFrDroopStart, 1).await;
+                }
+                result
             }
             UnderFrDroopEnd(inverter, hz) => {
-                self.set_hold(inverter, Register::UnderFrDroopEnd, hz)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::UnderFrDroopEnd, hz).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::UnderFrDroopEnd, 1).await;
+                }
+                result
             }
             UnderFrIncreasePctPerHz(inverter, pct) => {
-                self.set_hold(inverter, Register::UnderFrIncreasePctPerHz, pct)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::UnderFrIncreasePctPerHz, pct).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::UnderFrIncreasePctPerHz, 1).await;
+                }
+                result
             }
             DRMS(inverter, enable) => {
                 self.update_hold(
@@ -316,27 +344,47 @@ impl Coordinator {
                 .await
             }
             ChargeRate(inverter, pct) => {
-                self.set_hold(inverter, Register::ChargePowerPercentCmd, pct)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::ChargePowerPercentCmd, pct).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::ChargePowerPercentCmd, 1).await;
+                }
+                result
             }
             DischargeRate(inverter, pct) => {
-                self.set_hold(inverter, Register::DischgPowerPercentCmd, pct)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::DischgPowerPercentCmd, pct).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::DischgPowerPercentCmd, 1).await;
+                }
+                result
             }
 
             AcChargeRate(inverter, pct) => {
-                self.set_hold(inverter, Register::AcChargePowerCmd, pct)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::AcChargePowerCmd, pct).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::AcChargePowerCmd, 1).await;
+                }
+                result
             }
 
             AcChargeSocLimit(inverter, pct) => {
-                self.set_hold(inverter, Register::AcChargeSocLimit, pct)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::AcChargeSocLimit, pct).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::AcChargeSocLimit, 1).await;
+                }
+                result
             }
 
             DischargeCutoffSocLimit(inverter, pct) => {
-                self.set_hold(inverter, Register::DischgCutOffSocEod, pct)
-                    .await
+                let result = self.set_hold(inverter.clone(), Register::DischgCutOffSocEod, pct).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::DischgCutOffSocEod, 1).await;
+                }
+                result
             }
             // Register 110 switches
             PvOffGrid(inverter, enable) => {

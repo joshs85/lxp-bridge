@@ -364,4 +364,66 @@ async fn for_input_ignore_127_254() {
     assert_eq!(mqtt::Message::for_input(packet, false).unwrap(), vec![]);
 }
 
+#[tokio::test]
+async fn test_frequency_command_processing() {
+    common_setup();
+
+    let inverter = Factory::inverter();
+
+    // Test that frequency commands properly multiply by 100
+    // This verifies that 62.99 Hz from Home Assistant becomes 6299 sent to the device
+    
+    // Create a mock MQTT message with a frequency value
+    let mqtt_msg = mqtt::Message {
+        topic: "cmd/2222222222/set/ovf_derate_start_hz".to_string(),
+        retain: false,
+        payload: "62.99".to_string(),
+    };
+
+    // Parse the command to verify the value conversion
+    let command = mqtt_msg.to_command(inverter.clone()).unwrap();
+    
+    match command {
+        Command::OVFDerateStart(_, value) => {
+            // The value should be 6299 (62.99 * 100)
+            assert_eq!(value, 6299);
+        }
+        _ => panic!("Expected OVFDerateStart command"),
+    }
+
+    // Test another frequency value
+    let mqtt_msg = mqtt::Message {
+        topic: "cmd/2222222222/set/under_fr_droop_start_hz".to_string(),
+        retain: false,
+        payload: "59.50".to_string(),
+    };
+
+    let command = mqtt_msg.to_command(inverter.clone()).unwrap();
+    
+    match command {
+        Command::UnderFrDroopStart(_, value) => {
+            // The value should be 5950 (59.50 * 100)
+            assert_eq!(value, 5950);
+        }
+        _ => panic!("Expected UnderFrDroopStart command"),
+    }
+
+    // Test edge case: exact integer
+    let mqtt_msg = mqtt::Message {
+        topic: "cmd/2222222222/set/ovf_derate_end_hz".to_string(),
+        retain: false,
+        payload: "65.00".to_string(),
+    };
+
+    let command = mqtt_msg.to_command(inverter.clone()).unwrap();
+    
+    match command {
+        Command::OVFDerateEnd(_, value) => {
+            // The value should be 6500 (65.00 * 100)
+            assert_eq!(value, 6500);
+        }
+        _ => panic!("Expected OVFDerateEnd command"),
+    }
+}
+
 

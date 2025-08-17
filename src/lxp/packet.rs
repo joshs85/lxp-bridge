@@ -954,8 +954,11 @@ impl TranslatedData {
 
     fn decode(input: &[u8]) -> Result<Self> {
         let len = input.len();
+        
+        // Allow 38 bytes as minimum for all packet types
+        // This accommodates WriteSingle reply packets which can be shorter
         if len < 38 {
-            bail!("TranslatedData::decode packet too short");
+            bail!("TranslatedData::decode packet too short (got {} bytes, need at least 38)", len);
         }
 
         let protocol = Utils::u16ify(input, 2);
@@ -1124,7 +1127,7 @@ impl ReadParam {
     fn decode(input: &[u8]) -> Result<Self> {
         let len = input.len();
         if len < 24 {
-            bail!("ReadParam::decode packet too short");
+            bail!("ReadParam::decode packet too short (got {} bytes, need at least 24)", len);
         }
 
         let protocol = Utils::u16ify(input, 2);
@@ -1220,7 +1223,7 @@ impl WriteParam {
     fn decode(input: &[u8]) -> Result<Self> {
         let len = input.len();
         if len < 21 {
-            bail!("WriteParam::decode packet too short");
+            bail!("WriteParam::decode packet too short (got {} bytes, need at least 21)", len);
         }
 
         let protocol = Utils::u16ify(input, 2);
