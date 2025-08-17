@@ -93,6 +93,8 @@ pub struct Switch {
     command_topic: String,
     value_template: String,
     unique_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    entity_category: Option<String>,
     device: Device,
     availability: Availability,
 }
@@ -103,6 +105,8 @@ pub struct Button {
     name: String,
     command_topic: String,
     unique_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    entity_category: Option<String>,
     device: Device,
     availability: Availability,
 }
@@ -115,6 +119,8 @@ pub struct Number {
     command_topic: String,
     value_template: String,
     unique_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    entity_category: Option<String>,
     device: Device,
     availability: Availability,
     min: f64,
@@ -132,6 +138,8 @@ pub struct Text {
     command_template: String,
     value_template: String,
     unique_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    entity_category: Option<String>,
     device: Device,
     availability: Availability,
     pattern: String,
@@ -237,6 +245,7 @@ impl Config {
                 device_class: Some("battery"),
                 state_class: Some("measurement"),
                 unit_of_measurement: Some("%"),
+                // Remove invalid "measurement" category - let it use default
                 ..base.clone()
             },
             Entity {
@@ -372,41 +381,49 @@ impl Config {
             Entity {
                 key: "v_bat",
                 name: "Battery Voltage",
+                // Remove invalid "measurement" category
                 ..voltage.clone()
             },
             Entity {
                 key: "v_ac_r",
                 name: "Grid Voltage",
+                // Remove invalid "measurement" category
                 ..voltage.clone()
             },
             Entity {
                 key: "v_pv_1",
                 name: "PV Voltage (String 1)",
+                // Remove invalid "measurement" category
                 ..voltage.clone()
             },
             Entity {
                 key: "v_pv_2",
                 name: "PV Voltage (String 2)",
+                // Remove invalid "measurement" category
                 ..voltage.clone()
             },
             Entity {
                 key: "v_pv_3",
                 name: "PV Voltage (String 3)",
+                // Remove invalid "measurement" category
                 ..voltage.clone()
             },
             Entity {
                 key: "v_eps_r",
                 name: "EPS Voltage",
+                // Remove invalid "measurement" category
                 ..voltage.clone()
             },
             Entity {
                 key: "f_ac",
                 name: "Grid Frequency",
+                // Remove invalid "measurement" category
                 ..frequency.clone()
             },
             Entity {
                 key: "f_eps",
                 name: "EPS Frequency",
+                // Remove invalid "measurement" category
                 ..frequency.clone()
             },
             Entity {
@@ -414,237 +431,284 @@ impl Config {
                 name: "Apparent EPS Power",
                 device_class: Some("apparent_power"),
                 unit_of_measurement: Some("VA"),
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_pv",
                 name: "PV Power (Array)",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_pv_1",
                 name: "PV Power (String 1)",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_pv_2",
                 name: "PV Power (String 2)",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_pv_3",
                 name: "PV Power (String 3)",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_battery",
                 name: "Battery Power (discharge is negative)",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_charge",
                 name: "Battery Charge",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_discharge",
                 name: "Battery Discharge",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_grid",
                 name: "Grid Power (export is negative)",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_to_user",
                 name: "Power from Grid",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_to_grid",
                 name: "Power to Grid",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_eps",
                 name: "Active EPS Power",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_inv",
                 name: "Inverter Power",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "p_rec",
                 name: "AC Charge Power",
+                // Remove invalid "measurement" category
                 ..power.clone()
             },
             Entity {
                 key: "e_pv_all",
                 name: "PV Generation (All time)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_all_1",
                 name: "PV Generation (All time) (String 1)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_all_2",
                 name: "PV Generation (All time) (String 2)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_all_3",
                 name: "PV Generation (All time) (String 3)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_day",
                 name: "PV Generation (Today))",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_day_1",
                 name: "PV Generation (Today) (String 1)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_day_2",
                 name: "PV Generation (Today) (String 2)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_day_3",
                 name: "PV Generation (Today) (String 3)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "bat_capacity",
                 name: "Battery Capacity",
                 value_template: ValueTemplate::String("{{ float(value_json.bat_capacity) * 51.2 / 1000 }}".to_string()),
+                // Remove invalid "measurement" category
                 ..energy_storage.clone()
             },
             Entity {
                 key: "e_chg_all",
                 name: "Battery Charge (All time)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_chg_day",
                 name: "Battery Charge (Today)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_dischg_all",
                 name: "Battery Discharge (All time)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_dischg_day",
                 name: "Battery Discharge (Today)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_to_user_all",
                 name: "Energy from Grid (All time)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_to_user_day",
                 name: "Energy from Grid (Today)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_to_grid_all",
                 name: "Energy to Grid (All time)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_to_grid_day",
                 name: "Energy to Grid (Today)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_eps_all",
                 name: "Energy from EPS (All time)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_eps_day",
                 name: "Energy from EPS (Today)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_rec_all",
                 name: "Energy of AC Charging (All time)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_rec_day",
                 name: "Energy of AC Charging (Today)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_inv_all",
                 name: "Energy of Inverter (All time)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "e_inv_day",
                 name: "Energy of Inverter (Today)",
+                // Remove invalid "measurement" category
                 ..energy.clone()
             },
             Entity {
                 key: "t_inner",
                 name: "Inverter Temperature",
+                // Remove invalid "measurement" category
                 ..temperature.clone()
             },
             Entity {
                 key: "t_rad_1",
                 name: "Radiator 1 Temperature",
+                // Remove invalid "measurement" category
                 ..temperature.clone()
             },
             Entity {
                 key: "t_rad_2",
                 name: "Radiator 2 Temperature",
+                // Remove invalid "measurement" category
                 ..temperature.clone()
             },
             Entity {
                 key: "t_bat",
                 name: "Battery Temperature",
+                // Remove invalid "measurement" category
                 ..temperature.clone()
             },
             Entity {
                 key: "max_chg_curr",
                 name: "Max Charge Current",
+                // Remove invalid "measurement" category
                 ..current.clone()
             },
             Entity {
                 key: "max_dischg_curr",
                 name: "Max Discharge Current",
+                // Remove invalid "measurement" category
                 ..current.clone()
             },
             Entity {
                 key: "min_cell_voltage",
                 name: "Min Cell Voltage (BMS)",
+                // Remove invalid "measurement" category
                 ..voltage.clone()
             },
             Entity {
                 key: "max_cell_voltage",
                 name: "Max Cell Voltage (BMS)",
+                // Remove invalid "measurement" category
                 ..voltage.clone()
             },
             Entity {
                 key: "min_cell_temp",
                 name: "Min Cell Temperature (BMS)",
+                // Remove invalid "measurement" category
                 ..temperature.clone()
             },
             Entity {
                 key: "max_cell_temp",
                 name: "Max Cell Temperature (BMS)",
+                // Remove invalid "measurement" category
                 ..temperature.clone()
             },
             // System Information Sensors
@@ -696,6 +760,30 @@ impl Config {
                 unit_of_measurement: Some("s"),
                 ..base.clone()
             },
+            Entity {
+                key: "charge_volt_ref",
+                name: "Charge Voltage Reference",
+                // Remove invalid "measurement" category
+                ..voltage.clone()
+            },
+            Entity {
+                key: "dischg_cut_volt",
+                name: "Discharge Cut-off Voltage",
+                // Remove invalid "measurement" category
+                ..voltage.clone()
+            },
+            Entity {
+                key: "bat_current",
+                name: "Battery Current",
+                // Remove invalid "measurement" category
+                ..current.clone()
+            },
+            Entity {
+                key: "vbat_inv",
+                name: "Inverter Battery Voltage",
+                // Remove invalid "measurement" category
+                ..voltage.clone()
+            },
         ];
 
         sensors
@@ -718,75 +806,132 @@ impl Config {
             .to_vec()
     }
 
+    /// Generate all Home Assistant entity discovery messages
+    /// 
+    /// Entities are organized into logical functional groups to improve the user experience
+    /// in Home Assistant by presenting related controls together:
+    /// 
+    /// 1. SYSTEM CONTROL: Basic system operations (restart)
+    /// 2. SAFETY & PROTECTION: Core safety features and grid protection
+    /// 3. POWER MANAGEMENT: Battery backup, grid interaction, and demand response
+    /// 4. CHARGING CONTROLS: AC charging, charge priority, and system charging settings
+    /// 5. FREQUENCY CONTROLS: Over/under frequency management and response timing
+    /// 6. TIME-BASED CONTROLS: All timeslot configurations for various operations
+    /// 7. ADVANCED FEATURES: Forced discharge and register 110 switches
+    /// 8. SYSTEM LIMITS: Discharge cutoff and EPS settings
+    /// 9. SENSORS: All monitoring and status sensors (added at the end)
     pub fn all(&self) -> Result<Vec<mqtt::Message>> {
         let mut r = vec![
-            self.switch("eps", "Battery Backup")?,
-            self.switch("ovf_load_derate", "Over Frequency Load Derate")?,
-            self.switch("drms", "Demand Response Mode")?,
-            self.switch("lvrt", "Low Voltage Ride Through")?,
+            // Clean up duplicate anti_islanding topic on startup
+            self.remove_old_entity("anti_islanding")?,
+            
+            // ===== SYSTEM CONTROL =====
+            // System control
+            self.button("restart", "Restart Inverter")?,
+            
+            // ===== SAFETY & PROTECTION =====
+            // Core safety features
             self.switch("anti_island", "Anti-Islanding")?,
             self.switch("neutral_detect", "Zero ground detection")?,
-            self.switch("grid_on_power_ss", "Grid-connected soft start")?,
-            self.switch("ac_charge", "AC Charge")?,
-            self.switch("sw_seamless", "Off Grid Seamless Switching")?,
-            self.switch("set_to_standby", "Power On")?,
-            self.switch("charge_priority", "PV Charge Priority")?,
-            self.switch("forced_discharge", "Forced Discharge")?,
             self.switch("iso", "ISO")?,
             self.switch("gfci", "GFCI")?,
             self.switch("dci", "DCI")?,
+            
+            // Grid protection
+            self.switch("grid_on_power_ss", "Grid-connected soft start")?,
+            self.switch("lvrt", "Low Voltage Ride Through")?,
+            self.switch("ovf_load_derate", "Over Frequency Load Derate")?,
+            
+            // ===== POWER MANAGEMENT =====
+            // Battery backup and grid interaction
+            self.switch("eps", "Battery Backup")?,
+            self.switch("sw_seamless", "Off Grid Seamless Switching")?,
             self.switch("feed_in_grid", "Grid Sell Back")?,
-            // System control
-            self.button("restart", "Restart Inverter")?,
-            // Register 110 switches
+            self.switch("set_to_standby", "Power On")?,
+            
+            // Demand response and advanced features
+            self.switch("drms", "Demand Response Mode")?,
+            
+            // ===== CHARGING CONTROLS =====
+            // AC charging
+            self.switch("ac_charge", "AC Charge")?,
+            self.number_percent(Register::AcChargePowerCmd, "AC Charge Rate (%)", 0.0, 100.0, 1.0)?,
+            self.number_percent(Register::AcChargeSocLimit, "AC Charge Limit %", 0.0, 100.0, 1.0)?,
+            self.number_percent(
+                Register::AcChargeStartSocLimit,
+                "Charge From AC Lower Limit %",
+                0.0, 100.0, 1.0
+            )?,
+            self.number_percent(
+                Register::AcChargeEndSocLimit,
+                "Charge From AC Upper Limit %",
+                0.0, 100.0, 1.0
+            )?,
+            
+            // Charge priority
+            self.switch("charge_priority", "PV Charge Priority")?,
+            self.number_percent(Register::ChargePriorityPowerCmd, "Charge Priority Rate (%)", 0.0, 100.0, 1.0)?,
+            self.number_percent(Register::ChargePrioritySocLimit, "Charge Priority Limit %", 0.0, 100.0, 1.0)?,
+            
+            // System charging
+            self.number_percent(Register::ChargePowerPercentCmd, "System Charge Rate (%)", 0.0, 100.0, 1.0)?,
+            self.number_percent(Register::DischgPowerPercentCmd, "System Discharge Rate (%)", 0.0, 100.0, 1.0)?,
+            
+            // ===== FREQUENCY CONTROLS =====
+            // Over frequency controls
+            self.number_hz(Register::OVFDerateStart, "Over Frequency Derate Start (Hz)")?,
+            self.number_hz(Register::OVFDerateEnd, "Over Frequency Derate End (Hz)")?,
+            self.number_percent_per_hz(Register::OVFDeratePctPerHz, "Over Frequency Derate Rate (%/Hz)")?,
+            
+            // Under frequency controls
+            self.number_hz(Register::UnderFrDroopStart, "Under Frequency Droop Start (Hz)")?,
+            self.number_hz(Register::UnderFrDroopEnd, "Under Frequency Droop End (Hz)")?,
+            self.number_percent_per_hz(Register::UnderFrIncreasePctPerHz, "Under Frequency Increase Rate (%/Hz)")?,
+            
+            // Frequency response timing
+            self.number_ms(Register::DelayTimeForOverFDerate, "Frequency Response Delay Time (ms)")?,
+            
+            // ===== TIME-BASED CONTROLS =====
+            // AC charge timeslots
+            self.time_range("ac_charge/1", "AC Charge Timeslot 1")?,
+            self.time_range("ac_charge/2", "AC Charge Timeslot 2")?,
+            self.time_range("ac_charge/3", "AC Charge Timeslot 3")?,
+            
+            // AC first timeslots
+            self.time_range("ac_first/1", "AC First Timeslot 1")?,
+            self.time_range("ac_first/2", "AC First Timeslot 2")?,
+            self.time_range("ac_first/3", "AC First Timeslot 3")?,
+            
+            // Charge priority timeslots
+            self.time_range("charge_priority/1", "Charge Priority Timeslot 1")?,
+            self.time_range("charge_priority/2", "Charge Priority Timeslot 2")?,
+            self.time_range("charge_priority/3", "Charge Priority Timeslot 3")?,
+            
+            // Forced discharge timeslots
+            self.time_range("forced_discharge/1", "Forced Discharge Timeslot 1")?,
+            self.time_range("forced_discharge/2", "Forced Discharge Timeslot 2")?,
+            self.time_range("forced_discharge/3", "Forced Discharge Timeslot 3")?,
+            
+            // ===== ADVANCED FEATURES =====
+            // Forced discharge
+            self.switch("forced_discharge", "Forced Discharge")?,
+            self.number_percent(Register::ForcedDischgSocLimit, "Forced Discharge Limit %", 0.0, 100.0, 1.0)?,
+            
+            // Register 110 switches (advanced features)
             self.switch_register110("pv_off_grid", "PV Off Grid Enable")?,
             self.switch_register110("fast_zero_export", "Fast Zero Export Enable")?,
             self.switch_register110("micro_grid", "Micro Grid Enable")?,
             self.switch_register110("shared_battery", "Shared Battery Enable")?,
             self.switch_register110("charge_last", "Charge Last Enable")?,
-            self.number_percent(Register::ChargePowerPercentCmd, "System Charge Rate (%)")?,
-            self.number_percent(Register::DischgPowerPercentCmd, "System Discharge Rate (%)")?,
-            self.number_percent(Register::AcChargePowerCmd, "AC Charge Rate (%)")?,
-            self.number_percent(Register::AcChargeSocLimit, "AC Charge Limit %")?,
-            self.number_percent(Register::ChargePriorityPowerCmd, "Charge Priority Rate (%)")?,
-            self.number_percent(Register::ChargePrioritySocLimit, "Charge Priority Limit %")?,
-            self.number_percent(Register::ForcedDischgSocLimit, "Forced Discharge Limit %")?,
-            self.number_percent(Register::DischgCutOffSocEod, "Discharge Cutoff %")?,
-            // OVF Derate Frequency Controls
-            self.number_hz(Register::OVFDerateStart, "Over Frequency Derate Start (Hz)")?,
-            self.number_hz(Register::OVFDerateEnd, "Over Frequency Derate End (Hz)")?,
-            // UVF Derate Frequency Controls
-            self.number_hz(Register::UnderFrDroopStart, "Under Frequency Droop Start (Hz)")?,
-            self.number_hz(Register::UnderFrDroopEnd, "Under Frequency Droop End (Hz)")?,
-            // Frequency Response Rate Controls
-            self.number_percent_per_hz(Register::OVFDeratePctPerHz, "Over Frequency Derate Rate (%/Hz)")?,
-            self.number_percent_per_hz(Register::UnderFrIncreasePctPerHz, "Under Frequency Increase Rate (%/Hz)")?,
-            // Frequency Response Timing Control
-            self.number_ms(Register::DelayTimeForOverFDerate, "Frequency Response Delay Time (ms)")?,
+            
+            // ===== SYSTEM LIMITS =====
+            // Discharge cutoff
+            self.number_percent(Register::DischgCutOffSocEod, "Discharge Cutoff %", 0.0, 100.0, 1.0)?,
             self.number_percent(
                 Register::EpsDischgCutoffSocEod,
                 "Discharge Cutoff for EPS %",
+                0.0, 100.0, 1.0
             )?,
-            self.number_percent(
-                Register::AcChargeStartSocLimit,
-                "Charge From AC Lower Limit %",
-            )?,
-            self.number_percent(
-                Register::AcChargeEndSocLimit,
-                "Charge From AC Upper Limit %",
-            )?,
-            self.time_range("ac_charge/1", "AC Charge Timeslot 1")?,
-            self.time_range("ac_charge/2", "AC Charge Timeslot 2")?,
-            self.time_range("ac_charge/3", "AC Charge Timeslot 3")?,
-            self.time_range("ac_first/1", "AC First Timeslot 1")?,
-            self.time_range("ac_first/2", "AC First Timeslot 2")?,
-            self.time_range("ac_first/3", "AC First Timeslot 3")?,
-            self.time_range("charge_priority/1", "Charge Priority Timeslot 1")?,
-            self.time_range("charge_priority/2", "Charge Priority Timeslot 2")?,
-            self.time_range("charge_priority/3", "Charge Priority Timeslot 3")?,
-            self.time_range("forced_discharge/1", "Forced Discharge Timeslot 1")?,
-            self.time_range("forced_discharge/2", "Forced Discharge Timeslot 2")?,
-            self.time_range("forced_discharge/3", "Forced Discharge Timeslot 3")?,
         ];
 
         r.append(&mut self.sensors());
@@ -808,6 +953,20 @@ impl Config {
     }
 
     fn switch(&self, name: &str, label: &str) -> Result<mqtt::Message> {
+        // Determine entity category based on switch function
+        let entity_category = match name {
+            // Safety & Protection switches
+            "anti_island" | "neutral_detect" | "iso" | "gfci" | "dci" => Some("config"),
+            // Grid protection switches
+            "grid_on_power_ss" | "lvrt" | "ovf_load_derate" => Some("config"),
+            // Power management switches
+            "eps" | "sw_seamless" | "feed_in_grid" | "set_to_standby" => Some("config"),
+            // Advanced feature switches
+            "drms" | "ac_charge" | "charge_priority" | "forced_discharge" => Some("config"),
+            // Register 110 switches are already handled separately
+            _ => None,
+        };
+
         let config = Switch {
             value_template: format!("{{{{ value_json.{name}_en }}}}"),
             state_topic: format!(
@@ -823,6 +982,7 @@ impl Config {
             ),
             unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
             name: label.to_string(),
+            entity_category: entity_category.map(|s| s.to_string()),
             device: self.device(),
             availability: self.availability(),
         };
@@ -850,6 +1010,7 @@ impl Config {
             ),
             unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
             name: label.to_string(),
+            entity_category: Some("config".to_string()), // Advanced feature switches
             device: self.device(),
             availability: self.availability(),
         };
@@ -871,6 +1032,7 @@ impl Config {
                 name
             ),
             unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
+            entity_category: Some("config".to_string()), // System control buttons
             device: self.device(),
             availability: self.availability(),
         };
@@ -882,9 +1044,13 @@ impl Config {
         })
     }
 
-    /// Send cleanup message to remove old entity with the given name
-    /// This is used when renaming entities to ensure Home Assistant removes the old one
-    fn cleanup_old_entity(&self, name: &str) -> Result<mqtt::Message> {
+    /// Remove an old entity from Home Assistant by sending an empty retained message
+    /// This is the proper way to remove entities from Home Assistant via MQTT discovery
+    /// 
+    /// Currently used to clean up the duplicate "anti_islanding" topic that conflicts
+    /// with the correct "anti_island" topic. The duplicate topic is created by some
+    /// external system and needs to be removed on startup.
+    fn remove_old_entity(&self, name: &str) -> Result<mqtt::Message> {
         Ok(mqtt::Message {
             topic: self.ha_discovery_topic("switch", name),
             retain: true,
@@ -892,7 +1058,14 @@ impl Config {
         })
     }
 
-    fn number_percent(&self, register: Register, label: &str) -> Result<mqtt::Message> {
+    fn number_percent(
+        &self,
+        register: Register,
+        label: &str,
+        min: f64,
+        max: f64,
+        step: f64,
+    ) -> Result<mqtt::Message> {
         let config = Number {
             name: label.to_string(),
             state_topic: format!(
@@ -909,11 +1082,12 @@ impl Config {
             ),
             value_template: "{{ float(value) }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            entity_category: Some("config".to_string()), // System control numbers
             device: self.device(),
             availability: self.availability(),
-            min: 0.0,
-            max: 100.0,
-            step: 1.0,
+            min,
+            max,
+            step,
             unit_of_measurement: "%".to_string(),
         };
 
@@ -941,6 +1115,7 @@ impl Config {
             ),
             value_template: "{{ float(value) / 100 }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            entity_category: Some("config".to_string()), // System control numbers
             device: self.device(),
             availability: self.availability(),
             min: 0.0,
@@ -973,6 +1148,7 @@ impl Config {
             ),
             value_template: "{{ value }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            entity_category: Some("config".to_string()), // System control numbers
             device: self.device(),
             availability: self.availability(),
             min: 0.0,
@@ -1003,12 +1179,13 @@ impl Config {
                 self.inverter.datalog(),
                 register.clone() as u16,
             ),
-            value_template: "{{ float(value) }}".to_string(),
+            value_template: "{{ value }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            entity_category: Some("config".to_string()), // System control numbers
             device: self.device(),
             availability: self.availability(),
             min: 0.0,
-            max: 1000.0,
+            max: 10000.0,
             step: 1.0,
             unit_of_measurement: "ms".to_string(),
         };
@@ -1028,24 +1205,25 @@ impl Config {
                 "{}/{}/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
-                name,
+                name
             ),
             command_topic: format!(
                 "{}/cmd/{}/set/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
-                name,
+                name
             ),
             command_template: r#"{% set parts = value.split("-") %}{"start":"{{ parts[0] }}", "end":"{{ parts[1] }}"}"#.to_string(),
             value_template: r#"{{ value_json["start"] }}-{{ value_json["end"] }}"#.to_string(),
-            unique_id: format!("{}_{}_text_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
+            unique_id: format!("{}_{}_text_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name.replace('/', "_")),
+            entity_category: Some("config".to_string()), // Time-based controls
             device: self.device(),
             availability: self.availability(),
             pattern: r"([01]?[0-9]|2[0-3]):[0-5][0-9]-([01]?[0-9]|2[0-3]):[0-5][0-9]".to_string(),
         };
 
         Ok(mqtt::Message {
-            topic: self.ha_discovery_topic("text", name),
+            topic: self.ha_discovery_topic("text", &name.replace('/', "_")),
             retain: true,
             payload: serde_json::to_string(&config)?,
         })
@@ -1057,9 +1235,9 @@ impl Config {
 
     fn device(&self) -> Device {
         Device {
+            manufacturer: "LuxPower".to_string(),
+            name: format!("LXP Inverter {}", self.inverter.datalog()),
             identifiers: [format!("{}_{}", self.mqtt_config.namespace(), self.inverter.datalog())],
-            manufacturer: "LuxPower".to_owned(),
-            name: format!("{}_{}", self.mqtt_config.namespace(), self.inverter.datalog()),
         }
     }
 

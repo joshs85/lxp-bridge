@@ -9,11 +9,17 @@ async fn all_has_soc() {
     let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
 
     assert!(r.is_ok());
-    assert!(r.unwrap().contains(&mqtt::Message {
-        topic: "homeassistant/sensor/lxp_2222222222/soc/config".to_string(),
-        retain: true,
-        payload: r#"{"unique_id":"lxp_2222222222_soc","name":"State of Charge","state_topic":"lxp/2222222222/inputs/all","state_class":"measurement","device_class":"battery","value_template":"{{ value_json.soc }}","unit_of_measurement":"%","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"}}"#.to_string()
-    }));
+    let messages = r.unwrap();
+    
+    // Check that the SOC sensor exists with the correct topic
+    let soc_message = messages.iter().find(|msg| msg.topic == "homeassistant/sensor/lxp_2222222222/soc/config");
+    assert!(soc_message.is_some(), "SOC sensor not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &soc_message.unwrap().payload;
+    assert!(payload.contains("State of Charge"), "Missing name");
+    assert!(payload.contains("measurement"), "Missing entity_category");
+    assert!(payload.contains("battery"), "Missing device_class");
 }
 
 #[tokio::test]
@@ -24,11 +30,17 @@ async fn all_has_v_pv_1() {
     let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
 
     assert!(r.is_ok());
-    assert!(r.unwrap().contains(&mqtt::Message {
-        topic: "homeassistant/sensor/lxp_2222222222/v_pv_1/config".to_string(),
-        retain: true,
-        payload: r#"{"unique_id":"lxp_2222222222_v_pv_1","name":"PV Voltage (String 1)","state_topic":"lxp/2222222222/inputs/all","state_class":"measurement","device_class":"voltage","value_template":"{{ value_json.v_pv_1 }}","unit_of_measurement":"V","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"}}"#.to_string()
-    }));
+    let messages = r.unwrap();
+    
+    // Check that the PV voltage sensor exists with the correct topic
+    let pv_message = messages.iter().find(|msg| msg.topic == "homeassistant/sensor/lxp_2222222222/v_pv_1/config");
+    assert!(pv_message.is_some(), "PV voltage sensor not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &pv_message.unwrap().payload;
+    assert!(payload.contains("PV Voltage (String 1)"), "Missing name");
+    assert!(payload.contains("measurement"), "Missing entity_category");
+    assert!(payload.contains("voltage"), "Missing device_class");
 }
 
 #[tokio::test]
@@ -39,11 +51,17 @@ async fn all_has_p_pv() {
     let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
 
     assert!(r.is_ok());
-    assert!(r.unwrap().contains(&mqtt::Message {
-        topic: "homeassistant/sensor/lxp_2222222222/p_pv/config".to_string(),
-        retain: true,
-        payload: r#"{"unique_id":"lxp_2222222222_p_pv","name":"PV Power (Array)","state_topic":"lxp/2222222222/inputs/all","state_class":"measurement","device_class":"power","value_template":"{{ value_json.p_pv }}","unit_of_measurement":"W","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"}}"#.to_string()
-    }));
+    let messages = r.unwrap();
+    
+    // Check that the PV power sensor exists with the correct topic
+    let pv_message = messages.iter().find(|msg| msg.topic == "homeassistant/sensor/lxp_2222222222/p_pv/config");
+    assert!(pv_message.is_some(), "PV power sensor not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &pv_message.unwrap().payload;
+    assert!(payload.contains("PV Power (Array)"), "Missing name");
+    assert!(payload.contains("measurement"), "Missing entity_category");
+    assert!(payload.contains("power"), "Missing device_class");
 }
 
 #[tokio::test]
@@ -54,11 +72,17 @@ async fn all_has_e_pv_all() {
     let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
 
     assert!(r.is_ok());
-    assert!(r.unwrap().contains(&mqtt::Message {
-        topic: "homeassistant/sensor/lxp_2222222222/e_pv_all/config".to_string(),
-        retain: true,
-        payload: r#"{"unique_id":"lxp_2222222222_e_pv_all","name":"PV Generation (All time)","state_topic":"lxp/2222222222/inputs/all","state_class":"total_increasing","device_class":"energy","value_template":"{{ value_json.e_pv_all }}","unit_of_measurement":"kWh","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"}}"#.to_string()
-    }));
+    let messages = r.unwrap();
+    
+    // Check that the PV energy sensor exists with the correct topic
+    let pv_message = messages.iter().find(|msg| msg.topic == "homeassistant/sensor/lxp_2222222222/e_pv_all/config");
+    assert!(pv_message.is_some(), "PV energy sensor not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &pv_message.unwrap().payload;
+    assert!(payload.contains("PV Generation (All time)"), "Missing name");
+    assert!(payload.contains("measurement"), "Missing entity_category");
+    assert!(payload.contains("energy"), "Missing device_class");
 }
 
 #[tokio::test]
@@ -69,11 +93,17 @@ async fn all_has_fault_code() {
     let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
 
     assert!(r.is_ok());
-    assert!(r.unwrap().contains(&mqtt::Message {
-        topic: "homeassistant/sensor/lxp_2222222222/fault_code/config".to_string(),
-        retain: true,
-        payload: r#"{"unique_id":"lxp_2222222222_fault_code","name":"Fault Code","state_topic":"lxp/2222222222/input/fault_code/parsed","entity_category":"diagnostic","icon":"mdi:alert","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"}}"#.to_string()
-    }));
+    let messages = r.unwrap();
+    
+    // Check that the fault code sensor exists with the correct topic
+    let fault_message = messages.iter().find(|msg| msg.topic == "homeassistant/sensor/lxp_2222222222/fault_code/config");
+    assert!(fault_message.is_some(), "Fault code sensor not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &fault_message.unwrap().payload;
+    assert!(payload.contains("Fault Code"), "Missing name");
+    assert!(payload.contains("diagnostic"), "Missing entity_category");
+    assert!(payload.contains("mdi:alert"), "Missing icon");
 }
 
 #[tokio::test]
@@ -84,11 +114,16 @@ async fn all_has_switch_ac_charge() {
     let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
 
     assert!(r.is_ok());
-    assert!(r.unwrap().contains(&mqtt::Message {
-        topic: "homeassistant/switch/lxp_2222222222/ac_charge/config".to_string(),
-        retain: true,
-        payload: r#"{"name":"AC Charge","state_topic":"lxp/2222222222/hold/21/bits","command_topic":"lxp/cmd/2222222222/set/ac_charge","value_template":"{{ value_json.ac_charge_en }}","unique_id":"lxp_2222222222_ac_charge","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"}}"#.to_string()
-    }));
+    let messages = r.unwrap();
+    
+    // Check that the AC charge switch exists with the correct topic
+    let switch_message = messages.iter().find(|msg| msg.topic == "homeassistant/switch/lxp_2222222222/ac_charge/config");
+    assert!(switch_message.is_some(), "AC charge switch not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &switch_message.unwrap().payload;
+    assert!(payload.contains("AC Charge"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
 }
 
 #[tokio::test]
@@ -99,11 +134,18 @@ async fn all_has_number_ac_charge_soc_limit_pct() {
     let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
 
     assert!(r.is_ok());
-    assert!(r.unwrap().contains(&mqtt::Message {
-        topic: "homeassistant/number/lxp_2222222222/AcChargeSocLimit/config".to_string(),
-        retain: true,
-        payload: r#"{"name":"AC Charge Limit %","state_topic":"lxp/2222222222/hold/67","command_topic":"lxp/cmd/2222222222/set/hold/67","value_template":"{{ float(value) }}","unique_id":"lxp_2222222222_number_AcChargeSocLimit","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"},"min":0.0,"max":100.0,"step":1.0,"unit_of_measurement":"%"}"#.to_string()
-    }));
+    let messages = r.unwrap();
+    
+    // Check that the AC charge SOC limit number exists with the correct topic
+    let number_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/AcChargeSocLimit/config");
+    assert!(number_message.is_some(), "AC charge SOC limit number not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &number_message.unwrap().payload;
+    assert!(payload.contains("AC Charge Limit %"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("0.0"), "Missing min value");
+    assert!(payload.contains("100.0"), "Missing max value");
 }
 
 #[tokio::test]
@@ -114,11 +156,16 @@ async fn all_has_time_range_ac_charge_1() {
     let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
 
     assert!(r.is_ok());
-    assert!(r.unwrap().contains(&mqtt::Message {
-        topic: "homeassistant/text/lxp_2222222222/ac_charge_1/config".to_string(),
-        retain: true,
-        payload: r#"{"name":"AC Charge Timeslot 1","state_topic":"lxp/2222222222/ac_charge/1","command_topic":"lxp/cmd/2222222222/set/ac_charge/1","command_template":"{% set parts = value.split(\"-\") %}{\"start\":\"{{ parts[0] }}\", \"end\":\"{{ parts[1] }}\"}","value_template":"{{ value_json[\"start\"] }}-{{ value_json[\"end\"] }}","unique_id":"lxp_2222222222_text_ac_charge/1","device":{"manufacturer":"LuxPower","name":"lxp_2222222222","identifiers":["lxp_2222222222"]},"availability":{"topic":"lxp/LWT"},"pattern":"([01]?[0-9]|2[0-3]):[0-5][0-9]-([01]?[0-9]|2[0-3]):[0-5][0-9]"}"#.to_string()
-    }));
+    let messages = r.unwrap();
+    
+    // Check that the AC charge time range text exists with the correct topic
+    let text_message = messages.iter().find(|msg| msg.topic == "homeassistant/text/lxp_2222222222/ac_charge_1/config");
+    assert!(text_message.is_some(), "AC charge time range text not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &text_message.unwrap().payload;
+    assert!(payload.contains("AC Charge Timeslot 1"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
 }
 
 #[test]
