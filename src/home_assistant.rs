@@ -1,3 +1,30 @@
+//! Home Assistant MQTT Discovery Integration
+//! 
+//! This module provides MQTT discovery for Home Assistant, automatically creating
+//! entities for all inverter registers and controls.
+//! 
+//! ## Entity Categories
+//! 
+//! Home Assistant uses `entity_category` to organize entities into different sections:
+//! 
+//! - **`entity_category: Some("config".to_string())`** → Entities appear in the "Configuration" section
+//!   - Used for advanced settings, safety controls, and system configuration
+//!   - Examples: Grid protection limits, reactive power settings, frequency controls
+//! 
+//! - **`entity_category: Some("diagnostic".to_string())`** → Entities appear in the "Diagnostic" section  
+//!   - Used for system maintenance, troubleshooting, and administrative functions
+//!   - Examples: Restart button, system reset functions, diagnostic tools
+//! 
+//! - **`entity_category: None` or omitted** → Entities appear in the primary controls section
+//!   - Used for everyday operational controls and frequently used settings
+//!   - Examples: AC charge controls, time slots, basic power management
+//! 
+//! ## MQTT Discovery
+//! 
+//! All entities are automatically discovered by Home Assistant via MQTT discovery.
+//! The discovery payload includes all necessary configuration for proper entity display
+//! and functionality within Home Assistant.
+
 use crate::prelude::*;
 use lxp::packet::Register;
 
@@ -829,109 +856,140 @@ impl Config {
             
             // ===== SYSTEM CONTROL =====
             // System control
-            self.button("restart", "Restart Inverter")?,
+            self.button("restart", "Restart Inverter", Some("diagnostic".to_string()))?,
             
             // ===== SAFETY & PROTECTION =====
             // Core safety features
-            self.switch("anti_island", "Anti-Islanding")?,
-            self.switch("neutral_detect", "Zero ground detection")?,
-            self.switch("iso", "ISO")?,
-            self.switch("gfci", "GFCI")?,
-            self.switch("dci", "DCI")?,
+            self.switch("anti_island", "Anti-Islanding", Some("config".to_string()))?,
+            self.switch("neutral_detect", "Zero ground detection", Some("config".to_string()))?,
+            self.switch("iso", "ISO", Some("config".to_string()))?,
+            self.switch("gfci", "GFCI", Some("config".to_string()))?,
+            self.switch("dci", "DCI", Some("config".to_string()))?,
             
             // Grid protection
-            self.switch("grid_on_power_ss", "Grid-connected soft start")?,
-            self.switch("lvrt", "Low Voltage Ride Through")?,
-            self.switch("ovf_load_derate", "Over Frequency Load Derate")?,
+            self.switch("grid_on_power_ss", "Grid-connected soft start", Some("config".to_string()))?,
+            self.switch("lvrt", "Low Voltage Ride Through", Some("config".to_string()))?,
+            self.switch("ovf_load_derate", "Over Frequency Load Derate", Some("config".to_string()))?,
             
             // ===== POWER MANAGEMENT =====
             // Battery backup and grid interaction
-            self.switch("eps", "Battery Backup")?,
-            self.switch("sw_seamless", "Off Grid Seamless Switching")?,
-            self.switch("feed_in_grid", "Grid Sell Back")?,
-            self.switch("set_to_standby", "Power On")?,
+            self.switch("eps", "Battery Backup", Some("config".to_string()))?,
+            self.switch("sw_seamless", "Off Grid Seamless Switching", Some("config".to_string()))?,
+            self.switch("feed_in_grid", "Grid Sell Back", Some("config".to_string()))?,
+            self.switch("set_to_standby", "Power On", None)?,
             
             // Demand response and advanced features
-            self.switch("drms", "Demand Response Mode")?,
+            self.switch("drms", "Demand Response Mode", Some("config".to_string()))?,
             
             // ===== CHARGING CONTROLS =====
             // AC charging
-            self.switch("ac_charge", "AC Charge")?,
-            self.number_percent(Register::AcChargePowerCmd, "AC Charge Rate (%)", 0.0, 100.0, 1.0, None)?,
-            self.number_percent(Register::AcChargeSocLimit, "AC Charge Limit %", 0.0, 100.0, 1.0, None)?,
+            self.switch("ac_charge", "AC Charge", None)?,
+            self.number_percent(Register::AcChargePowerCmd, "AC Charge Rate (%)", 0.0, 100.0, 1.0, None, None)?,
+            self.number_percent(Register::AcChargeSocLimit, "AC Charge Limit %", 0.0, 100.0, 1.0, None, None)?,
             self.number_percent(
                 Register::AcChargeStartSocLimit,
                 "Charge From AC Lower Limit %",
-                0.0, 100.0, 1.0, None
+                0.0, 100.0, 1.0, None, None
             )?,
             self.number_percent(
                 Register::AcChargeEndSocLimit,
                 "Charge From AC Upper Limit %",
-                0.0, 100.0, 1.0, None
+                0.0, 100.0, 1.0, None, None
             )?,
             
             // Charge priority
-            self.switch("charge_priority", "PV Charge Priority")?,
-            self.number_percent(Register::ChargePriorityPowerCmd, "Charge Priority Rate (%)", 0.0, 100.0, 1.0, None)?,
-            self.number_percent(Register::ChargePrioritySocLimit, "Charge Priority Limit %", 0.0, 100.0, 1.0, None)?,
+            self.switch("charge_priority", "PV Charge Priority", None)?,
+            self.number_percent(Register::ChargePriorityPowerCmd, "Charge Priority Rate (%)", 0.0, 100.0, 1.0, None, None)?,
+            self.number_percent(Register::ChargePrioritySocLimit, "Charge Priority Limit %", 0.0, 100.0, 1.0, None, None)?,
             
             // System charging
-            self.number_percent(Register::ChargePowerPercentCmd, "System Charge Rate (%)", 0.0, 100.0, 1.0, None)?,
-            self.number_percent(Register::DischgPowerPercentCmd, "System Discharge Rate (%)", 0.0, 100.0, 1.0, None)?,
+            self.number_percent(Register::ChargePowerPercentCmd, "System Charge Rate (%)", 0.0, 100.0, 1.0, None, None)?,
+            self.number_percent(Register::DischgPowerPercentCmd, "System Discharge Rate (%)", 0.0, 100.0, 1.0, None, None)?,
             
             // ===== FREQUENCY CONTROLS =====
             // Over frequency controls
-            self.number_hz(Register::OVFDerateStart, "Over Frequency Derate Start (Hz)", None)?,
-            self.number_hz(Register::OVFDerateEnd, "Over Frequency Derate End (Hz)", None)?,
-            self.number_percent_per_hz(Register::OVFDeratePctPerHz, "Over Frequency Derate Rate (%/Hz)", None)?,
+            self.number_hz(Register::OVFDerateStart, "Over Frequency Derate Start (Hz)", None, Some("config".to_string()))?,
+            self.number_hz(Register::OVFDerateEnd, "Over Frequency Derate End (Hz)", None, Some("config".to_string()))?,
+            self.number_percent_per_hz(Register::OVFDeratePctPerHz, "Over Frequency Derate Rate (%/Hz)", None, Some("config".to_string()))?,
             
             // Under frequency controls
-            self.number_hz(Register::UnderFrDroopStart, "Under Frequency Droop Start (Hz)", None)?,
-            self.number_hz(Register::UnderFrDroopEnd, "Under Frequency Droop End (Hz)", None)?,
-            self.number_percent_per_hz(Register::UnderFrIncreasePctPerHz, "Under Frequency Increase Rate (%/Hz)", None)?,
+            self.number_hz(Register::UnderFrDroopStart, "Under Frequency Droop Start (Hz)", None, Some("config".to_string()))?,
+            self.number_hz(Register::UnderFrDroopEnd, "Under Frequency Droop End (Hz)", None, Some("config".to_string()))?,
+            self.number_percent_per_hz(Register::UnderFrIncreasePctPerHz, "Under Frequency Increase Rate (%/Hz)", None, Some("config".to_string()))?,
             
             // Frequency response timing
-            self.number_ms(Register::DelayTimeForOverFDerate, "Frequency Response Delay Time (ms)", None)?,
+            self.number_ms(Register::DelayTimeForOverFDerate, "Frequency Response Delay Time (ms)", None, Some("config".to_string()))?,
+            
+            // ===== REACTIVE POWER CONTROLS =====
+            // Q(V) Curve Control Points (Registers 54-58)
+            self.number_percent(Register::MaxQPercentForQV, "Reactive Power - Q1 Reactive Power (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::V1L, "Reactive Power - Q(V) Curve V1 Low (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::V2L, "Reactive Power - Q(V) Curve V2 Low (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::V1H, "Reactive Power - Q(V) Curve V1 High (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::V2H, "Reactive Power - Q(V) Curve V2 High (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            
+            // Reactive Power Command Type and Values (Registers 59-62)
+            self.number_percent(Register::ReactivePowerCMDType, "Reactive Power - Command Type", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_percent(Register::ActivePowerPercentCMD, "Reactive Power - Active Power Percentage Command (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_percent(Register::ReactivePowerPercentCMD, "Reactive Power - Reactive Power Percentage Command (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_percent(Register::PFCMD, "Reactive Power - Power Factor Command", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            
+            // Q(V) Curve Reference Parameters (Registers 185-186)
+            self.number_voltage(Register::VrefQv, "Reactive Power - Q(V) Curve Reference Voltage (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::VrefFiltertime, "Reactive Power - Q(V) Curve Voltage Filter Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
+            
+            // Q(V) Curve Control Points (Registers 121, 187-188)
+            self.number_percent(Register::Q2Qv, "Reactive Power - Q(V) Curve Q2 Reactive Power (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_percent(Register::Q3Qv, "Reactive Power - Q(V) Curve Q3 Reactive Power (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_percent(Register::Q4Qv, "Reactive Power - Q(V) Curve Q4 Reactive Power (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            
+            // QP Priority Control Points (Registers 189-191)
+            self.number_percent(Register::P1Qp, "Reactive Power - QP Priority Curve P1 Power (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_percent(Register::P2Qp, "Reactive Power - QP Priority Curve P2 Power (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_percent(Register::P3Qp, "Reactive Power - QP Priority Curve P3 Power (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            
+            // Volt-Watt Open Loop Response Time (Register 183)
+            self.number_time(Register::VoltWattDelayTime, "Reactive Power - Volt-Watt Open Loop Response Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
             
             // ===== CONNECTION & RECONNECTION =====
             // Grid connection settings
-            self.number_time(Register::GridConnectTime, "Grid Connection Delay (s)", 30.0, 600.0, 1.0, Some(false))?,
-            self.number_time(Register::GridReconnectTime, "Grid Reconnection Delay (s)", 0.0, 900.0, 1.0, Some(false))?,
-            self.number_voltage(Register::GridVoltConnLow, "Grid Voltage Low Limit (V)", 180.0, 280.0, 0.1, Some(false))?,
-            self.number_voltage(Register::GridVoltConnHigh, "Grid Voltage High Limit (V)", 180.0, 280.0, 0.1, Some(false))?,
-            self.number_frequency(Register::GridFreqConnLow, "Grid Frequency Low Limit (Hz)", 47.5, 63.0, 0.01, Some(false))?,
-            self.number_frequency(Register::GridFreqConnHigh, "Grid Frequency High Limit (Hz)", 47.5, 63.0, 0.01, Some(false))?,
+            self.number_time(Register::GridConnectTime, "Grid Connection Delay (s)", 30.0, 600.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridReconnectTime, "Grid Reconnection Delay (s)", 0.0, 900.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::GridVoltConnLow, "Grid Voltage Low Limit (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::GridVoltConnHigh, "Grid Voltage High Limit (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_frequency(Register::GridFreqConnLow, "Grid Frequency Low Limit (Hz)", 47.5, 63.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_frequency(Register::GridFreqConnHigh, "Grid Frequency High Limit (Hz)", 47.5, 63.0, 0.01, Some(false), Some("config".to_string()))?,
             
             // ===== INTERFACE PROTECTION =====
             // Grid Voltage Protection Level 1
-            self.number_voltage(Register::GridVoltLimit1Low, "Grid Voltage Limit1 Low (V)", 180.0, 280.0, 0.1, Some(false))?,
-            self.number_voltage(Register::GridVoltLimit1High, "Grid Voltage Limit1 High (V)", 180.0, 280.0, 0.1, Some(false))?,
-            self.number_time(Register::GridVoltLimit1LowTime, "Grid Voltage Limit1 Low Time (s)", 0.0, 300.0, 0.01, Some(false))?,
-            self.number_time(Register::GridVoltLimit1HighTime, "Grid Voltage Limit1 High Time (s)", 0.0, 300.0, 0.01, Some(false))?,
+            self.number_voltage(Register::GridVoltLimit1Low, "Grid Voltage Limit1 Low (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::GridVoltLimit1High, "Grid Voltage Limit1 High (V)", 180.0, 280.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridVoltLimit1LowTime, "Grid Voltage Limit1 Low Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridVoltLimit1HighTime, "Grid Voltage Limit1 High Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
             // Grid Voltage Protection Level 2
-            self.number_voltage(Register::GridVoltLimit2Low, "Grid Voltage Limit2 Low (V)", 180.0, 280.0, 0.1, Some(false))?,
-            self.number_voltage(Register::GridVoltLimit2High, "Grid Voltage Limit2 High (V)", 180.0, 280.0, 0.1, Some(false))?,
-            self.number_time(Register::GridVoltLimit2LowTime, "Grid Voltage Limit2 Low Time (s)", 0.0, 300.0, 0.01, Some(false))?,
+            self.number_voltage(Register::GridVoltLimit2Low, "Grid Voltage Limit2 Low (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::GridVoltLimit2High, "Grid Voltage Limit2 High (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridVoltLimit2LowTime, "Grid Voltage Limit2 Low Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
             // Grid Voltage Protection Level 3
-            self.number_voltage(Register::GridVoltLimit3Low, "Grid Voltage Limit3 Low (V)", 180.0, 280.0, 0.1, Some(false))?,
-            self.number_voltage(Register::GridVoltLimit3High, "Grid Voltage Limit3 High (V)", 180.0, 280.0, 0.1, Some(false))?,
-            self.number_time(Register::GridVoltLimit3LowTime, "Grid Voltage Limit3 Low Time (s)", 0.0, 300.0, 0.01, Some(false))?,
-            self.number_time(Register::GridVoltLimit3HighTime, "Grid Voltage Limit3 High Time (s)", 0.0, 300.0, 0.01, Some(false))?,
+            self.number_voltage(Register::GridVoltLimit3Low, "Grid Voltage Limit3 Low (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_voltage(Register::GridVoltLimit3High, "Grid Voltage Limit3 High (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridVoltLimit3LowTime, "Grid Voltage Limit3 Low Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridVoltLimit3HighTime, "Grid Voltage Limit3 High Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
             // Grid Frequency Protection Level 1
-            self.number_frequency(Register::GridFreqLimit1Low, "Grid Frequency Limit1 Low (Hz)", 47.5, 63.0, 0.01, Some(false))?,
-            self.number_frequency(Register::GridFreqLimit1High, "Grid Frequency Limit1 High (Hz)", 47.5, 63.0, 0.01, Some(false))?,
-            self.number_time(Register::GridFreqLimit1LowTime, "Grid Frequency Limit1 Low Time (s)", 0.0, 300.0, 0.01, Some(false))?,
-            self.number_time(Register::GridFreqLimit1HighTime, "Grid Frequency Limit1 High Time (s)", 0.0, 300.0, 0.01, Some(false))?,
+            self.number_frequency(Register::GridFreqLimit1Low, "Grid Frequency Limit1 Low (Hz)", 47.5, 63.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_frequency(Register::GridFreqLimit1High, "Grid Frequency Limit1 High (Hz)", 47.5, 63.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridFreqLimit1LowTime, "Grid Frequency Limit1 Low Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridFreqLimit1HighTime, "Grid Frequency Limit1 High Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
             // Grid Frequency Protection Level 2
-            self.number_frequency(Register::GridFreqLimit2Low, "Grid Frequency Limit2 Low (Hz)", 47.5, 63.0, 0.01, Some(false))?,
-            self.number_frequency(Register::GridFreqLimit2High, "Grid Frequency Limit2 High (Hz)", 47.5, 63.0, 0.01, Some(false))?,
-            self.number_time(Register::GridFreqLimit2LowTime, "Grid Frequency Limit2 Low Time (s)", 0.0, 300.0, 0.01, Some(false))?,
-            self.number_time(Register::GridFreqLimit2HighTime, "Grid Frequency Limit2 High Time (s)", 0.0, 300.0, 0.01, Some(false))?,
+            self.number_frequency(Register::GridFreqLimit2Low, "Grid Frequency Limit2 Low (Hz)", 47.5, 63.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_frequency(Register::GridFreqLimit2High, "Grid Frequency Limit2 High (Hz)", 47.5, 63.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridFreqLimit2LowTime, "Grid Frequency Limit2 Low Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridFreqLimit2HighTime, "Grid Frequency Limit2 High Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
             // Grid Frequency Protection Level 3
-            self.number_frequency(Register::GridFreqLimit3Low, "Grid Frequency Limit3 Low (Hz)", 47.5, 63.0, 0.01, Some(false))?,
-            self.number_frequency(Register::GridFreqLimit3High, "Grid Frequency Limit3 High (Hz)", 47.5, 63.0, 0.01, Some(false))?,
-            self.number_time(Register::GridFreqLimit3LowTime, "Grid Frequency Limit3 Low Time (s)", 0.0, 300.0, 0.01, Some(false))?,
-            self.number_time(Register::GridFreqLimit3HighTime, "Grid Frequency Limit3 High Time (s)", 0.0, 300.0, 0.01, Some(false))?,
+            self.number_frequency(Register::GridFreqLimit3Low, "Grid Frequency Limit3 Low (Hz)", 47.5, 63.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_frequency(Register::GridFreqLimit3High, "Grid Frequency Limit3 High (Hz)", 47.5, 63.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridFreqLimit3LowTime, "Grid Frequency Limit3 Low Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
+            self.number_time(Register::GridFreqLimit3HighTime, "Grid Frequency Limit3 High Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
             
             // ===== TIME-BASED CONTROLS =====
             // AC charge timeslots
@@ -956,23 +1014,23 @@ impl Config {
             
             // ===== ADVANCED FEATURES =====
             // Forced discharge
-            self.switch("forced_discharge", "Forced Discharge")?,
-            self.number_percent(Register::ForcedDischgSocLimit, "Forced Discharge Limit %", 0.0, 100.0, 1.0, None)?,
+            self.switch("forced_discharge", "Forced Discharge", None)?,
+            self.number_percent(Register::ForcedDischgSocLimit, "Forced Discharge Limit %", 0.0, 100.0, 1.0, None, None)?,
             
             // Register 110 switches (advanced features)
-            self.switch_register110("pv_off_grid", "PV Off Grid Enable")?,
-            self.switch_register110("fast_zero_export", "Fast Zero Export Enable")?,
-            self.switch_register110("micro_grid", "Micro Grid Enable")?,
-            self.switch_register110("shared_battery", "Shared Battery Enable")?,
-            self.switch_register110("charge_last", "Charge Last Enable")?,
+            self.switch_register110("pv_off_grid", "PV Off Grid Enable", Some("config".to_string()))?,
+            self.switch_register110("fast_zero_export", "Fast Zero Export Enable", Some("config".to_string()))?,
+            self.switch_register110("micro_grid", "Micro Grid Enable", Some("config".to_string()))?,
+            self.switch_register110("shared_battery", "Shared Battery Enable", Some("config".to_string()))?,
+            self.switch_register110("charge_last", "Charge Last Enable", Some("config".to_string()))?,
             
             // ===== SYSTEM LIMITS =====
             // Discharge cutoff
-            self.number_percent(Register::DischgCutOffSocEod, "Discharge Cutoff %", 0.0, 100.0, 1.0, None)?,
+            self.number_percent(Register::DischgCutOffSocEod, "Discharge Cutoff %", 0.0, 100.0, 1.0, None, None)?,
             self.number_percent(
                 Register::EpsDischgCutoffSocEod,
                 "Discharge Cutoff for EPS %",
-                0.0, 100.0, 1.0, None
+                0.0, 100.0, 1.0, None, None
             )?,
         ];
 
@@ -994,21 +1052,7 @@ impl Config {
         )
     }
 
-    fn switch(&self, name: &str, label: &str) -> Result<mqtt::Message> {
-        // Determine entity category based on switch function
-        let entity_category = match name {
-            // Safety & Protection switches
-            "anti_island" | "neutral_detect" | "iso" | "gfci" | "dci" => Some("config"),
-            // Grid protection switches
-            "grid_on_power_ss" | "lvrt" | "ovf_load_derate" => Some("config"),
-            // Power management switches
-            "eps" | "sw_seamless" | "feed_in_grid" | "set_to_standby" => Some("config"),
-            // Advanced feature switches
-            "drms" | "ac_charge" | "charge_priority" | "forced_discharge" => Some("config"),
-            // Register 110 switches are already handled separately
-            _ => None,
-        };
-
+    fn switch(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
         let config = Switch {
             value_template: format!("{{{{ value_json.{name}_en }}}}"),
             state_topic: format!(
@@ -1036,7 +1080,7 @@ impl Config {
         })
     }
 
-    fn switch_register110(&self, name: &str, label: &str) -> Result<mqtt::Message> {
+    fn switch_register110(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
         let config = Switch {
             value_template: format!("{{{{ value_json.{name}_en }}}}"),
             state_topic: format!(
@@ -1052,7 +1096,7 @@ impl Config {
             ),
             unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
             name: label.to_string(),
-            entity_category: Some("config".to_string()), // Advanced feature switches
+            entity_category: entity_category.map(|s| s.to_string()), // Use provided value or None
             device: self.device(),
             availability: self.availability(),
         };
@@ -1064,7 +1108,7 @@ impl Config {
         })
     }
 
-    fn button(&self, name: &str, label: &str) -> Result<mqtt::Message> {
+    fn button(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
         let config = Button {
             name: label.to_string(),
             command_topic: format!(
@@ -1074,7 +1118,7 @@ impl Config {
                 name
             ),
             unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
-            entity_category: Some("config".to_string()), // System control buttons
+            entity_category: entity_category.map(|s| s.to_string()), // Use provided value or None
             device: self.device(),
             availability: self.availability(),
         };
@@ -1108,6 +1152,7 @@ impl Config {
         max: f64,
         step: f64,
         enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
     ) -> Result<mqtt::Message> {
         // Map register to command name for proper MQTT routing
         let command_topic = match register {
@@ -1137,7 +1182,7 @@ impl Config {
                 self.inverter.datalog()
             ),
             // These registers don't have named commands, use raw register format
-            Register::ChargePriorityPowerCmd | Register::ChargePrioritySocLimit | Register::ForcedDischgSocLimit | Register::AcChargeStartSocLimit | Register::AcChargeEndSocLimit | Register::EpsDischgCutoffSocEod => format!(
+            Register::ChargePriorityPowerCmd | Register::ChargePrioritySocLimit | Register::ForcedDischgSocLimit | Register::AcChargeStartSocLimit | Register::AcChargeEndSocLimit | Register::EpsDischgCutoffSocEod | Register::MaxQPercentForQV | Register::ActivePowerPercentCMD | Register::ReactivePowerPercentCMD | Register::Q3Qv | Register::Q4Qv | Register::P1Qp | Register::P2Qp | Register::P3Qp | Register::ReactivePowerCMDType | Register::PFCMD | Register::Q2Qv | Register::VoltWattDelayTime => format!(
                 "{}/cmd/{}/set/hold/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
@@ -1157,7 +1202,7 @@ impl Config {
             command_topic,
             value_template: "{{ float(value) }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
-            entity_category: Some("config".to_string()), // System control numbers
+            entity_category, // Use provided value or None (which will be skipped during serialization and result in the controll being added to primary controlls.)  Options: diagnostic, config
             enabled_by_default, // Use provided value or None (which will be skipped during serialization)
             device: self.device(),
             availability: self.availability(),
@@ -1174,7 +1219,13 @@ impl Config {
         })
     }
 
-    fn number_hz(&self, register: Register, label: &str, enabled_by_default: Option<bool>) -> Result<mqtt::Message> {
+    fn number_hz(
+        &self,
+        register: Register,
+        label: &str,
+        enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
+    ) -> Result<mqtt::Message> {
         // Map register to command name for proper MQTT routing
         let command_name = match register {
             Register::OVFDerateStart => "ovf_derate_start_hz",
@@ -1200,7 +1251,7 @@ impl Config {
             ),
             value_template: "{{ float(value) / 100 }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
-            entity_category: Some("config".to_string()), // System control numbers
+            entity_category, // Use provided value or None (which will be skipped during serialization)
             enabled_by_default, // Use provided value or None (which will be skipped during serialization)
             device: self.device(),
             availability: self.availability(),
@@ -1217,7 +1268,13 @@ impl Config {
         })
     }
 
-    fn number_percent_per_hz(&self, register: Register, label: &str, enabled_by_default: Option<bool>) -> Result<mqtt::Message> {
+    fn number_percent_per_hz(
+        &self,
+        register: Register,
+        label: &str,
+        enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
+    ) -> Result<mqtt::Message> {
         // Map register to command name for proper MQTT routing
         let command_name = match register {
             Register::OVFDeratePctPerHz => "ovf_derate_pct_per_hz",
@@ -1241,7 +1298,7 @@ impl Config {
             ),
             value_template: "{{ value }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
-            entity_category: Some("config".to_string()), // System control numbers
+            entity_category, // Use provided value or None (which will be skipped during serialization)
             enabled_by_default, // Use provided value or None (which will be skipped during serialization)
             device: self.device(),
             availability: self.availability(),
@@ -1258,7 +1315,13 @@ impl Config {
         })
     }
 
-    fn number_ms(&self, register: Register, label: &str, enabled_by_default: Option<bool>) -> Result<mqtt::Message> {
+    fn number_ms(
+        &self,
+        register: Register,
+        label: &str,
+        enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
+    ) -> Result<mqtt::Message> {
         // Map register to command name for proper MQTT routing
         let command_name = match register {
             Register::DelayTimeForOverFDerate => "frequency_active_open_loop_response_time",
@@ -1281,7 +1344,7 @@ impl Config {
             ),
             value_template: "{{ value }}".to_string(),
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
-            entity_category: Some("config".to_string()), // System control numbers
+            entity_category, // Use provided value or None (which will be skipped during serialization)
             enabled_by_default, // Use provided value or None (which will be skipped during serialization)
             device: self.device(),
             availability: self.availability(),
@@ -1298,7 +1361,16 @@ impl Config {
         })
     }
 
-    fn number_voltage(&self, register: Register, label: &str, min: f64, max: f64, step: f64, enabled_by_default: Option<bool>) -> Result<mqtt::Message> {
+    fn number_voltage(
+        &self,
+        register: Register,
+        label: &str,
+        min: f64,
+        max: f64,
+        step: f64,
+        enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
+    ) -> Result<mqtt::Message> {
         // Map register to command name for proper MQTT routing
         let command_name = match register {
             Register::GridVoltConnLow => "grid_voltage_low",
@@ -1310,6 +1382,12 @@ impl Config {
             Register::GridVoltLimit2High => "grid_volt_limit2_high",
             Register::GridVoltLimit3Low => "grid_volt_limit3_low",
             Register::GridVoltLimit3High => "grid_volt_limit3_high",
+            // Reactive Power Q(V) Curve Voltage Points
+            Register::V1L => "v1l",
+            Register::V2L => "v2l",
+            Register::V1H => "v1h",
+            Register::V2H => "v2h",
+            Register::VrefQv => "vref_qv",
             _ => return Err(anyhow!("number_voltage: unsupported register {:?}", register)),
         };
 
@@ -1329,7 +1407,7 @@ impl Config {
             ),
             value_template: "{{ float(value) / 10 }}".to_string(), // Convert from 0.1V units
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
-            entity_category: Some("config".to_string()), // System control numbers
+            entity_category, // Use provided value or None (which will be skipped during serialization)
             enabled_by_default, // Use provided value or None (which will be skipped during serialization)
             device: self.device(),
             availability: self.availability(),
@@ -1346,7 +1424,16 @@ impl Config {
         })
     }
 
-    fn number_time(&self, register: Register, label: &str, min: f64, max: f64, step: f64, enabled_by_default: Option<bool>) -> Result<mqtt::Message> {
+    fn number_time(
+        &self,
+        register: Register,
+        label: &str,
+        min: f64,
+        max: f64,
+        step: f64,
+        enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
+    ) -> Result<mqtt::Message> {
         // Map register to command name for proper MQTT routing
         let command_name = match register {
             Register::GridConnectTime => "grid_connect_time",
@@ -1364,6 +1451,10 @@ impl Config {
             Register::GridFreqLimit2HighTime => "grid_freq_limit2_high_time",
             Register::GridFreqLimit3LowTime => "grid_freq_limit3_low_time",
             Register::GridFreqLimit3HighTime => "grid_freq_limit3_high_time",
+            // Reactive Power Q(V) Curve Time Parameters
+            Register::VrefFiltertime => "vref_filtertime",
+            // Volt-Watt Open Loop Response Time
+            Register::VoltWattDelayTime => "volt_watt_delay_time",
             _ => return Err(anyhow!("number_time: unsupported register {:?}", register)),
         };
 
@@ -1387,13 +1478,13 @@ impl Config {
                 Register::GridVoltLimit3HighTime | Register::GridFreqLimit1LowTime | 
                 Register::GridFreqLimit1HighTime | Register::GridFreqLimit2LowTime | 
                 Register::GridFreqLimit2HighTime | Register::GridFreqLimit3LowTime | 
-                Register::GridFreqLimit3HighTime) {
-                "{{ float(value) / 100 }}".to_string() // Convert from 0.01s units for interface protection
+                Register::GridFreqLimit3HighTime | Register::VrefFiltertime | Register::VoltWattDelayTime) {
+                "{{ float(value) / 100 }}".to_string() // Convert from 0.01s units for interface protection and reactive power
             } else {
                 "{{ value }}".to_string() // No conversion for regular time registers
             },
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
-            entity_category: Some("config".to_string()), // System control numbers
+            entity_category, // Use provided value or None (which will be skipped during serialization)
             enabled_by_default, // Use provided value or None (which will be skipped during serialization)
             device: self.device(),
             availability: self.availability(),
@@ -1410,7 +1501,16 @@ impl Config {
         })
     }
 
-    fn number_frequency(&self, register: Register, label: &str, min: f64, max: f64, step: f64, enabled_by_default: Option<bool>) -> Result<mqtt::Message> {
+    fn number_frequency(
+        &self,
+        register: Register,
+        label: &str,
+        min: f64,
+        max: f64,
+        step: f64,
+        enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
+    ) -> Result<mqtt::Message> {
         // Map register to command name for proper MQTT routing
         let command_name = match register {
             Register::GridFreqConnLow => "grid_frequency_low",
@@ -1441,7 +1541,7 @@ impl Config {
             ),
             value_template: "{{ float(value) / 100 }}".to_string(), // Convert from 0.01Hz units
             unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
-            entity_category: Some("config".to_string()), // System control numbers
+            entity_category, // Use provided value or None (which will be skipped during serialization)
             enabled_by_default, // Use provided value or None (which will be skipped during serialization)
             device: self.device(),
             availability: self.availability(),
@@ -1479,7 +1579,7 @@ impl Config {
             command_template: r#"{% set parts = value.split("-") %}{"start":"{{ parts[0] }}", "end":"{{ parts[1] }}"}"#.to_string(),
             value_template: r#"{{ value_json["start"] }}-{{ value_json["end"] }}"#.to_string(),
             unique_id: format!("{}_{}_text_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name.replace('/', "_")),
-            entity_category: Some("config".to_string()), // Time-based controls
+            entity_category: None, // Time-based controls go to primary controls
             device: self.device(),
             availability: self.availability(),
             pattern: r"([01]?[0-9]|2[0-3]):[0-5][0-9]-([01]?[0-9]|2[0-3]):[0-5][0-9]".to_string(),

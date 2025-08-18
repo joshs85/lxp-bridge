@@ -490,6 +490,7 @@ These registers control power ramp rates and basic charging parameters.
   - **Unit**: %
   - **Range**: 0-100
   - **Description**: AC charge percentage setting
+  - **Note**: Located at `UL Compliance > Active Power-Reactive Power Mode > AC Charge Power (kW)` on EG4 monitoring installer website. GUI displays "kW" but stores percentage values in 0.1% units (120 = 12.0%, 110 = 11.0%). GUI fails with code 3 when trying to set above 12kW (120%), suggesting this is a maximum limit. Backup data shows values up to 120% despite documentation showing 0-100% range.
   
 - **Register 67**: ACChgSOCLimit
   - **Unit**: %
@@ -880,10 +881,11 @@ This register controls various system enable functions through individual bits.
 This register controls bus voltage parameters for QV curve operation.
 
 ### Register Details
-- **Register 121**: BusVoltHighEE? Q2_QV
-  - **Unit**: 0.1V-%
-  - **Range**: 4500-5500
-  - **Description**: Bus voltage high threshold for QV curve operation
+- **Register 121**: Q2_QV
+  - **Unit**: %
+  - **Range**: 0-100
+  - **Description**: Q2 reactive power percentage value for Q(V) curve
+  - **Note**: Located at `UL Compliance > Reactive Power Capability > Voltage-Reactive Power Mode > Q2(%)` on EG4 monitoring installer website. This register stores the Q2 reactive power percentage value for the Q(V) curve. Backup data shows values like 0% and 10%, confirming it stores percentage values. The original documentation showing "0.1V-%" and range "4500-5500" appears to be incorrect.  The Manufacturer documentation also had BusVoltageHighEE? Crossed out for the name of this one.
 
 ## EPS Discharge SOC Limit (Register 125)
 This register sets the low SOC limit for Emergency Power Supply operation.
@@ -1435,9 +1437,10 @@ These registers control the Volt-Watt curve for grid voltage response.
   - **Description**: Volt-Watt curve voltage point 2
   
 - **Register 183**: VoltWatt_DelayTime
-  - **Unit**: Main cnt
+  - **Unit**: Seconds
   - **Range**: 500-60000ms
   - **Description**: Default 10000ms
+  - **Note**: Located at `UL Compliance > Voltage-Active Power Mode > Open Loop Response Time(s)` on EG4 Monitoring and installer website. GUI displays time in seconds (e.g., 10s, 12s) but documentation shows range in milliseconds (500-60000ms). Backup data shows values like 10 and 12, suggesting it stores seconds directly.
   
 - **Register 184**: VoltWatt_P2
   - **Unit**: %

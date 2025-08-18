@@ -1,6 +1,7 @@
 ---
 alwaysApply: true
 ---
+
 # LXP Bridge Project Overview
 
 ## Project Purpose
@@ -74,4 +75,76 @@ The application follows a modular, async architecture:
 - `tests/test_home_assistant.rs`: Added tests for entity properties and value templates
 - `tests/test_mqtt_message.rs`: Added tests for command parsing and topic routing
 
-**Status**: ✅ **Complete** - All tests passing, code compiled and verified
+### Reactive Power Registers (Completed)
+**Date**: December 2024  
+**Description**: Implemented comprehensive reactive power capability registers for grid power factor control and Q(V)/Q(P) curve management.
+
+**Features Added**:
+- **25 New Registers**: All reactive power control parameters across 4 functional groups
+- **Q(V) Curve Control**: Voltage-reactive power curve management with 5 voltage points and 4 reactive power points
+- **Reactive Power Commands**: Command type, active/reactive power percentages, and power factor controls
+- **Q(V) Curve Reference**: Reference voltage and filter time parameters
+- **QP Priority Control**: Power percentage control points for priority-based operation
+- **Volt-Watt Response Time**: Open loop response time for voltage-active power mode
+
+**Technical Details**:
+- **Units**: Voltage (0.1V), Time (0.01s), Power (%), Power Factor (0.001)
+- **Registers**: 54-62, 121, 183, 185-191 (following Modbus protocol specification)
+- **Value Templates**: Proper unit conversions for Home Assistant display
+- **Testing**: All existing tests passing, code compiled and verified
+
+**Files Modified**:
+- `src/lxp/packet.rs`: Added 25 new register enum variants with proper Rust naming conventions
+- `src/command.rs`: Added corresponding command definitions and result topics for all registers
+- `src/coordinator/mod.rs`: Added command handlers with proper error handling and state updates
+- `src/mqtt.rs`: Added MQTT topic parsing for all reactive power commands
+- `src/home_assistant.rs`: Added Home Assistant discovery with proper entity configuration, value templates, and disabled-by-default configuration
+
+**Security Features**:
+- All entities use proper MQTT topic routing
+- No sensitive information exposed in frontend
+- Proper error handling and validation
+- Follows existing security patterns
+- **All reactive power entities disabled by default** to prevent accidental changes
+
+**Home Assistant Integration**:
+- All entities prefixed with "Reactive Power -" for clear identification
+- All entities disabled by default (enabled_by_default: false)
+- Proper unit conversions and value templates
+- Organized in logical functional groups
+
+**Status**: ✅ **Complete** - All tests passing, code compiled and verified, ready for production use
+
+### Home Assistant Entity Organization (Completed)
+**Date**: December 2024  
+**Description**: Improved Home Assistant entity organization by implementing proper entity categories and moving controls to appropriate sections.
+
+**Features Added**:
+- **Entity Category Documentation**: Comprehensive documentation explaining Home Assistant entity organization
+- **Primary Controls Section**: Moved basic operational controls (AC charge, time slots, etc.) to primary controls
+- **Configuration Section**: Advanced settings and safety controls remain in configuration section
+- **Diagnostic Section**: System maintenance functions (restart button) moved to diagnostic section
+- **Improved User Experience**: Better organization makes it easier to find everyday controls vs. advanced settings
+
+**Technical Details**:
+- **Entity Categories**: 
+  - `None` (omitted) → Primary controls section (everyday operational controls)
+  - `"config"` → Configuration section (advanced settings, safety controls)
+  - `"diagnostic"` → Diagnostic section (system maintenance, troubleshooting)
+- **Function Parameters**: Added `entity_category` parameter to all number functions for flexible categorization
+- **Control Placement**:
+  - **Primary Controls**: AC charge controls, time slots, basic power management
+  - **Configuration**: Grid protection limits, reactive power settings, frequency controls
+  - **Diagnostic**: Restart button, system reset functions
+
+**Files Modified**:
+- `src/home_assistant.rs`: 
+  - Added comprehensive entity category documentation
+  - Added `entity_category` parameter to all number functions
+  - Added `entity_category` parameter to switch functions for flexible categorization
+  - Added `entity_category` parameter to button functions for flexible categorization
+  - Updated entity placement logic for better organization
+  - Moved restart button to diagnostic section
+- `tests/test_home_assistant.rs`: Updated tests to reflect new entity category expectations
+
+**Status**: ✅ **Complete** - All tests passing, improved Home Assistant organization, better user experience

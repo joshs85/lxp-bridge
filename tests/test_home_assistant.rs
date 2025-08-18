@@ -123,7 +123,8 @@ async fn all_has_switch_ac_charge() {
     // Check that the payload contains the expected fields
     let payload = &switch_message.unwrap().payload;
     assert!(payload.contains("AC Charge"), "Missing name");
-    assert!(payload.contains("config"), "Missing entity_category");
+    // Basic operational controls should be in primary controls (no entity_category)
+    assert!(!payload.contains("entity_category"), "Basic operational controls should not have entity_category");
 }
 
 #[tokio::test]
@@ -143,7 +144,8 @@ async fn all_has_number_ac_charge_soc_limit_pct() {
     // Check that the payload contains the expected fields
     let payload = &number_message.unwrap().payload;
     assert!(payload.contains("AC Charge Limit %"), "Missing name");
-    assert!(payload.contains("config"), "Missing entity_category");
+    // Basic operational controls should be in primary controls (no entity_category)
+    assert!(!payload.contains("entity_category"), "Basic operational controls should not have entity_category");
     assert!(payload.contains("0.0"), "Missing min value");
     assert!(payload.contains("100.0"), "Missing max value");
 }
@@ -165,7 +167,8 @@ async fn all_has_time_range_ac_charge_1() {
     // Check that the payload contains the expected fields
     let payload = &text_message.unwrap().payload;
     assert!(payload.contains("AC Charge Timeslot 1"), "Missing name");
-    assert!(payload.contains("config"), "Missing entity_category");
+    // Basic operational controls should be in primary controls (no entity_category)
+    assert!(!payload.contains("entity_category"), "Basic operational controls should not have entity_category");
 }
 
 #[test]

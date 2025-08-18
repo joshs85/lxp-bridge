@@ -649,6 +649,154 @@ impl Coordinator {
                 }
                 result
             }
+            // Reactive Power Control (Registers 54-62)
+            SetMaxQPercentForQV(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::MaxQPercentForQV, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::MaxQPercentForQV, 1).await;
+                }
+                result
+            }
+            SetV1L(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::V1L, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::V1L, 1).await;
+                }
+                result
+            }
+            SetV2L(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::V2L, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::V2L, 1).await;
+                }
+                result
+            }
+            SetV1H(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::V1H, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::V1H, 1).await;
+                }
+                result
+            }
+            SetV2H(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::V2H, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::V2H, 1).await;
+                }
+                result
+            }
+            SetReactivePowerCMDType(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::ReactivePowerCMDType, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::ReactivePowerCMDType, 1).await;
+                }
+                result
+            }
+            SetActivePowerPercentCMD(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::ActivePowerPercentCMD, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::ActivePowerPercentCMD, 1).await;
+                }
+                result
+            }
+            SetReactivePowerPercentCMD(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::ReactivePowerPercentCMD, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::ReactivePowerPercentCMD, 1).await;
+                }
+                result
+            }
+            SetPFCMD(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::PFCMD, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::PFCMD, 1).await;
+                }
+                result
+            }
+            // Q(V) Curve Reference Parameters (Registers 185-186)
+            SetVrefQv(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::VrefQv, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::VrefQv, 1).await;
+                }
+                result
+            }
+            SetVrefFiltertime(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::VrefFiltertime, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::VrefFiltertime, 1).await;
+                }
+                result
+            }
+            // Q(V) Curve Control Points (Registers 187-188)
+            SetQ3Qv(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::Q3Qv, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::Q3Qv, 1).await;
+                }
+                result
+            }
+            SetQ4Qv(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::Q4Qv, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::Q4Qv, 1).await;
+                }
+                result
+            }
+            SetQ2Qv(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::Q2Qv, value).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::Q2Qv, 1).await;
+                }
+                result
+            }
+            // QP Priority Control Points (Registers 189-191)
+            SetP1Qp(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::P1Qp, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::P1Qp, 1).await;
+                }
+                result
+            }
+            SetP2Qp(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::P2Qp, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::P2Qp, 1).await;
+                }
+                result
+            }
+            SetP3Qp(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::P3Qp, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::P3Qp, 1).await;
+                }
+                result
+            }
+            // Volt-Watt Open Loop Response Time (Register 183)
+            SetVoltWattDelayTime(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::VoltWattDelayTime, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::VoltWattDelayTime, 1).await;
+                }
+                result
+            }
             RestartInverter(inverter) => {
                 // Set bit 7 of register 11 to 1 to restart the inverter
                 self.update_hold_register11(

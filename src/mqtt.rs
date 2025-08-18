@@ -245,6 +245,29 @@ impl Message {
             ["set", "grid_freq_limit3_high"] => SetGridFreqLimit3High(inverter, self.payload_int()?),
             ["set", "grid_freq_limit3_low_time"] => SetGridFreqLimit3LowTime(inverter, self.payload_int()?),
             ["set", "grid_freq_limit3_high_time"] => SetGridFreqLimit3HighTime(inverter, self.payload_int()?),
+            // Reactive Power Control (Registers 54-62)
+            ["set", "max_q_percent_for_qv"] => SetMaxQPercentForQV(inverter, self.payload_int()?),
+            ["set", "v1l"] => SetV1L(inverter, self.payload_int()?),
+            ["set", "v2l"] => SetV2L(inverter, self.payload_int()?),
+            ["set", "v1h"] => SetV1H(inverter, self.payload_int()?),
+            ["set", "v2h"] => SetV2H(inverter, self.payload_int()?),
+            ["set", "reactive_power_cmd_type"] => SetReactivePowerCMDType(inverter, self.payload_int()?),
+            ["set", "active_power_percent_cmd"] => SetActivePowerPercentCMD(inverter, self.payload_int()?),
+            ["set", "reactive_power_percent_cmd"] => SetReactivePowerPercentCMD(inverter, self.payload_int()?),
+            ["set", "pf_cmd"] => SetPFCMD(inverter, self.payload_int()?),
+            // Q(V) Curve Reference Parameters (Registers 185-186)
+            ["set", "vref_qv"] => SetVrefQv(inverter, self.payload_int()?),
+            ["set", "vref_filtertime"] => SetVrefFiltertime(inverter, self.payload_int()?),
+            // Q(V) Curve Control Points (Registers 187-188)
+            ["set", "q3_qv"] => SetQ3Qv(inverter, self.payload_int()?),
+            ["set", "q4_qv"] => SetQ4Qv(inverter, self.payload_int()?),
+            ["set", "q2_qv"] => SetQ2Qv(inverter, self.payload_int()?),
+            // QP Priority Control Points (Registers 189-191)
+            ["set", "p1_qp"] => SetP1Qp(inverter, self.payload_int()?),
+            ["set", "p2_qp"] => SetP2Qp(inverter, self.payload_int()?),
+            ["set", "p3_qp"] => SetP3Qp(inverter, self.payload_int()?),
+            // Volt-Watt Open Loop Response Time (Register 183)
+            ["set", "volt_watt_delay_time"] => SetVoltWattDelayTime(inverter, self.payload_int()?),
             // Register 110 switches
             ["set", "pv_off_grid"] => PvOffGrid(inverter, self.payload_bool()),
             ["set", "fast_zero_export"] => FastZeroExport(inverter, self.payload_bool()),

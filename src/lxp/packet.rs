@@ -580,6 +580,16 @@ pub enum Register {
     GridFreqLimit3High = 51,     // Grid frequency class 3 overfrequency protection point (0.01Hz)
     GridFreqLimit3LowTime = 52,  // Grid frequency level 3 underfrequency protection time (0.01s)
     GridFreqLimit3HighTime = 53, // Grid frequency class 3 overfrequency protection time (0.01s)
+    // Reactive Power Control (Registers 54-62)
+    MaxQPercentForQV = 54,       // Maximum reactive power percentage for Q(V) curve
+    V1L = 55,                     // Q(V) curve undervoltage 1 (0.1V)
+    V2L = 56,                     // Q(V) curve undervoltage 2 (0.1V)
+    V1H = 57,                     // Q(V) curve overvoltage 1 (0.1V)
+    V2H = 58,                     // Q(V) curve overvoltage 2 (0.1V)
+    ReactivePowerCMDType = 59,    // Reactive power command type
+    ActivePowerPercentCMD = 60,   // Active power percentage command
+    ReactivePowerPercentCMD = 61, // Reactive power percentage command
+    PFCMD = 62,                   // Power factor command
     ChargePowerPercentCmd = 64,  // System Charge Rate (%)
     DischgPowerPercentCmd = 65,  // System Discharge Rate (%)
     AcChargePowerCmd = 66,       // Grid Charge Power Rate (%)
@@ -598,6 +608,19 @@ pub enum Register {
     UnderFrDroopStart = 134,      // Frequency Active Power Mode Under frequency Droop Start dbUF(Hz)
     UnderFrDroopEnd = 135,        // Frequency Active Power Mode Under frequency Droop End (Hz)
     UnderFrIncreasePctPerHz = 193,// Frequency Active Power Mode Under frequency Droop kUF (%/Hz)
+    // Volt-Watt Open Loop Response Time (Register 183)
+    VoltWattDelayTime = 183,      // Volt-Watt Open Loop Response Time (s)
+    // Q(V) Curve Reference Parameters (Registers 185-186)
+    VrefQv = 185,                // Q(V) curve reference voltage (0.1V)
+    VrefFiltertime = 186,        // Q(V) curve voltage filter time (s)
+    // Q(V) Curve Control Points (Registers 187-188)
+    Q2Qv = 121,                  // Q2 reactive power percentage value for Q(V) curve
+    Q3Qv = 187,                  // Q3 reactive power percentage value for Q(V) curve
+    Q4Qv = 188,                  // Q4 reactive power percentage value for Q(V) curve
+    // QP Priority Control Points (Registers 189-191)
+    P1Qp = 189,                  // P1 power percentage value for QP priority curve
+    P2Qp = 190,                  // P2 power percentage value for QP priority curve
+    P3Qp = 191,                  // P3 power percentage value for QP priority curve
     ResetSetting = 11,              // Reset settings register (bit 7 = InvReboot)
 }
 

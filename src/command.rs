@@ -51,6 +51,29 @@ pub enum Command {
     SetGridVoltageHigh(config::Inverter, u16),
     SetGridFrequencyLow(config::Inverter, u16),
     SetGridFrequencyHigh(config::Inverter, u16),
+    // Reactive Power Control (Registers 54-62)
+    SetMaxQPercentForQV(config::Inverter, u16),
+    SetV1L(config::Inverter, u16),
+    SetV2L(config::Inverter, u16),
+    SetV1H(config::Inverter, u16),
+    SetV2H(config::Inverter, u16),
+    SetReactivePowerCMDType(config::Inverter, u16),
+    SetActivePowerPercentCMD(config::Inverter, u16),
+    SetReactivePowerPercentCMD(config::Inverter, u16),
+    SetPFCMD(config::Inverter, u16),
+    SetQ2Qv(config::Inverter, u16),
+    // Q(V) Curve Reference Parameters (Registers 185-186)
+    SetVrefQv(config::Inverter, u16),
+    SetVrefFiltertime(config::Inverter, u16),
+    // Q(V) Curve Control Points (Registers 187-188)
+    SetQ3Qv(config::Inverter, u16),
+    SetQ4Qv(config::Inverter, u16),
+    // QP Priority Control Points (Registers 189-191)
+    SetP1Qp(config::Inverter, u16),
+    SetP2Qp(config::Inverter, u16),
+    SetP3Qp(config::Inverter, u16),
+    // Volt-Watt Open Loop Response Time (Register 183)
+    SetVoltWattDelayTime(config::Inverter, u16),
     // Interface Protection - Grid Voltage Limits
     SetGridVoltLimit1Low(config::Inverter, u16),
     SetGridVoltLimit1High(config::Inverter, u16),
@@ -170,6 +193,29 @@ impl Command {
             SetGridVoltageHigh(inverter, _) => format!("{}/set/grid_voltage_high", inverter.datalog()),
             SetGridFrequencyLow(inverter, _) => format!("{}/set/grid_frequency_low", inverter.datalog()),
             SetGridFrequencyHigh(inverter, _) => format!("{}/set/grid_frequency_high", inverter.datalog()),
+            // Reactive Power Control (Registers 54-62)
+            SetMaxQPercentForQV(inverter, _) => format!("{}/set/max_q_percent_for_qv", inverter.datalog()),
+            SetV1L(inverter, _) => format!("{}/set/v1l", inverter.datalog()),
+            SetV2L(inverter, _) => format!("{}/set/v2l", inverter.datalog()),
+            SetV1H(inverter, _) => format!("{}/set/v1h", inverter.datalog()),
+            SetV2H(inverter, _) => format!("{}/set/v2h", inverter.datalog()),
+            SetReactivePowerCMDType(inverter, _) => format!("{}/set/reactive_power_cmd_type", inverter.datalog()),
+            SetActivePowerPercentCMD(inverter, _) => format!("{}/set/active_power_percent_cmd", inverter.datalog()),
+            SetReactivePowerPercentCMD(inverter, _) => format!("{}/set/reactive_power_percent_cmd", inverter.datalog()),
+            SetPFCMD(inverter, _) => format!("{}/set/pf_cmd", inverter.datalog()),
+            SetQ2Qv(inverter, _) => format!("{}/set/q2_qv", inverter.datalog()),
+            // Q(V) Curve Reference Parameters (Registers 185-186)
+            SetVrefQv(inverter, _) => format!("{}/set/vref_qv", inverter.datalog()),
+            SetVrefFiltertime(inverter, _) => format!("{}/set/vref_filtertime", inverter.datalog()),
+            // Q(V) Curve Control Points (Registers 187-188)
+            SetQ3Qv(inverter, _) => format!("{}/set/q3_qv", inverter.datalog()),
+            SetQ4Qv(inverter, _) => format!("{}/set/q4_qv", inverter.datalog()),
+            // QP Priority Control Points (Registers 189-191)
+            SetP1Qp(inverter, _) => format!("{}/set/p1_qp", inverter.datalog()),
+            SetP2Qp(inverter, _) => format!("{}/set/p2_qp", inverter.datalog()),
+            SetP3Qp(inverter, _) => format!("{}/set/p3_qp", inverter.datalog()),
+            // Volt-Watt Open Loop Response Time (Register 183)
+            SetVoltWattDelayTime(inverter, _) => format!("{}/set/volt_watt_delay_time", inverter.datalog()),
             // Interface Protection - Grid Voltage Limits
             SetGridVoltLimit1Low(inverter, _) => format!("{}/set/grid_volt_limit1_low", inverter.datalog()),
             SetGridVoltLimit1High(inverter, _) => format!("{}/set/grid_volt_limit1_high", inverter.datalog()),
