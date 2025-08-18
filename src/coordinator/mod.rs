@@ -437,6 +437,218 @@ impl Coordinator {
                 .await?;
                 Ok(())
             }
+            // Connection and reconnection configuration
+            SetGridConnectTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridConnectTime, time).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::GridConnectTime, 1).await;
+                }
+                result
+            }
+            SetGridReconnectTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridReconnectTime, time).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::GridReconnectTime, 1).await;
+                }
+                result
+            }
+            SetGridVoltageLow(inverter, voltage) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltConnLow, voltage).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::GridVoltConnLow, 1).await;
+                }
+                result
+            }
+            SetGridVoltageHigh(inverter, voltage) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltConnHigh, voltage).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::GridVoltConnHigh, 1).await;
+                }
+                result
+            }
+            SetGridFrequencyLow(inverter, frequency) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqConnLow, frequency).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::GridFreqConnLow, 1).await;
+                }
+                result
+            }
+            SetGridFrequencyHigh(inverter, frequency) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqConnHigh, frequency).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::GridFreqConnHigh, 1).await;
+                }
+                result
+            }
+            // Interface Protection - Grid Voltage Limits
+            SetGridVoltLimit1Low(inverter, voltage) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit1Low, voltage).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit1Low, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit1High(inverter, voltage) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit1High, voltage).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit1High, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit1LowTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit1LowTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit1LowTime, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit1HighTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit1HighTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit1HighTime, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit2Low(inverter, voltage) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit2Low, voltage).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit2Low, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit2High(inverter, voltage) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit2High, voltage).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit2High, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit2LowTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit2LowTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit2LowTime, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit3Low(inverter, voltage) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit3Low, voltage).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit3Low, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit3High(inverter, voltage) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit3High, voltage).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit3High, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit3LowTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit3LowTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit3LowTime, 1).await;
+                }
+                result
+            }
+            SetGridVoltLimit3HighTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridVoltLimit3HighTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridVoltLimit3HighTime, 1).await;
+                }
+                result
+            }
+            // Interface Protection - Grid Frequency Limits
+            SetGridFreqLimit1Low(inverter, frequency) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit1Low, frequency).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit1Low, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit1High(inverter, frequency) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit1High, frequency).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit1High, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit1LowTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit1LowTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit1LowTime, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit1HighTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit1HighTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit1HighTime, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit2Low(inverter, frequency) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit2Low, frequency).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit2Low, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit2High(inverter, frequency) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit2High, frequency).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit2High, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit2LowTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit2LowTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit2LowTime, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit2HighTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit2HighTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit2HighTime, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit3Low(inverter, frequency) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit3Low, frequency).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit3Low, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit3High(inverter, frequency) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit3High, frequency).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit3High, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit3LowTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit3LowTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit3LowTime, 1).await;
+                }
+                result
+            }
+            SetGridFreqLimit3HighTime(inverter, time) => {
+                let result = self.set_hold(inverter.clone(), Register::GridFreqLimit3HighTime, time).await;
+                if result.is_ok() {
+                    let _ = self.read_hold(inverter, Register::GridFreqLimit3HighTime, 1).await;
+                }
+                result
+            }
             RestartInverter(inverter) => {
                 // Set bit 7 of register 11 to 1 to restart the inverter
                 self.update_hold_register11(

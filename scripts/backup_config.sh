@@ -48,23 +48,35 @@ if [ ! -f "Cargo.toml" ]; then
 fi
 
 # Check if required arguments are provided
-if [ $# -lt 3 ]; then
-    echo "Usage: $0 <config_file> <inverter_serial> <output_file>"
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <config_file> <inverter_serial> [output_file]"
     echo ""
     echo "Arguments:"
     echo "  config_file      Path to your lxp-bridge configuration file"
     echo "  inverter_serial  Serial number of the inverter to backup"
-    echo "  output_file      Path where the backup JSON file will be saved"
+    echo "  output_file      (Optional) Path where the backup JSON file will be saved"
+    echo "                   If not specified, will save to backups/backup_<timestamp>.json"
     echo ""
-    echo "Example:"
+    echo "Examples:"
+    echo "  $0 config.yaml 5555555555"
     echo "  $0 config.yaml 5555555555 backup_$(date +%Y%m%d_%H%M%S).json"
+    echo "  $0 config.yaml 5555555555 backups/my_custom_backup.json"
     echo ""
     exit 1
 fi
 
 CONFIG_FILE="$1"
 INVERTER_SERIAL="$2"
-OUTPUT_FILE="$3"
+
+# Set default output file if not provided
+if [ $# -eq 2 ]; then
+    # Default to backups folder with timestamp
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    OUTPUT_FILE="backups/backup_${TIMESTAMP}.json"
+    print_status "No output file specified, using default: $OUTPUT_FILE"
+else
+    OUTPUT_FILE="$3"
+fi
 
 # Validate inputs
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -119,7 +131,7 @@ if [ $? -eq 0 ]; then
     print_success "Backup saved to: $OUTPUT_FILE"
     echo ""
     print_status "📊 Backup contains:"
-    print_status "   - Raw hold andregister values from your real system"
+    print_status "   - Raw hold register values from your real system"
     print_status "   - Hexadecimal values for protocol validation"
     echo ""
     print_status "🔒 No changes were made to your system"

@@ -553,6 +553,27 @@ fn test_mqtt_message_to_command_coverage() {
     
     let command = message.to_command(inverter.clone());
     assert!(command.is_ok(), "Failed to parse set hold command with valid payload");
+    
+    // Test the new grid connection commands
+    let grid_commands = vec![
+        ("cmd/AB12345678/set/grid_connect_time", "30", "grid connect time"),
+        ("cmd/AB12345678/set/grid_reconnect_time", "60", "grid reconnect time"),
+        ("cmd/AB12345678/set/grid_voltage_low", "2200", "grid voltage low"),
+        ("cmd/AB12345678/set/grid_voltage_high", "2550", "grid voltage high"),
+        ("cmd/AB12345678/set/grid_frequency_low", "5950", "grid frequency low"),
+        ("cmd/AB12345678/set/grid_frequency_high", "6200", "grid frequency high"),
+    ];
+    
+    for (topic, payload, description) in grid_commands {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: payload.to_string(),
+        };
+        
+        let command = message.to_command(inverter.clone());
+        assert!(command.is_ok(), "Failed to parse {} command", description);
+    }
 }
 
 #[test]
@@ -598,6 +619,299 @@ fn test_mqtt_message_split_cmd_topic_coverage() {
     
     let result = invalid_message.split_cmd_topic();
     assert!(result.is_err());
+}
+
+#[test]
+fn test_grid_connection_commands_parsing() {
+    // Test the new grid connection and reconnection commands
+    use lxp_bridge::mqtt::Message;
+    use lxp_bridge::config::Inverter;
+    use lxp_bridge::command::Command;
+    
+    // Create a mock inverter config
+    let inverter = Inverter {
+        host: "127.0.0.1".to_string(),
+        port: 502,
+        serial: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        datalog: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        enabled: true,
+        heartbeats: None,
+        publish_holdings_on_connect: None,
+        read_timeout: None,
+    };
+    
+    // Test all grid connection commands with valid payloads
+    let test_cases = vec![
+        ("cmd/AB12345678/set/grid_connect_time", "30"),
+        ("cmd/AB12345678/set/grid_reconnect_time", "60"),
+        ("cmd/AB12345678/set/grid_voltage_low", "2200"),
+        ("cmd/AB12345678/set/grid_voltage_high", "2550"),
+        ("cmd/AB12345678/set/grid_frequency_low", "5950"),
+        ("cmd/AB12345678/set/grid_frequency_high", "6200"),
+    ];
+    
+    for (topic, payload) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: payload.to_string(),
+        };
+        
+        let command = message.to_command(inverter.clone());
+        assert!(command.is_ok(), "Failed to parse command: {}", topic);
+        
+        // Verify the command was parsed successfully (we can't compare Command enums directly)
+        let command = command.unwrap();
+        match command {
+            Command::SetGridConnectTime(_, _) |
+            Command::SetGridReconnectTime(_, _) |
+            Command::SetGridVoltageLow(_, _) |
+            Command::SetGridVoltageHigh(_, _) |
+            Command::SetGridFrequencyLow(_, _) |
+            Command::SetGridFrequencyHigh(_, _) => {
+                // Command was parsed successfully
+            }
+            _ => panic!("Unexpected command type for topic: {}", topic),
+        }
+    }
+    
+    // Test invalid payloads (non-numeric)
+    let invalid_payloads = vec![
+        ("cmd/AB12345678/set/grid_connect_time", "invalid"),
+        ("cmd/AB12345678/set/grid_voltage_low", "abc"),
+        ("cmd/AB12345678/set/grid_frequency_high", "xyz"),
+    ];
+    
+    for (topic, payload) in invalid_payloads {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: payload.to_string(),
+        };
+        
+        let command = message.to_command(inverter.clone());
+        assert!(command.is_err(), "Should fail to parse invalid payload: {}", payload);
+    }
+    
+    // Test missing payloads
+    let message = Message {
+        topic: "cmd/AB12345678/set/grid_connect_time".to_string(),
+        retain: false,
+        payload: "".to_string(),
+    };
+    
+    let command = message.to_command(inverter.clone());
+    assert!(command.is_err(), "Should fail to parse empty payload");
+}
+
+#[test]
+fn test_interface_protection_commands_parsing() {
+    // Test the interface protection commands
+    use lxp_bridge::mqtt::Message;
+    use lxp_bridge::config::Inverter;
+    use lxp_bridge::command::Command;
+    
+    // Create a mock inverter config
+    let inverter = Inverter {
+        host: "127.0.0.1".to_string(),
+        port: 502,
+        serial: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        datalog: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        enabled: true,
+        heartbeats: None,
+        publish_holdings_on_connect: None,
+        read_timeout: None,
+    };
+    
+    // Test all interface protection commands with valid payloads
+    let test_cases = vec![
+        // Grid Voltage Protection Level 1
+        ("cmd/AB12345678/set/grid_volt_limit1_low", "2200"),
+        ("cmd/AB12345678/set/grid_volt_limit1_high", "2550"),
+        ("cmd/AB12345678/set/grid_volt_limit1_low_time", "100"),
+        ("cmd/AB12345678/set/grid_volt_limit1_high_time", "100"),
+        // Grid Voltage Protection Level 2
+        ("cmd/AB12345678/set/grid_volt_limit2_low", "2200"),
+        ("cmd/AB12345678/set/grid_volt_limit2_high", "2550"),
+        ("cmd/AB12345678/set/grid_volt_limit2_low_time", "100"),
+        // Grid Voltage Protection Level 3
+        ("cmd/AB12345678/set/grid_volt_limit3_low", "2200"),
+        ("cmd/AB12345678/set/grid_volt_limit3_high", "2550"),
+        ("cmd/AB12345678/set/grid_volt_limit3_low_time", "100"),
+        ("cmd/AB12345678/set/grid_volt_limit3_high_time", "100"),
+        // Grid Frequency Protection Level 1
+        ("cmd/AB12345678/set/grid_freq_limit1_low", "5950"),
+        ("cmd/AB12345678/set/grid_freq_limit1_high", "6200"),
+        ("cmd/AB12345678/set/grid_freq_limit1_low_time", "100"),
+        ("cmd/AB12345678/set/grid_freq_limit1_high_time", "100"),
+        // Grid Frequency Protection Level 2
+        ("cmd/AB12345678/set/grid_freq_limit2_low", "5950"),
+        ("cmd/AB12345678/set/grid_freq_limit2_high", "6200"),
+        ("cmd/AB12345678/set/grid_freq_limit2_low_time", "100"),
+        ("cmd/AB12345678/set/grid_freq_limit2_high_time", "100"),
+        // Grid Frequency Protection Level 3
+        ("cmd/AB12345678/set/grid_freq_limit3_low", "5950"),
+        ("cmd/AB12345678/set/grid_freq_limit3_high", "6200"),
+        ("cmd/AB12345678/set/grid_freq_limit3_low_time", "100"),
+        ("cmd/AB12345678/set/grid_freq_limit3_high_time", "100"),
+    ];
+    
+    for (topic, payload) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: payload.to_string(),
+        };
+        
+        let command = message.to_command(inverter.clone());
+        assert!(command.is_ok(), "Failed to parse command: {}", topic);
+        
+        // Verify the command was parsed successfully (we can't compare Command enums directly)
+        let command = command.unwrap();
+        match command {
+            Command::SetGridVoltLimit1Low(_, _) |
+            Command::SetGridVoltLimit1High(_, _) |
+            Command::SetGridVoltLimit1LowTime(_, _) |
+            Command::SetGridVoltLimit1HighTime(_, _) |
+            Command::SetGridVoltLimit2Low(_, _) |
+            Command::SetGridVoltLimit2High(_, _) |
+            Command::SetGridVoltLimit2LowTime(_, _) |
+            Command::SetGridVoltLimit3Low(_, _) |
+            Command::SetGridVoltLimit3High(_, _) |
+            Command::SetGridVoltLimit3LowTime(_, _) |
+            Command::SetGridVoltLimit3HighTime(_, _) |
+            Command::SetGridFreqLimit1Low(_, _) |
+            Command::SetGridFreqLimit1High(_, _) |
+            Command::SetGridFreqLimit1LowTime(_, _) |
+            Command::SetGridFreqLimit1HighTime(_, _) |
+            Command::SetGridFreqLimit2Low(_, _) |
+            Command::SetGridFreqLimit2High(_, _) |
+            Command::SetGridFreqLimit2LowTime(_, _) |
+            Command::SetGridFreqLimit2HighTime(_, _) |
+            Command::SetGridFreqLimit3Low(_, _) |
+            Command::SetGridFreqLimit3High(_, _) |
+            Command::SetGridFreqLimit3LowTime(_, _) |
+            Command::SetGridFreqLimit3HighTime(_, _) => {
+                // Command was parsed successfully
+            }
+            _ => panic!("Unexpected command type for topic: {}", topic),
+        }
+    }
+    
+    // Test invalid payloads (non-numeric)
+    let invalid_payloads = vec![
+        ("cmd/AB12345678/set/grid_volt_limit1_low", "invalid"),
+        ("cmd/AB12345678/set/grid_freq_limit1_high", "abc"),
+        ("cmd/AB12345678/set/grid_volt_limit2_low_time", "xyz"),
+    ];
+    
+    for (topic, payload) in invalid_payloads {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: payload.to_string(),
+        };
+        
+        let command = message.to_command(inverter.clone());
+        assert!(command.is_err(), "Should fail to parse invalid payload: {}", payload);
+    }
+}
+
+#[test]
+fn test_grid_connection_commands_topic_parsing() {
+    // Test that grid connection command topics are properly parsed
+    use lxp_bridge::mqtt::Message;
+    
+    let test_cases = vec![
+        ("cmd/AB12345678/set/grid_connect_time", "AB12345678", vec!["set", "grid_connect_time"]),
+        ("cmd/AB12345678/set/grid_reconnect_time", "AB12345678", vec!["set", "grid_reconnect_time"]),
+        ("cmd/AB12345678/set/grid_voltage_low", "AB12345678", vec!["set", "grid_voltage_low"]),
+        ("cmd/AB12345678/set/grid_voltage_high", "AB12345678", vec!["set", "grid_voltage_high"]),
+        ("cmd/AB12345678/set/grid_frequency_low", "AB12345678", vec!["set", "grid_frequency_low"]),
+        ("cmd/AB12345678/set/grid_frequency_high", "AB12345678", vec!["set", "grid_frequency_high"]),
+    ];
+    
+    for (topic, expected_datalog, expected_parts) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: "test".to_string(),
+        };
+        
+        let result = message.split_cmd_topic().unwrap();
+        let (target_inverter, parts) = result;
+        
+        match target_inverter {
+            lxp_bridge::mqtt::TargetInverter::Serial(serial) => {
+                assert_eq!(serial.to_string(), expected_datalog);
+            }
+            lxp_bridge::mqtt::TargetInverter::All => {
+                panic!("Expected serial inverter, got All");
+            }
+        }
+        
+        assert_eq!(parts, expected_parts);
+    }
+}
+
+#[test]
+fn test_interface_protection_commands_topic_parsing() {
+    // Test that interface protection command topics are properly parsed
+    use lxp_bridge::mqtt::Message;
+    
+    let test_cases = vec![
+        // Grid Voltage Protection Level 1
+        ("cmd/AB12345678/set/grid_volt_limit1_low", "AB12345678", vec!["set", "grid_volt_limit1_low"]),
+        ("cmd/AB12345678/set/grid_volt_limit1_high", "AB12345678", vec!["set", "grid_volt_limit1_high"]),
+        ("cmd/AB12345678/set/grid_volt_limit1_low_time", "AB12345678", vec!["set", "grid_volt_limit1_low_time"]),
+        ("cmd/AB12345678/set/grid_volt_limit1_high_time", "AB12345678", vec!["set", "grid_volt_limit1_high_time"]),
+        // Grid Voltage Protection Level 2
+        ("cmd/AB12345678/set/grid_volt_limit2_low", "AB12345678", vec!["set", "grid_volt_limit2_low"]),
+        ("cmd/AB12345678/set/grid_volt_limit2_high", "AB12345678", vec!["set", "grid_volt_limit2_high"]),
+        ("cmd/AB12345678/set/grid_volt_limit2_low_time", "AB12345678", vec!["set", "grid_volt_limit2_low_time"]),
+        // Grid Voltage Protection Level 3
+        ("cmd/AB12345678/set/grid_volt_limit3_low", "AB12345678", vec!["set", "grid_volt_limit3_low"]),
+        ("cmd/AB12345678/set/grid_volt_limit3_high", "AB12345678", vec!["set", "grid_volt_limit3_high"]),
+        ("cmd/AB12345678/set/grid_volt_limit3_low_time", "AB12345678", vec!["set", "grid_volt_limit3_low_time"]),
+        ("cmd/AB12345678/set/grid_volt_limit3_high_time", "AB12345678", vec!["set", "grid_volt_limit3_high_time"]),
+        // Grid Frequency Protection Level 1
+        ("cmd/AB12345678/set/grid_freq_limit1_low", "AB12345678", vec!["set", "grid_freq_limit1_low"]),
+        ("cmd/AB12345678/set/grid_freq_limit1_high", "AB12345678", vec!["set", "grid_freq_limit1_high"]),
+        ("cmd/AB12345678/set/grid_freq_limit1_low_time", "AB12345678", vec!["set", "grid_freq_limit1_low_time"]),
+        ("cmd/AB12345678/set/grid_freq_limit1_high_time", "AB12345678", vec!["set", "grid_freq_limit1_high_time"]),
+        // Grid Frequency Protection Level 2
+        ("cmd/AB12345678/set/grid_freq_limit2_low", "AB12345678", vec!["set", "grid_freq_limit2_low"]),
+        ("cmd/AB12345678/set/grid_freq_limit2_high", "AB12345678", vec!["set", "grid_freq_limit2_high"]),
+        ("cmd/AB12345678/set/grid_freq_limit2_low_time", "AB12345678", vec!["set", "grid_freq_limit2_low_time"]),
+        ("cmd/AB12345678/set/grid_freq_limit2_high_time", "AB12345678", vec!["set", "grid_freq_limit2_high_time"]),
+        // Grid Frequency Protection Level 3
+        ("cmd/AB12345678/set/grid_freq_limit3_low", "AB12345678", vec!["set", "grid_freq_limit3_low"]),
+        ("cmd/AB12345678/set/grid_freq_limit3_high", "AB12345678", vec!["set", "grid_freq_limit3_high"]),
+        ("cmd/AB12345678/set/grid_freq_limit3_low_time", "AB12345678", vec!["set", "grid_freq_limit3_low_time"]),
+        ("cmd/AB12345678/set/grid_freq_limit3_high_time", "AB12345678", vec!["set", "grid_freq_limit3_high_time"]),
+    ];
+    
+    for (topic, expected_datalog, expected_parts) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: "test".to_string(),
+        };
+        
+        let result = message.split_cmd_topic().unwrap();
+        let (target_inverter, parts) = result;
+        
+        match target_inverter {
+            lxp_bridge::mqtt::TargetInverter::Serial(serial) => {
+                assert_eq!(serial.to_string(), expected_datalog);
+            }
+            lxp_bridge::mqtt::TargetInverter::All => {
+                panic!("Expected serial inverter, got All");
+            }
+        }
+        
+        assert_eq!(parts, expected_parts);
+    }
 }
 
 #[test]

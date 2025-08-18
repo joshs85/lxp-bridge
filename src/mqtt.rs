@@ -213,6 +213,38 @@ impl Message {
             ["set", "discharge_cutoff_soc_limit_pct"] => {
                 DischargeCutoffSocLimit(inverter, self.payload_int()?)
             }
+            // Connection and reconnection configuration
+            ["set", "grid_connect_time"] => SetGridConnectTime(inverter, self.payload_int()?),
+            ["set", "grid_reconnect_time"] => SetGridReconnectTime(inverter, self.payload_int()?),
+            ["set", "grid_voltage_low"] => SetGridVoltageLow(inverter, self.payload_int()?),
+            ["set", "grid_voltage_high"] => SetGridVoltageHigh(inverter, self.payload_int()?),
+            ["set", "grid_frequency_low"] => SetGridFrequencyLow(inverter, self.payload_int()?),
+            ["set", "grid_frequency_high"] => SetGridFrequencyHigh(inverter, self.payload_int()?),
+            // Interface Protection - Grid Voltage Limits
+            ["set", "grid_volt_limit1_low"] => SetGridVoltLimit1Low(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit1_high"] => SetGridVoltLimit1High(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit1_low_time"] => SetGridVoltLimit1LowTime(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit1_high_time"] => SetGridVoltLimit1HighTime(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit2_low"] => SetGridVoltLimit2Low(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit2_high"] => SetGridVoltLimit2High(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit2_low_time"] => SetGridVoltLimit2LowTime(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit3_low"] => SetGridVoltLimit3Low(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit3_high"] => SetGridVoltLimit3High(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit3_low_time"] => SetGridVoltLimit3LowTime(inverter, self.payload_int()?),
+            ["set", "grid_volt_limit3_high_time"] => SetGridVoltLimit3HighTime(inverter, self.payload_int()?),
+            // Interface Protection - Grid Frequency Limits
+            ["set", "grid_freq_limit1_low"] => SetGridFreqLimit1Low(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit1_high"] => SetGridFreqLimit1High(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit1_low_time"] => SetGridFreqLimit1LowTime(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit1_high_time"] => SetGridFreqLimit1HighTime(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit2_low"] => SetGridFreqLimit2Low(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit2_high"] => SetGridFreqLimit2High(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit2_low_time"] => SetGridFreqLimit2LowTime(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit2_high_time"] => SetGridFreqLimit2HighTime(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit3_low"] => SetGridFreqLimit3Low(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit3_high"] => SetGridFreqLimit3High(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit3_low_time"] => SetGridFreqLimit3LowTime(inverter, self.payload_int()?),
+            ["set", "grid_freq_limit3_high_time"] => SetGridFreqLimit3HighTime(inverter, self.payload_int()?),
             // Register 110 switches
             ["set", "pv_off_grid"] => PvOffGrid(inverter, self.payload_bool()),
             ["set", "fast_zero_export"] => FastZeroExport(inverter, self.payload_bool()),
