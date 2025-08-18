@@ -1,3 +1,50 @@
+---
+description: Project Overview
+alwaysApply: false
+---
+# LXP Bridge Project Overview
+
+## Project Purpose
+LXP Bridge is a Rust-based HomeAssistant Addon that provides local communication with EG4 18kPV (A LuxPower Re Brand) inverters, enabling monitoring and control without dependence on manufacturer servers. It integrates with Home Assistant and MQTT to enable full configuration and monitoring within Home Assistant
+
+## System Architecture
+The application follows a modular, async architecture:
+
+1. **Main Entry Point** ([src/main.rs](mdc:src/main.rs)): Handles signals and starts the application
+2. **Core Application** ([src/lib.rs](mdc:src/lib.rs)): Orchestrates all components
+3. **Coordinator** ([src/coordinator/mod.rs](mdc:src/coordinator/mod.rs)): Central hub for inverter and MQTT communication
+4. **LXP Protocol** ([src/lxp/](mdc:src/lxp/)): Handles inverter communication protocol
+5. **MQTT Integration** ([src/mqtt.rs](mdc:src/mqtt.rs)): External communication layer
+6. **Home Assistant** ([src/home_assistant.rs](mdc:src/home_assistant.rs)): HA add-on integration
+
+## Key Features
+- **Local Communication**: Direct inverter communication without cloud dependencies
+- **MQTT Integration**: Publish/subscribe messaging for external systems
+- **Home Assistant**: Native add-on with automatic device discovery
+- **Async Architecture**: High-performance async/await patterns with Tokio
+- **Protocol Support**: Modbus-based communication with LuxPower inverters
+- **Configuration Driven**: YAML-based configuration with environment overrides
+
+## Protocol Documentation
+**Essential References for Inverter Communication**:
+- **[doc/MODBUS_PROTOCOL.md](mdc:doc/MODBUS_PROTOCOL.md)** - Complete Modbus RTU protocol specification
+- **[doc/HOLD_REGISTERS.md](mdc:doc/HOLD_REGISTERS.md)** - All read/write hold registers
+- **[doc/INPUT_REGISTERS.md](mdc:doc/INPUT_REGISTERS.md)** - All read-only input registers  
+- **[doc/REGISTER_MAPPING.md](mdc:doc/REGISTER_MAPPING.md)** - Quick reference and implementation guide
+
+## Development Workflow
+- **Testing**: Unit tests in [tests/](mdc:tests/), integration tests in [integration_tests/](mdc:integration_tests/)
+- **Docker**: Multi-stage builds for development and production
+- **Deployment**: Docker images, systemd service, and Home Assistant add-on
+- **Documentation**: Protocol specs, register mappings, and configuration guides
+
+## Technology Stack
+- **Language**: Rust 2021 edition
+- **Async Runtime**: Tokio with multi-threaded runtime
+- **Protocol Parsing**: Nom for binary protocol handling
+- **Serialization**: Serde with YAML/JSON support
+- **MQTT**: Rumqttc client
+- **Networking**: TCP/UDP communication for inverters
 # LXP Bridge Project Overview
 
 ## Project Purpose
@@ -41,7 +88,3 @@ The application follows a modular, async architecture:
 - **Serialization**: Serde with YAML/JSON support
 - **MQTT**: Rumqttc client
 - **Networking**: TCP/UDP communication for inverters
-description:
-globs:
-alwaysApply: false
----

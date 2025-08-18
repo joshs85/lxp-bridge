@@ -11,7 +11,7 @@ pub mod scheduler;
 pub mod unixtime;
 pub mod utils;
 
-const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 use crate::prelude::*;
 

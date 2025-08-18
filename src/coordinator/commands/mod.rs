@@ -7,3 +7,4 @@ pub mod timesync;
 pub mod update_hold;
 pub mod update_hold_register110;
 pub mod write_param;
+pub mod backup_config;

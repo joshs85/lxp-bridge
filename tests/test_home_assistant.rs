@@ -234,9 +234,9 @@ fn under_frequency_controls_have_correct_topics() {
     // State topic should read from hold register
     assert!(payload["state_topic"].as_str().unwrap().contains("hold/134"));
     
-    // Command topic should send to set/hold register
+    // Command topic should send to the command endpoint
     assert!(payload["command_topic"].as_str().unwrap().contains("cmd"));
-    assert!(payload["command_topic"].as_str().unwrap().contains("set/hold/134"));
+    assert!(payload["command_topic"].as_str().unwrap().contains("set/under_fr_droop_start_hz"));
 
     // Check under frequency droop end topics
     let under_fr_end = messages
@@ -249,9 +249,9 @@ fn under_frequency_controls_have_correct_topics() {
     // State topic should read from hold register
     assert!(payload["state_topic"].as_str().unwrap().contains("hold/135"));
     
-    // Command topic should send to set/hold register
+    // Command topic should send to the command endpoint
     assert!(payload["command_topic"].as_str().unwrap().contains("cmd"));
-    assert!(payload["command_topic"].as_str().unwrap().contains("set/hold/135"));
+    assert!(payload["command_topic"].as_str().unwrap().contains("set/under_fr_droop_end_hz"));
 }
 
 #[test]

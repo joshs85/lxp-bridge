@@ -2,6 +2,7 @@
 // than good enough for our use cases and provides efficient storage.
 
 use crate::utils::Utils;
+use chrono::{Utc, TimeZone};
 
 use serde::{Serialize, Serializer};
 
@@ -11,6 +12,10 @@ pub struct UnixTime(pub chrono::DateTime<chrono::Utc>);
 impl UnixTime {
     pub fn now() -> Self {
         Self(Utils::utc())
+    }
+
+    pub fn new(timestamp: u32) -> Self {
+        Self(Utc.timestamp_opt(timestamp as i64, 0).unwrap())
     }
 }
 

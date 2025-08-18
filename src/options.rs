@@ -1,6 +1,6 @@
 use clap::Parser;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, PartialEq, Eq, Hash, Clone)]
 #[clap(author, version)]
 pub struct Options {
     /// Config file to read

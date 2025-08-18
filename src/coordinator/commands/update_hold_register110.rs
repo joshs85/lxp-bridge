@@ -33,6 +33,14 @@ impl UpdateHoldRegister110 {
         }
     }
 
+    pub fn bit(&self) -> lxp::packet::Register110Bit {
+        self.bit.clone()
+    }
+
+    pub fn enable(&self) -> bool {
+        self.enable
+    }
+
     pub async fn run(&self) -> Result<Packet> {
         let mut receiver = self.channels.from_inverter.subscribe();
 

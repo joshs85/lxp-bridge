@@ -22,6 +22,14 @@ impl WriteParam {
         }
     }
 
+    pub fn register(&self) -> u16 {
+        self.register
+    }
+
+    pub fn value(&self) -> u16 {
+        self.value
+    }
+
     pub async fn run(&self) -> Result<Packet> {
         let packet = Packet::WriteParam(lxp::packet::WriteParam {
             datalog: self.inverter.datalog(),

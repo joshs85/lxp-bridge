@@ -4,6 +4,7 @@ use cron_parser::parse;
 
 use chrono::{DateTime, Local};
 
+#[derive(Debug, Clone)]
 pub struct Scheduler {
     config: ConfigWrapper,
     channels: Channels,
@@ -12,6 +13,14 @@ pub struct Scheduler {
 impl Scheduler {
     pub fn new(config: ConfigWrapper, channels: Channels) -> Self {
         Self { config, channels }
+    }
+
+    pub fn config(&self) -> &ConfigWrapper {
+        &self.config
+    }
+
+    pub fn channels(&self) -> &Channels {
+        &self.channels
     }
 
     pub async fn start(&self) -> Result<()> {

@@ -1,10 +1,85 @@
+---
+description: Testing and Integration
+alwaysApply: false
+---
 # Testing and Integration Patterns
 
 ## Unit Testing
-- Place unit tests in [tests/](mdc:tests/) directory
+- Place unit tests in [tests/](mdc:tests/) directory.
 - Use `#[cfg(test)]` for test-only code
 - Mock external dependencies using the `mocks` feature
 - Test both success and error paths thoroughly
+- Maintain code coverage of 95% or higher
+- Code coverage files and reports must be placed in [tests/coverage](mdc:tests/coverage).
+
+## Test Coverage Generation
+
+### LLVM Coverage Tools (Recommended)
+The project uses LLVM's built-in coverage tools for accurate test coverage measurement:
+
+1. **Install LLVM Tools**:
+   ```bash
+   rustup component add llvm-tools-preview
+   ```
+
+2. **Generate Coverage Data**:
+   ```bash
+   CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='coverage/cargo-test-%p-%m.profraw' cargo test
+   ```
+
+3. **Generate Coverage Report**:
+   ```bash
+   grcov . --binary-path ./target/debug/ -s . -t html --branch --ignore-not-existing -o ./coverage/
+   ```
+
+### Alternative Coverage Tools
+- **cargo-tarpaulin**: Linux-only, requires OpenSSL
+- **grcov**: Cross-platform, requires additional setup
+- **cargo-llvm-cov**: Alternative LLVM coverage tool
+
+### Coverage Configuration
+- **Coverage Data**: Generated in `coverage/*.profraw` files
+- **HTML Reports**: Generated in `coverage/` directory
+- **Coverage Files**: All coverage artifacts must be placed in `coverage/` folder
+- **Branch Coverage**: Enabled for comprehensive analysis
+- **Coverage Excludes**: Test files and build artifacts are automatically excluded
+- **Directory Structure**: 
+  ```
+  coverage/
+  ├── *.profraw          # Raw coverage data files
+  ├── index.html         # Main coverage report
+  ├── src/               # Source code coverage details
+  └── ...                # Additional coverage artifacts
+  ```
+
+**Important**: Ensure the `coverage/` folder exists before running coverage commands:
+```bash
+mkdir -p coverage
+```
+
+### Complete Coverage Workflow
+1. **Prepare Coverage Directory**:
+   ```bash
+   mkdir -p coverage
+   ```
+
+2. **Generate Coverage Data**:
+   ```bash
+   CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='coverage/cargo-test-%p-%m.profraw' cargo test
+   ```
+
+3. **Generate HTML Report**:
+   ```bash
+   grcov . --binary-path ./target/debug/ -s . -t html --branch --ignore-not-existing -o ./coverage/
+   ```
+
+4. **View Coverage Report**:
+   ```bash
+   open coverage/index.html  # macOS
+   # or
+   xdg-open coverage/index.html  # Linux
+   # or manually open coverage/index.html in browser
+   ```
 
 ## Integration Testing
 - Integration tests are in [integration_tests/](mdc:integration_tests/)
@@ -29,7 +104,135 @@
 - Use descriptive test names that explain the scenario
 - Test both happy path and error conditions
 - Validate async behavior and timeouts
-description:
-globs:
-alwaysApply: false
----
+- Make sure to match the src directory structure when adding new tests
+
+## Test Coverage Best Practices
+- Run coverage generation after fixing all test failures
+- Ensure all tests pass before generating coverage reports
+- Review coverage reports to identify untested code paths
+- Add tests for uncovered functionality to maintain high coverage
+- Use coverage data to guide test development priorities
+
+## Current Test Status
+- **Total Tests**: 400+ tests across all modules
+- **Test Status**: All tests passing
+- **Coverage Target**: 95%+ code coverage
+- **Coverage Tools**: LLVM coverage tools (successfully configured)
+- **Test Categories**: Unit tests, integration tests, protocol tests, MQTT tests
+# Testing and Integration Patterns
+
+## Unit Testing
+- Place unit tests in [tests/](mdc:tests/) directory.
+- Use `#[cfg(test)]` for test-only code
+- Mock external dependencies using the `mocks` feature
+- Test both success and error paths thoroughly
+- Maintain code coverage of 95% or higher
+- Code coverage files and reports must be placed in [tests/coverage](mdc:tests/coverage).
+
+## Test Coverage Generation
+
+### LLVM Coverage Tools (Recommended)
+The project uses LLVM's built-in coverage tools for accurate test coverage measurement:
+
+1. **Install LLVM Tools**:
+   ```bash
+   rustup component add llvm-tools-preview
+   ```
+
+2. **Generate Coverage Data**:
+   ```bash
+   CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='coverage/cargo-test-%p-%m.profraw' cargo test
+   ```
+
+3. **Generate Coverage Report**:
+   ```bash
+   grcov . --binary-path ./target/debug/ -s . -t html --branch --ignore-not-existing -o ./coverage/
+   ```
+
+### Alternative Coverage Tools
+- **cargo-tarpaulin**: Linux-only, requires OpenSSL
+- **grcov**: Cross-platform, requires additional setup
+- **cargo-llvm-cov**: Alternative LLVM coverage tool
+
+### Coverage Configuration
+- **Coverage Data**: Generated in `coverage/*.profraw` files
+- **HTML Reports**: Generated in `coverage/` directory
+- **Coverage Files**: All coverage artifacts must be placed in `coverage/` folder
+- **Branch Coverage**: Enabled for comprehensive analysis
+- **Coverage Excludes**: Test files and build artifacts are automatically excluded
+- **Directory Structure**: 
+  ```
+  coverage/
+  ├── *.profraw          # Raw coverage data files
+  ├── index.html         # Main coverage report
+  ├── src/               # Source code coverage details
+  └── ...                # Additional coverage artifacts
+  ```
+
+**Important**: Ensure the `coverage/` folder exists before running coverage commands:
+```bash
+mkdir -p coverage
+```
+
+### Complete Coverage Workflow
+1. **Prepare Coverage Directory**:
+   ```bash
+   mkdir -p coverage
+   ```
+
+2. **Generate Coverage Data**:
+   ```bash
+   CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='coverage/cargo-test-%p-%m.profraw' cargo test
+   ```
+
+3. **Generate HTML Report**:
+   ```bash
+   grcov . --binary-path ./target/debug/ -s . -t html --branch --ignore-not-existing -o ./coverage/
+   ```
+
+4. **View Coverage Report**:
+   ```bash
+   open coverage/index.html  # macOS
+   # or
+   xdg-open coverage/index.html  # Linux
+   # or manually open coverage/index.html in browser
+   ```
+
+## Integration Testing
+- Integration tests are in [integration_tests/](mdc:integration_tests/)
+- Use Ruby/RSpec for high-level integration testing
+- Test real protocol communication with mock inverters
+- Validate MQTT message handling and routing
+
+## Test Fixtures
+- Store test data in [integration_tests/fixtures/](mdc:integration_tests/fixtures/)
+- Use JSON fixtures for packet data and responses
+- Maintain separate fixtures for different test scenarios
+- Document fixture format and purpose
+
+## Mock Infrastructure
+- Use the proxy system in [integration_tests/proxy/](mdc:integration_tests/proxy/) for testing
+- Mock inverter responses for predictable testing
+- Test error conditions and edge cases
+- Validate protocol compliance
+
+## Test Organization
+- Group related tests in separate spec files
+- Use descriptive test names that explain the scenario
+- Test both happy path and error conditions
+- Validate async behavior and timeouts
+- Make sure to match the src directory structure when adding new tests
+
+## Test Coverage Best Practices
+- Run coverage generation after fixing all test failures
+- Ensure all tests pass before generating coverage reports
+- Review coverage reports to identify untested code paths
+- Add tests for uncovered functionality to maintain high coverage
+- Use coverage data to guide test development priorities
+
+## Current Test Status
+- **Total Tests**: 400+ tests across all modules
+- **Test Status**: All tests passing
+- **Coverage Target**: 95%+ code coverage
+- **Coverage Tools**: LLVM coverage tools (successfully configured)
+- **Test Categories**: Unit tests, integration tests, protocol tests, MQTT tests

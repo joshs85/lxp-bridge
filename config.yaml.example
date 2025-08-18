@@ -25,9 +25,8 @@ mqtt:
   password:
   namespace: lxp
   publish_individual_input: true
-  homeassistant:
-    enabled: true
-    prefix: homeassistant
+  homeassistant_enabled: true
+  homeassistant_prefix: homeassistant
   
   # Reliability settings - IMPROVED to prevent restarts
   max_retries: 10                   # Increased from 3 for better resilience
