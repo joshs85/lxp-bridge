@@ -133,7 +133,7 @@ The application follows a modular, async architecture:
   - `"diagnostic"` → Diagnostic section (system maintenance, troubleshooting)
 - **Function Parameters**: Added `entity_category` parameter to all number functions for flexible categorization
 - **Control Placement**:
-  - **Primary Controls**: AC charge controls, time slots, basic power management
+  - **Primary Controls**: AC charge controls, time slots, basic power management, charge last priority
   - **Configuration**: Grid protection limits, reactive power settings, frequency controls
   - **Diagnostic**: Restart button, system reset functions
 

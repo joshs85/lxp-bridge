@@ -1022,7 +1022,7 @@ impl Config {
             self.switch_register110("fast_zero_export", "Fast Zero Export Enable", Some("config".to_string()))?,
             self.switch_register110("micro_grid", "Micro Grid Enable", Some("config".to_string()))?,
             self.switch_register110("shared_battery", "Shared Battery Enable", Some("config".to_string()))?,
-            self.switch_register110("charge_last", "Charge Last Enable", Some("config".to_string()))?,
+            self.switch_register110("charge_last", "Charge Last Enable", None)?,
             
             // ===== SYSTEM LIMITS =====
             // Discharge cutoff
