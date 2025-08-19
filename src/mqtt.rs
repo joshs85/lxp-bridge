@@ -57,6 +57,24 @@ impl Message {
                     payload: serde_json::to_string(&bits)?,
                 });
             }
+
+            if register == 179 {
+                let bits = lxp::packet::Register179Bits::new(value);
+                r.push(mqtt::Message {
+                    topic: format!("{}/hold/{}/bits", td.datalog, register),
+                    retain: true,
+                    payload: serde_json::to_string(&bits)?,
+                });
+            }
+
+            if register == 137 {
+                let bits = lxp::packet::Register137Bits::new(value);
+                r.push(mqtt::Message {
+                    topic: format!("{}/hold/{}/bits", td.datalog, register),
+                    retain: true,
+                    payload: serde_json::to_string(&bits)?,
+                });
+            }
         }
 
         Ok(r)

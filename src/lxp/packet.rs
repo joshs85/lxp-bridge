@@ -790,6 +790,66 @@ impl Register110Bits {
     }
 } // }}}
 
+// Register179Bits {{{
+#[derive(Clone, Debug, Serialize)]
+pub struct Register179Bits {
+    pub acct_direction_en: String,
+    pub pvct_direction_en: String,
+    pub afci_alarm_clr_en: String,
+    pub bat_wakeup_en: String,
+    pub volt_watt_en: String,
+    pub triptime_unit_en: String,
+    pub act_power_cmd_en: String,
+    pub ac_coupling_enable: String,
+    pub smart_load_enable: String,
+}
+
+impl Register179Bits {
+    fn is_bit_set(data: u16, bit: u16) -> String {
+        if (data & bit) == bit {
+            "ON".to_string()
+        } else {
+            "OFF".to_string()
+        }
+    }
+
+    pub fn new(data: u16) -> Self {
+        Self {
+            acct_direction_en: Self::is_bit_set(data, 1 << 0),
+            pvct_direction_en: Self::is_bit_set(data, 1 << 1),
+            afci_alarm_clr_en: Self::is_bit_set(data, 1 << 2),
+            bat_wakeup_en: Self::is_bit_set(data, 1 << 3),
+            volt_watt_en: Self::is_bit_set(data, 1 << 4),
+            triptime_unit_en: Self::is_bit_set(data, 1 << 5),
+            act_power_cmd_en: Self::is_bit_set(data, 1 << 6),
+            ac_coupling_enable: Self::is_bit_set(data, 1 << 11),
+            smart_load_enable: Self::is_bit_set(data, 1 << 13),
+        }
+    }
+} // }}}
+
+// Register137Bits {{{
+#[derive(Clone, Debug, Serialize)]
+pub struct Register137Bits {
+    pub grid_always_on_disable: String,
+}
+
+impl Register137Bits {
+    fn is_bit_set(data: u16, bit: u16) -> String {
+        if (data & bit) == bit {
+            "ON".to_string()
+        } else {
+            "OFF".to_string()
+        }
+    }
+
+    pub fn new(data: u16) -> Self {
+        Self {
+            grid_always_on_disable: Self::is_bit_set(data, 1 << 0),
+        }
+    }
+} // }}}
+
 // SystemInfo {{{
 #[derive(Clone, Debug, Serialize)]
 pub struct SystemInfo {

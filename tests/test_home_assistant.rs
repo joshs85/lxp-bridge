@@ -175,7 +175,7 @@ async fn all_has_lcd_password() {
     assert!(payload.contains("1.0"), "Missing step value");
     
     // Check that the value template formats the password as a 5-digit zero-padded string
-    assert!(payload.contains("\"value_template\":\"{{ '%05d' % value }}\""), "Missing correct value template for 5-digit formatting");
+    assert!(payload.contains("\"value_template\":\"{{ '%05d' | format(value) }}\""), "Missing correct value template for 5-digit formatting");
 }
 
 #[tokio::test]

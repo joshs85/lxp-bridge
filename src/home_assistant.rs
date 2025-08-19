@@ -1131,8 +1131,15 @@ impl Config {
     }
 
     fn switch_register179(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
+        // Map the name to the actual JSON field name
+        let json_field = match name {
+            "ac_coupling_enable" => "ac_coupling_enable",
+            "smart_load_enable" => "smart_load_enable",
+            _ => name,
+        };
+
         let config = Switch {
-            value_template: format!("{{{{ value_json.{name}_en }}}}"),
+            value_template: format!("{{{{ value_json.{json_field} }}}}"),
             state_topic: format!(
                 "{}/{}/hold/179/bits",
                 self.mqtt_config.namespace(),
@@ -1159,8 +1166,19 @@ impl Config {
     }
 
     fn switch_register137(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
+        // Map the name to the actual JSON field name
+        let json_field = match name {
+            "grid_always_on" => "grid_always_on_disable",
+            _ => name,
+        };
+
         let config = Switch {
-            value_template: format!("{{{{ value_json.{name}_en }}}}"),
+            value_template: if name == "grid_always_on" {
+                // Invert the logic: 0=enabled, 1=disabled, so we show the opposite
+                "{{ 'OFF' if value_json.grid_always_on_disable == 'ON' else 'ON' }}".to_string()
+            } else {
+                format!("{{{{ value_json.{json_field} }}}}")
+            },
             state_topic: format!(
                 "{}/{}/hold/137/bits",
                 self.mqtt_config.namespace(),
@@ -1723,7 +1741,7 @@ impl Config {
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
             ),
-                            value_template: "{{ '%05d' % value }}".to_string(), // Format as 5-digit zero-padded string
+                            value_template: "{{ '%05d' | format(value) }}".to_string(), // Format as 5-digit zero-padded string
             unique_id: format!("{}_{}_number_lcd_password", self.mqtt_config.namespace(), self.inverter.datalog()),
             entity_category: Some("config".to_string()), // Place in Configuration section
             enabled_by_default: Some(false), // Disable by default for security
