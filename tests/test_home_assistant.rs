@@ -151,6 +151,34 @@ async fn all_has_number_ac_charge_soc_limit_pct() {
 }
 
 #[tokio::test]
+async fn all_has_lcd_password() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
+
+    assert!(r.is_ok());
+    let messages = r.unwrap();
+    
+    // Check that the LCD password number exists with the correct topic
+    let number_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/lcd_password/config");
+    assert!(number_message.is_some(), "LCD password number not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &number_message.unwrap().payload;
+    assert!(payload.contains("LCD Password"), "Missing name");
+    // LCD password should be in configuration section
+    assert!(payload.contains("\"entity_category\":\"config\""), "LCD password should have entity_category config");
+    assert!(payload.contains("\"enabled_by_default\":false"), "LCD password should be disabled by default for security");
+    assert!(payload.contains("0.0"), "Missing min value");
+    assert!(payload.contains("65535.0"), "Missing max value");
+    assert!(payload.contains("1.0"), "Missing step value");
+    
+    // Check that the value template formats the password as a 5-digit zero-padded string
+    assert!(payload.contains("\"value_template\":\"{{ '%05d' % value }}\""), "Missing correct value template for 5-digit formatting");
+}
+
+#[tokio::test]
 async fn all_has_time_range_ac_charge_1() {
     common_setup();
 
@@ -733,4 +761,195 @@ fn interface_protection_entities_have_correct_mqtt_topics() {
         assert!(entity.payload.contains(&expected_command_topic), 
                 "Entity {} should have correct command topic: {}", entity_name, expected_command_topic);
     }
+}
+
+#[tokio::test]
+async fn all_has_generator_cool_down_time() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
+
+    assert!(r.is_ok());
+    let messages = r.unwrap();
+    
+    // Check that the Generator Cool-Down Time entity exists with the correct topic
+    let cool_down_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/GeneratorCoolDownTime/config");
+    assert!(cool_down_message.is_some(), "Generator Cool-Down Time entity not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &cool_down_message.unwrap().payload;
+    assert!(payload.contains("Generator Cool-Down Time (min)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("min"), "Missing unit_of_measurement");
+    assert!(payload.contains("0.0"), "Missing min value");
+    assert!(payload.contains("60.0"), "Missing max value");
+    assert!(payload.contains("0.1"), "Missing step value");
+    
+    // Check that it has the correct value template for 0.1 minute units
+    assert!(payload.contains("{{ float(value) / 100 }}"), "Should convert from 0.1 minute units");
+    
+    // Check that it has the correct MQTT topics
+    assert!(payload.contains("lxp/2222222222/hold/237"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/generator_cool_down_time"), "Should have correct command topic");
+}
+
+#[tokio::test]
+async fn all_has_ac_coupling_entities() {
+    common_setup();
+    let config = Factory::example_config();
+    let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
+    assert!(r.is_ok());
+    let messages = r.unwrap();
+    
+    // Check AC Coupling Enable switch
+    let ac_coupling_enable_message = messages.iter().find(|msg| msg.topic == "homeassistant/switch/lxp_2222222222/ac_coupling_enable/config");
+    assert!(ac_coupling_enable_message.is_some(), "AC Coupling Enable switch not found");
+    let payload = &ac_coupling_enable_message.unwrap().payload;
+    assert!(payload.contains("AC Coupling Enable"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("lxp/2222222222/hold/179/bits"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/ac_coupling_enable"), "Should have correct command topic");
+    
+    // Check AC Couple Start SOC
+    let start_soc_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/ACCoupleStartSOC/config");
+    assert!(start_soc_message.is_some(), "AC Couple Start SOC entity not found");
+    let payload = &start_soc_message.unwrap().payload;
+    assert!(payload.contains("AC Couple Start SOC (%)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("0.0"), "Missing min value");
+    assert!(payload.contains("100.0"), "Missing max value");
+    assert!(payload.contains("1.0"), "Missing step value");
+    assert!(payload.contains("lxp/2222222222/hold/220"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/hold/220"), "Should have correct command topic");
+    
+    // Check AC Couple End SOC
+    let end_soc_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/ACCoupleEndSOC/config");
+    assert!(end_soc_message.is_some(), "AC Couple End SOC entity not found");
+    let payload = &end_soc_message.unwrap().payload;
+    assert!(payload.contains("AC Couple End SOC (%)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("0.0"), "Missing min value");
+    assert!(payload.contains("101.0"), "Missing max value");
+    assert!(payload.contains("1.0"), "Missing step value");
+    assert!(payload.contains("lxp/2222222222/hold/221"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/hold/221"), "Should have correct command topic");
+    
+    // Check AC Couple Start Voltage
+    let start_volt_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/ACCoupleStartVolt/config");
+    assert!(start_volt_message.is_some(), "AC Couple Start Voltage entity not found");
+    let payload = &start_volt_message.unwrap().payload;
+    assert!(payload.contains("AC Couple Start Voltage (V)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("40.0"), "Missing min value");
+    assert!(payload.contains("60.0"), "Missing max value");
+    assert!(payload.contains("0.1"), "Missing step value");
+    assert!(payload.contains("{{ float(value) / 10 }}"), "Should convert from 0.1V units");
+    assert!(payload.contains("lxp/2222222222/hold/222"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/ac_couple_start_volt"), "Should have correct command topic");
+    
+    // Check AC Couple End Voltage
+    let end_volt_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/ACCoupleEndVolt/config");
+    assert!(end_volt_message.is_some(), "AC Couple End Voltage entity not found");
+    let payload = &end_volt_message.unwrap().payload;
+    assert!(payload.contains("AC Couple End Voltage (V)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("40.0"), "Missing min value");
+    assert!(payload.contains("60.0"), "Missing max value");
+    assert!(payload.contains("0.1"), "Missing step value");
+    assert!(payload.contains("{{ float(value) / 10 }}"), "Should convert from 0.1V units");
+    assert!(payload.contains("lxp/2222222222/hold/223"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/ac_couple_end_volt"), "Should have correct command topic");
+}
+
+#[tokio::test]
+async fn all_has_smart_load_entities() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
+
+    assert!(r.is_ok());
+    let messages = r.unwrap();
+    
+    // Check Smart Load Enable
+    let smart_load_enable_message = messages.iter().find(|msg| msg.topic == "homeassistant/switch/lxp_2222222222/smart_load_enable/config");
+    assert!(smart_load_enable_message.is_some(), "Smart Load Enable entity not found");
+    let payload = &smart_load_enable_message.unwrap().payload;
+    assert!(payload.contains("Smart Load Enable"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("lxp/2222222222/hold/179/bits"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/smart_load_enable"), "Should have correct command topic");
+    
+    // Check Grid Always On
+    let grid_always_on_message = messages.iter().find(|msg| msg.topic == "homeassistant/switch/lxp_2222222222/grid_always_on/config");
+    assert!(grid_always_on_message.is_some(), "Grid Always On entity not found");
+    let payload = &grid_always_on_message.unwrap().payload;
+    assert!(payload.contains("Grid Always On"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("lxp/2222222222/hold/137/bits"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/grid_always_on"), "Should have correct command topic");
+    
+    // Check Smart Load Start Voltage
+    let start_volt_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/SmartLoadStartVolt/config");
+    assert!(start_volt_message.is_some(), "Smart Load Start Voltage entity not found");
+    let payload = &start_volt_message.unwrap().payload;
+    assert!(payload.contains("Smart Load Start Voltage (V)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("40.0"), "Missing min value");
+    assert!(payload.contains("60.0"), "Missing max value");
+    assert!(payload.contains("0.1"), "Missing step value");
+    assert!(payload.contains("{{ float(value) / 10 }}"), "Should convert from 0.1V units");
+    assert!(payload.contains("lxp/2222222222/hold/213"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/smart_load_start_volt"), "Should have correct command topic");
+    
+    // Check Smart Load End Voltage
+    let end_volt_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/SmartLoadEndVolt/config");
+    assert!(end_volt_message.is_some(), "Smart Load End Voltage entity not found");
+    let payload = &end_volt_message.unwrap().payload;
+    assert!(payload.contains("Smart Load End Voltage (V)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("40.0"), "Missing min value");
+    assert!(payload.contains("60.0"), "Missing max value");
+    assert!(payload.contains("0.1"), "Missing step value");
+    assert!(payload.contains("{{ float(value) / 10 }}"), "Should convert from 0.1V units");
+    assert!(payload.contains("lxp/2222222222/hold/214"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/smart_load_end_volt"), "Should have correct command topic");
+    
+    // Check Smart Load Start SOC
+    let start_soc_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/SmartLoadStartSOC/config");
+    assert!(start_soc_message.is_some(), "Smart Load Start SOC entity not found");
+    let payload = &start_soc_message.unwrap().payload;
+    assert!(payload.contains("Smart Load Start SOC (%)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("0.0"), "Missing min value");
+    assert!(payload.contains("100.0"), "Missing max value");
+    assert!(payload.contains("1.0"), "Missing step value");
+    assert!(payload.contains("lxp/2222222222/hold/215"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/smart_load_start_soc"), "Should have correct command topic");
+    
+    // Check Smart Load End SOC
+    let end_soc_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/SmartLoadEndSOC/config");
+    assert!(end_soc_message.is_some(), "Smart Load End SOC entity not found");
+    let payload = &end_soc_message.unwrap().payload;
+    assert!(payload.contains("Smart Load End SOC (%)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("0.0"), "Missing min value");
+    assert!(payload.contains("100.0"), "Missing max value");
+    assert!(payload.contains("1.0"), "Missing step value");
+    assert!(payload.contains("lxp/2222222222/hold/216"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/smart_load_end_soc"), "Should have correct command topic");
+    
+    // Check Start PV Power
+    let pv_power_message = messages.iter().find(|msg| msg.topic == "homeassistant/number/lxp_2222222222/StartPVPower/config");
+    assert!(pv_power_message.is_some(), "Start PV Power entity not found");
+    let payload = &pv_power_message.unwrap().payload;
+    assert!(payload.contains("Start PV Power (kW)"), "Missing name");
+    assert!(payload.contains("config"), "Missing entity_category");
+    assert!(payload.contains("0.0"), "Missing min value");
+    assert!(payload.contains("10.0"), "Missing max value");
+    assert!(payload.contains("0.1"), "Missing step value");
+    assert!(payload.contains("{{ float(value) / 10 }}"), "Should convert from 0.1kW units");
+    assert!(payload.contains("lxp/2222222222/hold/217"), "Should have correct state topic");
+    assert!(payload.contains("lxp/cmd/2222222222/set/start_pv_power"), "Should have correct command topic");
 }

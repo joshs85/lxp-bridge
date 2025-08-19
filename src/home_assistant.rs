@@ -951,6 +951,25 @@ impl Config {
             // Volt-Watt Open Loop Response Time (Register 183)
             self.number_time(Register::VoltWattDelayTime, "Reactive Power - Volt-Watt Open Loop Response Time (s)", 0.0, 300.0, 0.01, Some(false), Some("config".to_string()))?,
             
+            // Generator Configuration
+            self.number_time(Register::GeneratorCoolDownTime, "Generator Cool-Down Time (min)", 0.0, 60.0, 0.1, None, Some("config".to_string()))?,
+            
+            // ===== AC COUPLING CONFIGURATION =====
+            self.switch_register179("ac_coupling_enable", "AC Coupling Enable", Some("config".to_string()))?,
+            self.number_percent(Register::ACCoupleStartSOC, "AC Couple Start SOC (%)", 0.0, 100.0, 1.0, None, Some("config".to_string()))?,
+            self.number_percent(Register::ACCoupleEndSOC, "AC Couple End SOC (%)", 0.0, 101.0, 1.0, None, Some("config".to_string()))?,
+            self.number_voltage(Register::ACCoupleStartVolt, "AC Couple Start Voltage (V)", 40.0, 60.0, 0.1, None, Some("config".to_string()))?,
+            self.number_voltage(Register::ACCoupleEndVolt, "AC Couple End Voltage (V)", 40.0, 60.0, 0.1, None, Some("config".to_string()))?,
+            
+            // ===== SMART LOAD CONFIGURATION =====
+            self.switch_register179("smart_load_enable", "Smart Load Enable", Some("config".to_string()))?,
+            self.switch_register137("grid_always_on", "Grid Always On", Some("config".to_string()))?,
+            self.number_voltage(Register::SmartLoadStartVolt, "Smart Load Start Voltage (V)", 40.0, 60.0, 0.1, None, Some("config".to_string()))?,
+            self.number_voltage(Register::SmartLoadEndVolt, "Smart Load End Voltage (V)", 40.0, 60.0, 0.1, None, Some("config".to_string()))?,
+            self.number_percent(Register::SmartLoadStartSOC, "Smart Load Start SOC (%)", 0.0, 100.0, 1.0, None, Some("config".to_string()))?,
+            self.number_percent(Register::SmartLoadEndSOC, "Smart Load End SOC (%)", 0.0, 100.0, 1.0, None, Some("config".to_string()))?,
+            self.number_power(Register::StartPVPower, "Start PV Power (kW)", 0.0, 10.0, 0.1, None, Some("config".to_string()))?,
+            
             // ===== CONNECTION & RECONNECTION =====
             // Grid connection settings
             self.number_time(Register::GridConnectTime, "Grid Connection Delay (s)", 30.0, 600.0, 1.0, Some(false), Some("config".to_string()))?,
@@ -1023,6 +1042,9 @@ impl Config {
             self.switch_register110("micro_grid", "Micro Grid Enable", Some("config".to_string()))?,
             self.switch_register110("shared_battery", "Shared Battery Enable", Some("config".to_string()))?,
             self.switch_register110("charge_last", "Charge Last Enable", None)?,
+            
+            // ===== LCD CONFIGURATION =====
+            self.number_lcd_password()?,
             
             // ===== SYSTEM LIMITS =====
             // Discharge cutoff
@@ -1108,6 +1130,62 @@ impl Config {
         })
     }
 
+    fn switch_register179(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
+        let config = Switch {
+            value_template: format!("{{{{ value_json.{name}_en }}}}"),
+            state_topic: format!(
+                "{}/{}/hold/179/bits",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            command_topic: format!(
+                "{}/cmd/{}/set/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                name
+            ),
+            unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
+            name: label.to_string(),
+            entity_category: entity_category.map(|s| s.to_string()), // Use provided value or None
+            device: self.device(),
+            availability: self.availability(),
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("switch", name),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
+    fn switch_register137(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
+        let config = Switch {
+            value_template: format!("{{{{ value_json.{name}_en }}}}"),
+            state_topic: format!(
+                "{}/{}/hold/137/bits",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            command_topic: format!(
+                "{}/cmd/{}/set/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                name
+            ),
+            unique_id: format!("{}_{}_{}", self.mqtt_config.namespace(), self.inverter.datalog(), name),
+            name: label.to_string(),
+            entity_category: entity_category.map(|s| s.to_string()), // Use provided value or None
+            device: self.device(),
+            availability: self.availability(),
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("switch", name),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
     fn button(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
         let config = Button {
             name: label.to_string(),
@@ -1141,6 +1219,59 @@ impl Config {
             topic: self.ha_discovery_topic("switch", name),
             retain: true,
             payload: "".to_string(), // Empty payload tells Home Assistant to remove the entity
+        })
+    }
+
+    fn number_power(
+        &self,
+        register: Register,
+        label: &str,
+        min: f64,
+        max: f64,
+        step: f64,
+        enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
+    ) -> Result<mqtt::Message> {
+        // Map register to command name for proper MQTT routing
+        let command_topic = match register {
+            Register::StartPVPower => format!(
+                "{}/cmd/{}/set/start_pv_power",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            _ => format!(
+                "{}/cmd/{}/set/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16
+            ),
+        };
+
+        let config = Number {
+            name: label.to_string(),
+            state_topic: format!(
+                "{}/{}/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16,
+            ),
+            command_topic,
+            value_template: "{{ float(value) / 10 }}".to_string(), // Convert from 0.1kW units
+            unique_id: format!("{}_{}_number_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            entity_category, // Use provided value or None (which will be skipped during serialization and result in the controll being added to primary controlls.)  Options: diagnostic, config
+            enabled_by_default, // Use provided value or None (which will be skipped during serialization)
+            device: self.device(),
+            availability: self.availability(),
+            min,
+            max,
+            step,
+            unit_of_measurement: "kW".to_string(),
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("number", &format!("{register:?}")),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
         })
     }
 
@@ -1181,8 +1312,19 @@ impl Config {
                 self.mqtt_config.namespace(),
                 self.inverter.datalog()
             ),
+            // Smart Load SOC registers have named commands
+            Register::SmartLoadStartSOC => format!(
+                "{}/cmd/{}/set/smart_load_start_soc",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
+            Register::SmartLoadEndSOC => format!(
+                "{}/cmd/{}/set/smart_load_end_soc",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog()
+            ),
             // These registers don't have named commands, use raw register format
-            Register::ChargePriorityPowerCmd | Register::ChargePrioritySocLimit | Register::ForcedDischgSocLimit | Register::AcChargeStartSocLimit | Register::AcChargeEndSocLimit | Register::EpsDischgCutoffSocEod | Register::MaxQPercentForQV | Register::ActivePowerPercentCMD | Register::ReactivePowerPercentCMD | Register::Q3Qv | Register::Q4Qv | Register::P1Qp | Register::P2Qp | Register::P3Qp | Register::ReactivePowerCMDType | Register::PFCMD | Register::Q2Qv | Register::VoltWattDelayTime => format!(
+            Register::ChargePriorityPowerCmd | Register::ChargePrioritySocLimit | Register::ForcedDischgSocLimit | Register::AcChargeStartSocLimit | Register::AcChargeEndSocLimit | Register::EpsDischgCutoffSocEod | Register::MaxQPercentForQV | Register::ActivePowerPercentCMD | Register::ReactivePowerPercentCMD | Register::Q3Qv | Register::Q4Qv | Register::P1Qp | Register::P2Qp | Register::P3Qp | Register::ReactivePowerCMDType | Register::PFCMD | Register::Q2Qv | Register::VoltWattDelayTime | Register::ACCoupleStartSOC | Register::ACCoupleEndSOC => format!(
                 "{}/cmd/{}/set/hold/{}",
                 self.mqtt_config.namespace(),
                 self.inverter.datalog(),
@@ -1388,6 +1530,12 @@ impl Config {
             Register::V1H => "v1h",
             Register::V2H => "v2h",
             Register::VrefQv => "vref_qv",
+            // AC Coupling Voltage Thresholds
+            Register::ACCoupleStartVolt => "ac_couple_start_volt",
+            Register::ACCoupleEndVolt => "ac_couple_end_volt",
+            // Smart Load Voltage Thresholds
+            Register::SmartLoadStartVolt => "smart_load_start_volt",
+            Register::SmartLoadEndVolt => "smart_load_end_volt",
             _ => return Err(anyhow!("number_voltage: unsupported register {:?}", register)),
         };
 
@@ -1455,6 +1603,8 @@ impl Config {
             Register::VrefFiltertime => "vref_filtertime",
             // Volt-Watt Open Loop Response Time
             Register::VoltWattDelayTime => "volt_watt_delay_time",
+            // Generator Configuration
+            Register::GeneratorCoolDownTime => "generator_cool_down_time",
             _ => return Err(anyhow!("number_time: unsupported register {:?}", register)),
         };
 
@@ -1478,8 +1628,8 @@ impl Config {
                 Register::GridVoltLimit3HighTime | Register::GridFreqLimit1LowTime | 
                 Register::GridFreqLimit1HighTime | Register::GridFreqLimit2LowTime | 
                 Register::GridFreqLimit2HighTime | Register::GridFreqLimit3LowTime | 
-                Register::GridFreqLimit3HighTime | Register::VrefFiltertime | Register::VoltWattDelayTime) {
-                "{{ float(value) / 100 }}".to_string() // Convert from 0.01s units for interface protection and reactive power
+                Register::GridFreqLimit3HighTime | Register::VrefFiltertime | Register::VoltWattDelayTime | Register::GeneratorCoolDownTime) {
+                "{{ float(value) / 100 }}".to_string() // Convert from 0.01s units for interface protection and reactive power, or 0.1 minute units for generator cool-down
             } else {
                 "{{ value }}".to_string() // No conversion for regular time registers
             },
@@ -1553,6 +1703,40 @@ impl Config {
 
         Ok(mqtt::Message {
             topic: self.ha_discovery_topic("number", &format!("{register:?}")),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
+    /// Creates a number entity for LCD password configuration
+    fn number_lcd_password(&self) -> Result<mqtt::Message> {
+        let config = Number {
+            name: "LCD Password".to_string(),
+            state_topic: format!(
+                "{}/{}/hold/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                Register::LCDPassword as u16,
+            ),
+            command_topic: format!(
+                "{}/cmd/{}/set/lcd_password",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+            ),
+                            value_template: "{{ '%05d' % value }}".to_string(), // Format as 5-digit zero-padded string
+            unique_id: format!("{}_{}_number_lcd_password", self.mqtt_config.namespace(), self.inverter.datalog()),
+            entity_category: Some("config".to_string()), // Place in Configuration section
+            enabled_by_default: Some(false), // Disable by default for security
+            device: self.device(),
+            availability: self.availability(),
+            min: 0.0,
+            max: 65535.0, // u16 max value
+            step: 1.0,
+            unit_of_measurement: "".to_string(), // No unit for password
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("number", "lcd_password"),
             retain: true,
             payload: serde_json::to_string(&config)?,
         })

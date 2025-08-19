@@ -74,6 +74,22 @@ pub enum Command {
     SetP3Qp(config::Inverter, u16),
     // Volt-Watt Open Loop Response Time (Register 183)
     SetVoltWattDelayTime(config::Inverter, u16),
+    // Generator Configuration
+    SetGeneratorCoolDownTime(config::Inverter, u16),
+    // AC Coupling Configuration
+    SetACCouplingEnable(config::Inverter, bool),
+    SetACCoupleStartSOC(config::Inverter, u16),
+    SetACCoupleEndSOC(config::Inverter, u16),
+    SetACCoupleStartVolt(config::Inverter, u16),
+    SetACCoupleEndVolt(config::Inverter, u16),
+    // Smart Load Configuration
+    SetSmartLoadEnable(config::Inverter, bool),
+    SetGridAlwaysOn(config::Inverter, bool),
+    SetSmartLoadStartVolt(config::Inverter, u16),
+    SetSmartLoadEndVolt(config::Inverter, u16),
+    SetSmartLoadStartSOC(config::Inverter, u16),
+    SetSmartLoadEndSOC(config::Inverter, u16),
+    SetStartPVPower(config::Inverter, u16),
     // Interface Protection - Grid Voltage Limits
     SetGridVoltLimit1Low(config::Inverter, u16),
     SetGridVoltLimit1High(config::Inverter, u16),
@@ -99,6 +115,8 @@ pub enum Command {
     SetGridFreqLimit3High(config::Inverter, u16),
     SetGridFreqLimit3LowTime(config::Inverter, u16),
     SetGridFreqLimit3HighTime(config::Inverter, u16),
+    // LCD Configuration
+    SetLCDPassword(config::Inverter, u16),
     // Register 110 switches
     PvOffGrid(config::Inverter, bool),
     FastZeroExport(config::Inverter, bool),
@@ -216,6 +234,22 @@ impl Command {
             SetP3Qp(inverter, _) => format!("{}/set/p3_qp", inverter.datalog()),
             // Volt-Watt Open Loop Response Time (Register 183)
             SetVoltWattDelayTime(inverter, _) => format!("{}/set/volt_watt_delay_time", inverter.datalog()),
+            // Generator Configuration
+            SetGeneratorCoolDownTime(inverter, _) => format!("{}/set/generator_cool_down_time", inverter.datalog()),
+            // AC Coupling Configuration
+            SetACCouplingEnable(inverter, _) => format!("{}/set/ac_coupling_enable", inverter.datalog()),
+            SetACCoupleStartSOC(inverter, _) => format!("{}/set/ac_couple_start_soc", inverter.datalog()),
+            SetACCoupleEndSOC(inverter, _) => format!("{}/set/ac_couple_end_soc", inverter.datalog()),
+            SetACCoupleStartVolt(inverter, _) => format!("{}/set/ac_couple_start_volt", inverter.datalog()),
+            SetACCoupleEndVolt(inverter, _) => format!("{}/set/ac_couple_end_volt", inverter.datalog()),
+        // Smart Load Configuration
+            SetSmartLoadStartVolt(inverter, _) => format!("{}/set/smart_load_start_volt", inverter.datalog()),
+            SetSmartLoadEndVolt(inverter, _) => format!("{}/set/smart_load_end_volt", inverter.datalog()),
+            SetSmartLoadStartSOC(inverter, _) => format!("{}/set/smart_load_start_soc", inverter.datalog()),
+            SetSmartLoadEndSOC(inverter, _) => format!("{}/set/smart_load_end_soc", inverter.datalog()),
+            SetSmartLoadEnable(inverter, _) => format!("{}/set/smart_load_enable", inverter.datalog()),
+            SetGridAlwaysOn(inverter, _) => format!("{}/set/grid_always_on", inverter.datalog()),
+            SetStartPVPower(inverter, _) => format!("{}/set/start_pv_power", inverter.datalog()),
             // Interface Protection - Grid Voltage Limits
             SetGridVoltLimit1Low(inverter, _) => format!("{}/set/grid_volt_limit1_low", inverter.datalog()),
             SetGridVoltLimit1High(inverter, _) => format!("{}/set/grid_volt_limit1_high", inverter.datalog()),
@@ -241,6 +275,8 @@ impl Command {
             SetGridFreqLimit3High(inverter, _) => format!("{}/set/grid_freq_limit3_high", inverter.datalog()),
             SetGridFreqLimit3LowTime(inverter, _) => format!("{}/set/grid_freq_limit3_low_time", inverter.datalog()),
             SetGridFreqLimit3HighTime(inverter, _) => format!("{}/set/grid_freq_limit3_high_time", inverter.datalog()),
+            // LCD Configuration
+            SetLCDPassword(inverter, _) => format!("{}/set/lcd_password", inverter.datalog()),
             // Register 110 switches
             PvOffGrid(inverter, _) => format!("{}/set/pv_off_grid", inverter.datalog()),
             FastZeroExport(inverter, _) => format!("{}/set/fast_zero_export", inverter.datalog()),

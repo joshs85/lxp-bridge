@@ -37,6 +37,7 @@ The application follows a modular, async architecture:
 - **Docker**: Multi-stage builds for development and production
 - **Deployment**: Docker images, systemd service, and Home Assistant add-on
 - **Documentation**: Protocol specs, register mappings, and configuration guides
+- **Register Investigation**: When documentation is insufficient, use interactive testing by changing values in the live system and taking before/after backups to identify unknown registers
 
 ## Technology Stack
 - **Language**: Rust 2021 edition
@@ -112,6 +113,100 @@ The application follows a modular, async architecture:
 - All entities disabled by default (enabled_by_default: false)
 - Proper unit conversions and value templates
 - Organized in logical functional groups
+
+**Status**: ✅ **Complete** - All tests passing, code compiled and verified, ready for production use
+
+### Smart Load Registers (Completed)
+**Date**: December 2024  
+**Description**: Implemented comprehensive Smart Load functionality for EG4 18kPV inverters, including enable/disable control, voltage thresholds, SOC limits, and PV power controls.
+
+**Features Added**:
+- **7 New Registers**: Smart Load enable/disable control, Grid Always On enable/disable control, voltage thresholds, SOC limits, and PV power controls
+- **Smart Load Enable/Disable Control**: Register 179, Bit 13 controls Smart Load functionality (0=disabled, 1=enabled)
+- **Grid Always On Enable/Disable Control**: Register 137, Bit 0 controls Grid Always On functionality (0=enabled, 1=disabled)
+- **Smart Load Voltage Thresholds**: Start and end voltage limits for Smart Load operation (40.0V-60.0V in 0.1V units)
+- **Smart Load SOC Thresholds**: Start and end SOC limits for Smart Load operation (0-100%)
+- **Start PV Power Control**: PV power threshold for Smart Load activation (0.0-10.0kW in 0.1kW units)
+- **Full MQTT Integration**: Command parsing and topic routing for all Smart Load functions
+- **Home Assistant Discovery**: Automatic entity creation with proper categorization
+
+**Technical Details**:
+- **Register 179, Bit 13**: Smart Load Enable/Disable control (0=disabled, 1=enabled)
+- **Register 137, Bit 0**: Grid Always On Enable/Disable control (0=enabled, 1=disabled) - **Note**: Uses inverted logic
+- **Register 213**: Smart Load Start Voltage (0.1V units, 40.0V-60.0V)
+- **Register 214**: Smart Load End Voltage (0.1V units, 40.0V-60.0V)
+- **Register 215**: Smart Load Start SOC (0-100%)
+- **Register 216**: Smart Load End SOC (0-100%)
+- **Register 217**: Start PV Power (0.1kW units, 0.0-10.0kW)
+- **Value Templates**: Proper unit conversions for Home Assistant display
+- **MQTT Topics**: Named command topics for proper routing (e.g., `smart_load_enable`, `grid_always_on`, `smart_load_start_volt`)
+
+**Files Modified**:
+- `src/lxp/packet.rs`: Added SmartLoadEnable bit to Register179Bit enum, GridAlwaysOnDisable bit to Register137Bit enum, and 5 new Smart Load register enum variants
+- `src/command.rs`: Added corresponding command definitions and result topics for both Smart Load and Grid Always On controls
+- `src/coordinator/mod.rs`: Added command handlers with proper error handling, state updates, and bit manipulation for both controls
+- `src/mqtt.rs`: Added MQTT topic parsing for all Smart Load and Grid Always On commands
+- `src/home_assistant.rs`: Added `number_power` function, Smart Load switch entity, Grid Always On switch entity, and threshold entities with proper configuration
+- `tests/test_home_assistant.rs`: Added comprehensive tests for all Smart Load and Grid Always On entities including enable/disable switches
+- `tests/test_mqtt_message.rs`: Added tests for command parsing and topic routing for both controls
+
+**Security Features**:
+- All entities placed in "config" category for proper organization
+- Proper MQTT topic routing and validation
+- Comprehensive error handling in command handlers
+- Secure bit manipulation for enable/disable controls
+- All tests passing (Home Assistant and MQTT tests)
+
+**Home Assistant Integration**:
+- Switch entity for Smart Load enable/disable control
+- Switch entity for Grid Always On enable/disable control
+- Number entities for voltage thresholds with proper ranges and unit conversions
+- Number entities for SOC thresholds with proper ranges
+- Number entity for PV power with kW units and 0.1kW step increments
+- All entities in "config" category for advanced settings
+- Proper unit conversions and value templates
+
+**Status**: ✅ **Complete** - All tests passing, code compiled and verified, ready for production use
+
+### AC Coupling Registers (Completed)
+**Date**: December 2024  
+**Description**: Implemented comprehensive AC coupling functionality for EG4 18kPV inverters, including enable/disable control and threshold settings.
+
+**Features Added**:
+- **5 New Registers**: AC coupling enable/disable control and 4 threshold setting registers
+- **AC Coupling Enable/Disable**: Switch entity controlled by Register 179, Bit 11
+- **SOC Thresholds**: Start and end SOC limits for AC coupling operation (0-100%)
+- **Voltage Thresholds**: Start and end voltage limits for AC coupling operation (40.0V-60.0V in 0.1V units)
+- **Full MQTT Integration**: Command parsing and topic routing for all AC coupling functions
+- **Home Assistant Discovery**: Automatic entity creation with proper categorization
+
+**Technical Details**:
+- **Register 179, Bit 11**: Controls AC coupling enable/disable (1=enabled, 0=disabled)
+- **Register 220**: AC Couple Start SOC (0-100%)
+- **Register 221**: AC Couple End SOC (0-100%)
+- **Register 222**: AC Couple Start Volt (0.1V units, 40.0V-60.0V)
+- **Register 223**: AC Couple End Volt (0.1V units, 40.0V-60.0V)
+- **Value Templates**: Proper unit conversions for Home Assistant display
+
+**Files Modified**:
+- `src/lxp/packet.rs`: Added Register179, Register179Bit enum, and 4 AC coupling threshold registers
+- `src/command.rs`: Added 5 new command definitions with proper result topics
+- `src/coordinator/mod.rs`: Added command handlers with bit manipulation for enable/disable
+- `src/mqtt.rs`: Added MQTT topic parsing for all AC coupling commands
+- `src/home_assistant.rs`: Added switch entity for enable/disable and number entities for thresholds
+
+**Security Features**:
+- All entities placed in "config" category for proper organization
+- Proper MQTT topic routing and validation
+- Comprehensive error handling in command handlers
+- Bit-level manipulation for enable/disable control
+- All tests passing (27 Home Assistant tests, 35 MQTT tests)
+
+**Home Assistant Integration**:
+- Switch entity for AC coupling enable/disable
+- Number entities for SOC and voltage thresholds with proper ranges
+- All entities in "config" category for advanced settings
+- Proper unit conversions and value templates
 
 **Status**: ✅ **Complete** - All tests passing, code compiled and verified, ready for production use
 

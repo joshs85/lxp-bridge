@@ -69,6 +69,7 @@ The backup creates a comprehensive JSON file with the following structure:
   "hold_registers": {
     "0": 0,
     "1": 0,
+    "2": 0,
     "10": 0,
     "11": 0,
     "67": 0,
@@ -88,6 +89,8 @@ The backup creates a comprehensive JSON file with the following structure:
 }
 ```
 
+**Note**: Registers are now sorted numerically by register number for easy reading and comparison. The format maintains the original HashMap structure but ensures consistent ordering.
+
 ## 🔍 Understanding the Output
 
 ### Backup Structure
@@ -104,7 +107,7 @@ The backup creates a comprehensive JSON file with the following structure:
 - **Raw Values**: 16-bit unsigned integers as stored in the inverter
 - **Scaling**: Some values need scaling (e.g., 2200 = 220.0V, 5999 = 59.99Hz)
 - **Range**: Values typically 0-65535 (16-bit unsigned)
-- **Format**: JSON object with register number as key, value as number
+- **Format**: JSON object with register number as key, value as number, sorted numerically by register number
 
 ### Datalog Field Importance
 - **MQTT Topics**: The datalog field is used in MQTT topic paths (e.g., `lxp/BA31100197/hold/67`)

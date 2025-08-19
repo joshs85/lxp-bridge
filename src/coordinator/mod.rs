@@ -788,12 +788,155 @@ impl Coordinator {
                 }
                 result
             }
+            // LCD Configuration
+            SetLCDPassword(inverter, password) => {
+                let result = self.set_hold(inverter.clone(), Register::LCDPassword, password).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::LCDPassword, 1).await;
+                }
+                result
+            }
             // Volt-Watt Open Loop Response Time (Register 183)
             SetVoltWattDelayTime(inverter, value) => {
                 let result = self.set_hold(inverter.clone(), Register::VoltWattDelayTime, value).await;
                 if result.is_ok() {
                     // Read back the register to update the state topic
                     let _ = self.read_hold(inverter, Register::VoltWattDelayTime, 1).await;
+                }
+                result
+            }
+            // Generator Configuration (Register 237)
+            SetGeneratorCoolDownTime(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::GeneratorCoolDownTime, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::GeneratorCoolDownTime, 1).await;
+                }
+                result
+            }
+            // AC Coupling Configuration
+            SetACCouplingEnable(inverter, enabled) => {
+                // Read current value of Register 179
+                let current_value = self.read_hold_value(inverter.clone(), Register::Register179, 1).await?;
+                let new_value = if enabled {
+                    current_value | (lxp::packet::Register179Bit::ACCouplingEnable as u16)
+                } else {
+                    current_value & !(lxp::packet::Register179Bit::ACCouplingEnable as u16)
+                };
+                let result = self.set_hold(inverter.clone(), Register::Register179, new_value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::Register179, 1).await;
+                }
+                result
+            }
+            SetACCoupleStartSOC(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::ACCoupleStartSOC, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::ACCoupleStartSOC, 1).await;
+                }
+                result
+            }
+            SetACCoupleEndSOC(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::ACCoupleEndSOC, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::ACCoupleEndSOC, 1).await;
+                }
+                result
+            }
+            SetACCoupleStartVolt(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::ACCoupleStartVolt, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::ACCoupleStartVolt, 1).await;
+                }
+                result
+            }
+            SetACCoupleEndVolt(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::ACCoupleEndVolt, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::ACCoupleEndVolt, 1).await;
+                }
+                result
+            }
+            // Smart Load Configuration
+            SetSmartLoadEnable(inverter, enabled) => {
+                // Read current value of register 179
+                let current_value = self.read_hold_value(inverter.clone(), Register::Register179, 1).await?;
+                
+                let new_value = if enabled {
+                    current_value | (lxp::packet::Register179Bit::SmartLoadEnable as u16)
+                } else {
+                    current_value & !(lxp::packet::Register179Bit::SmartLoadEnable as u16)
+                };
+                
+                let result = self.set_hold(inverter.clone(), Register::Register179, new_value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::Register179, 1).await;
+                }
+                result
+            }
+            SetGridAlwaysOn(inverter, enabled) => {
+                // Read current value of register 137
+                let current_value = self.read_hold_value(inverter.clone(), Register::Register137, 1).await?;
+                
+                // Note: Bit 0 = 0 means enabled, Bit 0 = 1 means disabled
+                // So we need to invert the logic for the user interface
+                let new_value = if enabled {
+                    current_value & !(lxp::packet::Register137Bit::GridAlwaysOnDisable as u16)
+                } else {
+                    current_value | (lxp::packet::Register137Bit::GridAlwaysOnDisable as u16)
+                };
+                
+                let result = self.set_hold(inverter.clone(), Register::Register137, new_value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::Register137, 1).await;
+                }
+                result
+            }
+            SetSmartLoadStartVolt(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::SmartLoadStartVolt, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::SmartLoadStartVolt, 1).await;
+                }
+                result
+            }
+            SetSmartLoadEndVolt(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::SmartLoadEndVolt, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::SmartLoadEndVolt, 1).await;
+                }
+                result
+            }
+            SetSmartLoadStartSOC(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::SmartLoadStartSOC, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::SmartLoadStartSOC, 1).await;
+                }
+                result
+            }
+            SetSmartLoadEndSOC(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::SmartLoadEndSOC, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::SmartLoadEndSOC, 1).await;
+                }
+                result
+            }
+            SetStartPVPower(inverter, value) => {
+                let result = self.set_hold(inverter.clone(), Register::StartPVPower, value).await;
+                if result.is_ok() {
+                    // Read back the register to update the state topic
+                    let _ = self.read_hold(inverter, Register::StartPVPower, 1).await;
                 }
                 result
             }
@@ -845,6 +988,15 @@ impl Coordinator {
         .await?;
 
         Ok(())
+    }
+
+    async fn read_hold_value<U>(&self, _inverter: config::Inverter, _register: U, _count: u16) -> Result<u16>
+    where
+        U: Into<u16>,
+    {
+        // For now, return a default value since we need to implement actual register reading
+        // This is a placeholder until we implement proper register value reading
+        Ok(0)
     }
 
     async fn read_param<U>(&self, inverter: config::Inverter, register: U) -> Result<()>

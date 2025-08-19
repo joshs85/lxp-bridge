@@ -268,6 +268,24 @@ impl Message {
             ["set", "p3_qp"] => SetP3Qp(inverter, self.payload_int()?),
             // Volt-Watt Open Loop Response Time (Register 183)
             ["set", "volt_watt_delay_time"] => SetVoltWattDelayTime(inverter, self.payload_int()?),
+            // Generator Configuration
+            ["set", "generator_cool_down_time"] => SetGeneratorCoolDownTime(inverter, self.payload_int()?),
+            // AC Coupling Configuration
+            ["set", "ac_coupling_enable"] => SetACCouplingEnable(inverter, self.payload_bool()),
+            ["set", "ac_couple_start_soc"] => SetACCoupleStartSOC(inverter, self.payload_int()?),
+            ["set", "ac_couple_end_soc"] => SetACCoupleEndSOC(inverter, self.payload_int()?),
+            ["set", "ac_couple_start_volt"] => SetACCoupleStartVolt(inverter, self.payload_int()?),
+            ["set", "ac_couple_end_volt"] => SetACCoupleEndVolt(inverter, self.payload_int()?),
+            // Smart Load Configuration
+            ["set", "smart_load_enable"] => SetSmartLoadEnable(inverter, self.payload_bool()),
+            ["set", "grid_always_on"] => SetGridAlwaysOn(inverter, self.payload_bool()),
+            ["set", "smart_load_start_volt"] => SetSmartLoadStartVolt(inverter, self.payload_int()?),
+            ["set", "smart_load_end_volt"] => SetSmartLoadEndVolt(inverter, self.payload_int()?),
+            ["set", "smart_load_start_soc"] => SetSmartLoadStartSOC(inverter, self.payload_int()?),
+            ["set", "smart_load_end_soc"] => SetSmartLoadEndSOC(inverter, self.payload_int()?),
+            ["set", "start_pv_power"] => SetStartPVPower(inverter, self.payload_int()?),
+            // LCD Configuration
+            ["set", "lcd_password"] => SetLCDPassword(inverter, self.payload_int()?),
             // Register 110 switches
             ["set", "pv_off_grid"] => PvOffGrid(inverter, self.payload_bool()),
             ["set", "fast_zero_export"] => FastZeroExport(inverter, self.payload_bool()),

@@ -120,6 +120,23 @@ impl BackupConfigCommand {
             input_registers.insert((i + 160).to_string(), value);
         }
 
+        // Convert HashMaps to BTreeMaps for consistent sorted JSON output
+        let sorted_hold_registers: std::collections::BTreeMap<String, u16> = {
+            let mut sorted = std::collections::BTreeMap::new();
+            for (key, value) in hold_registers {
+                sorted.insert(key, value);
+            }
+            sorted
+        };
+        
+        let sorted_input_registers: std::collections::BTreeMap<String, u16> = {
+            let mut sorted = std::collections::BTreeMap::new();
+            for (key, value) in input_registers {
+                sorted.insert(key, value);
+            }
+            sorted
+        };
+
         // Create the backup data structure
         let backup_data = json!({
             "backup_timestamp": chrono::Utc::now().to_rfc3339(),
@@ -127,8 +144,8 @@ impl BackupConfigCommand {
             "inverter_datalog": self.inverter.datalog().to_string(),
             "inverter_host": self.inverter.host(),
             "inverter_port": self.inverter.port(),
-            "hold_registers": hold_registers,
-            "input_registers": input_registers,
+            "hold_registers": sorted_hold_registers,
+            "input_registers": sorted_input_registers,
             "notes": "Real register values read from inverter using direct TCP communication (same as addon startup)"
         });
 

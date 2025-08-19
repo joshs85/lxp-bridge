@@ -1242,3 +1242,347 @@ fn test_mqtt_message_namespace_handling_coverage() {
         }
     }
 }
+
+#[test]
+fn test_lcd_password_commands_parsing() {
+    // Test the LCD password command parsing
+    use lxp_bridge::mqtt::Message;
+    use lxp_bridge::config::Inverter;
+    use lxp_bridge::command::Command;
+    
+    // Create a mock inverter config
+    let inverter = Inverter {
+        host: "127.0.0.1".to_string(),
+        port: 502,
+        serial: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        datalog: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        enabled: true,
+        heartbeats: None,
+        publish_holdings_on_connect: None,
+        read_timeout: None,
+    };
+    
+    // Test LCD password command with valid payloads
+    let test_cases = vec![
+        ("cmd/AB12345678/set/lcd_password", "0"),      // Default password
+        ("cmd/AB12345678/set/lcd_password", "12345"),  // Test password
+        ("cmd/AB12345678/set/lcd_password", "65535"),  // Max u16 value
+    ];
+    
+    for (topic, payload) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: payload.to_string(),
+        };
+        
+        let command = message.to_command(inverter.clone());
+        assert!(command.is_ok(), "Failed to parse LCD password command: {}", topic);
+        
+        // Verify the command was parsed successfully
+        let command = command.unwrap();
+        match command {
+            Command::SetLCDPassword(_, _) => {
+                // Command was parsed successfully
+            }
+            _ => panic!("Expected SetLCDPassword command for topic: {}", topic),
+        }
+    }
+}
+
+#[test]
+fn test_lcd_password_commands_topic_parsing() {
+    // Test that LCD password command topics are properly parsed
+    use lxp_bridge::mqtt::Message;
+    
+    let test_cases = vec![
+        ("cmd/AB12345678/set/lcd_password", "AB12345678", vec!["set", "lcd_password"]),
+    ];
+    
+    for (topic, expected_datalog, expected_parts) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: "test".to_string(),
+        };
+        
+        let result = message.split_cmd_topic().unwrap();
+        let (target_inverter, parts) = result;
+        
+        match target_inverter {
+            lxp_bridge::mqtt::TargetInverter::Serial(serial) => {
+                assert_eq!(serial.to_string(), expected_datalog);
+            }
+            lxp_bridge::mqtt::TargetInverter::All => {
+                panic!("Expected serial inverter, got All");
+            }
+        }
+        
+        assert_eq!(parts, expected_parts);
+    }
+}
+
+#[test]
+fn test_generator_cool_down_time_commands_parsing() {
+    // Test the generator cool-down time command parsing
+    use lxp_bridge::mqtt::Message;
+    use lxp_bridge::config::Inverter;
+    use lxp_bridge::command::Command;
+    
+    // Create a mock inverter config
+    let inverter = Inverter {
+        host: "127.0.0.1".to_string(),
+        port: 502,
+        serial: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        datalog: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        enabled: true,
+        heartbeats: None,
+        publish_holdings_on_connect: None,
+        read_timeout: None,
+    };
+    
+    // Test generator cool-down time command with valid payloads
+    let test_cases = vec![
+        ("cmd/AB12345678/set/generator_cool_down_time", "4"),   // 0.4 minutes
+        ("cmd/AB12345678/set/generator_cool_down_time", "5"),   // 0.5 minutes
+        ("cmd/AB12345678/set/generator_cool_down_time", "10"),  // 1.0 minutes
+        ("cmd/AB12345678/set/generator_cool_down_time", "60"),  // 6.0 minutes
+    ];
+    
+    for (topic, payload) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: payload.to_string(),
+        };
+        
+        let command = message.to_command(inverter.clone());
+        assert!(command.is_ok(), "Failed to parse generator cool-down time command: {}", topic);
+        
+        // Verify the command was parsed successfully
+        let command = command.unwrap();
+        match command {
+            Command::SetGeneratorCoolDownTime(_, _) => {
+                // Command was parsed successfully
+            }
+            _ => panic!("Expected SetGeneratorCoolDownTime command for topic: {}", topic),
+        }
+    }
+}
+
+#[test]
+fn test_generator_cool_down_time_commands_topic_parsing() {
+    // Test that generator cool-down time command topics are properly parsed
+    use lxp_bridge::mqtt::Message;
+    
+    let test_cases = vec![
+        ("cmd/AB12345678/set/generator_cool_down_time", "AB12345678", vec!["set", "generator_cool_down_time"]),
+    ];
+    
+    for (topic, expected_datalog, expected_parts) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: "test".to_string(),
+        };
+        
+        let result = message.split_cmd_topic().unwrap();
+        let (target_inverter, parts) = result;
+        
+        match target_inverter {
+            lxp_bridge::mqtt::TargetInverter::Serial(serial) => {
+                assert_eq!(serial.to_string(), expected_datalog);
+            }
+            lxp_bridge::mqtt::TargetInverter::All => {
+                panic!("Expected serial inverter, got All");
+            }
+        }
+        
+        assert_eq!(parts, expected_parts);
+    }
+}
+
+
+#[test]
+fn test_ac_coupling_commands_parsing() {
+    // Test the AC coupling command parsing
+    use lxp_bridge::mqtt::Message;
+    use lxp_bridge::config::Inverter;
+    use lxp_bridge::command::Command;
+    
+    // Create a mock inverter config
+    let inverter = Inverter {
+        host: "127.0.0.1".to_string(),
+        port: 502,
+        serial: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        datalog: lxp_bridge::lxp::inverter::Serial::from_str("AB12345678").unwrap(),
+        enabled: true,
+        heartbeats: None,
+        publish_holdings_on_connect: None,
+        read_timeout: None,
+    };
+    
+    // Test AC coupling and Smart Load commands with valid payloads
+    let test_cases = vec![
+        ("cmd/AB12345678/set/ac_coupling_enable", "true", Command::SetACCouplingEnable(inverter.clone(), true)),
+        ("cmd/AB12345678/set/ac_coupling_enable", "false", Command::SetACCouplingEnable(inverter.clone(), false)),
+        ("cmd/AB12345678/set/ac_couple_start_soc", "50", Command::SetACCoupleStartSOC(inverter.clone(), 50)),
+        ("cmd/AB12345678/set/ac_couple_end_soc", "80", Command::SetACCoupleEndSOC(inverter.clone(), 80)),
+        ("cmd/AB12345678/set/ac_couple_start_volt", "500", Command::SetACCoupleStartVolt(inverter.clone(), 500)),
+        ("cmd/AB12345678/set/ac_couple_end_volt", "600", Command::SetACCoupleEndVolt(inverter.clone(), 600)),
+        // Smart Load commands
+        ("cmd/AB12345678/set/smart_load_enable", "true", Command::SetSmartLoadEnable(inverter.clone(), true)),
+        ("cmd/AB12345678/set/grid_always_on", "true", Command::SetGridAlwaysOn(inverter.clone(), true)),
+        ("cmd/AB12345678/set/smart_load_start_volt", "500", Command::SetSmartLoadStartVolt(inverter.clone(), 500)),
+        ("cmd/AB12345678/set/smart_load_end_volt", "480", Command::SetSmartLoadEndVolt(inverter.clone(), 480)),
+        ("cmd/AB12345678/set/smart_load_start_soc", "99", Command::SetSmartLoadStartSOC(inverter.clone(), 99)),
+        ("cmd/AB12345678/set/smart_load_end_soc", "0", Command::SetSmartLoadEndSOC(inverter.clone(), 0)),
+        ("cmd/AB12345678/set/start_pv_power", "5", Command::SetStartPVPower(inverter.clone(), 5)),
+    ];
+    
+    for (topic, payload, expected_command) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: payload.to_string(),
+        };
+        
+        let command = message.to_command(inverter.clone());
+        assert!(command.is_ok(), "Failed to parse AC coupling command: {}", topic);
+        
+        // Verify the command was parsed successfully
+        let command = command.unwrap();
+        match command {
+            Command::SetACCouplingEnable(_, enabled) => {
+                if let Command::SetACCouplingEnable(_, expected_enabled) = expected_command {
+                    assert_eq!(enabled, expected_enabled, "AC coupling enable value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetACCouplingEnable command for topic: {}", topic);
+                }
+            },
+            Command::SetACCoupleStartSOC(_, value) => {
+                if let Command::SetACCoupleStartSOC(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "AC couple start SOC value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetACCoupleStartSOC command for topic: {}", topic);
+                }
+            },
+            Command::SetACCoupleEndSOC(_, value) => {
+                if let Command::SetACCoupleEndSOC(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "AC couple end SOC value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetACCoupleEndSOC command for topic: {}", topic);
+                }
+            },
+            Command::SetACCoupleStartVolt(_, value) => {
+                if let Command::SetACCoupleStartVolt(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "AC couple start voltage value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetACCoupleStartVolt command for topic: {}", topic);
+                }
+            },
+            Command::SetACCoupleEndVolt(_, value) => {
+                if let Command::SetACCoupleEndVolt(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "AC couple end voltage value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetACCoupleEndVolt command for topic: {}", topic);
+                }
+            },
+            // Smart Load commands
+            Command::SetSmartLoadEnable(_, enabled) => {
+                if let Command::SetSmartLoadEnable(_, expected_enabled) = expected_command {
+                    assert_eq!(enabled, expected_enabled, "Smart Load enable value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetSmartLoadEnable command for topic: {}", topic);
+                }
+            },
+            Command::SetGridAlwaysOn(_, enabled) => {
+                if let Command::SetGridAlwaysOn(_, expected_enabled) = expected_command {
+                    assert_eq!(enabled, expected_enabled, "Grid Always On enable value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetGridAlwaysOn command for topic: {}", topic);
+                }
+            },
+            Command::SetSmartLoadStartVolt(_, value) => {
+                if let Command::SetSmartLoadStartVolt(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "Smart Load start voltage value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetSmartLoadStartVolt command for topic: {}", topic);
+                }
+            },
+            Command::SetSmartLoadEndVolt(_, value) => {
+                if let Command::SetSmartLoadEndVolt(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "Smart Load end voltage value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetSmartLoadEndVolt command for topic: {}", topic);
+                }
+            },
+            Command::SetSmartLoadStartSOC(_, value) => {
+                if let Command::SetSmartLoadStartSOC(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "Smart Load start SOC value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetSmartLoadStartSOC command for topic: {}", topic);
+                }
+            },
+            Command::SetSmartLoadEndSOC(_, value) => {
+                if let Command::SetSmartLoadEndSOC(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "Smart Load end SOC value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetSmartLoadEndSOC command for topic: {}", topic);
+                }
+            },
+            Command::SetStartPVPower(_, value) => {
+                if let Command::SetStartPVPower(_, expected_value) = expected_command {
+                    assert_eq!(value, expected_value, "Start PV power value mismatch for topic: {}", topic);
+                } else {
+                    panic!("Expected SetStartPVPower command for topic: {}", topic);
+                }
+            },
+            _ => panic!("Unexpected command type for topic: {}", topic),
+        }
+    }
+}
+
+#[test]
+fn test_ac_coupling_commands_topic_parsing() {
+    // Test that AC coupling command topics are properly parsed
+    use lxp_bridge::mqtt::Message;
+    
+    let test_cases = vec![
+        ("cmd/AB12345678/set/ac_coupling_enable", "AB12345678", vec!["set", "ac_coupling_enable"]),
+        ("cmd/AB12345678/set/ac_couple_start_soc", "AB12345678", vec!["set", "ac_couple_start_soc"]),
+        ("cmd/AB12345678/set/ac_couple_end_soc", "AB12345678", vec!["set", "ac_couple_end_soc"]),
+        ("cmd/AB12345678/set/ac_couple_start_volt", "AB12345678", vec!["set", "ac_couple_start_volt"]),
+        ("cmd/AB12345678/set/ac_couple_end_volt", "AB12345678", vec!["set", "ac_couple_end_volt"]),
+        // Smart Load commands
+        ("cmd/AB12345678/set/smart_load_enable", "AB12345678", vec!["set", "smart_load_enable"]),
+        ("cmd/AB12345678/set/grid_always_on", "AB12345678", vec!["set", "grid_always_on"]),
+        ("cmd/AB12345678/set/smart_load_start_volt", "AB12345678", vec!["set", "smart_load_start_volt"]),
+        ("cmd/AB12345678/set/smart_load_end_volt", "AB12345678", vec!["set", "smart_load_end_volt"]),
+        ("cmd/AB12345678/set/smart_load_start_soc", "AB12345678", vec!["set", "smart_load_start_soc"]),
+        ("cmd/AB12345678/set/smart_load_end_soc", "AB12345678", vec!["set", "smart_load_end_soc"]),
+        ("cmd/AB12345678/set/start_pv_power", "AB12345678", vec!["set", "start_pv_power"]),
+    ];
+    
+    for (topic, expected_datalog, expected_parts) in test_cases {
+        let message = Message {
+            topic: topic.to_string(),
+            retain: false,
+            payload: "test".to_string(),
+        };
+        
+        let result = message.split_cmd_topic().unwrap();
+        let (target_inverter, parts) = result;
+        
+        match target_inverter {
+            lxp_bridge::mqtt::TargetInverter::Serial(serial) => {
+                assert_eq!(serial.to_string(), expected_datalog);
+            }
+            lxp_bridge::mqtt::TargetInverter::All => {
+                panic!("Expected serial inverter, got All");
+            }
+        }
+        
+        assert_eq!(parts, expected_parts);
+    }
+}

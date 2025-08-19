@@ -544,6 +544,9 @@ pub enum DeviceFunction {
 #[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
 #[repr(u16)]
 pub enum Register {
+    // Firmware Version Registers (Registers 9-10)
+    SlaveVerComVer = 9,          // Slave Ver and Com Ver (firmware versions)
+    CntlVerFWVer = 10,           // Cntl Ver and FWVer (firmware versions)
     Register21 = 21,             // not sure of a better name for this one..
     GridConnectTime = 23,        // Grid connection waiting time (s)
     GridReconnectTime = 24,      // Grid reconnection waiting time (s)
@@ -621,6 +624,26 @@ pub enum Register {
     P1Qp = 189,                  // P1 power percentage value for QP priority curve
     P2Qp = 190,                  // P2 power percentage value for QP priority curve
     P3Qp = 191,                  // P3 power percentage value for QP priority curve
+    // Generator Configuration (Register 237)
+    GeneratorCoolDownTime = 237,    // Generator cool-down time (0.1 minute units)
+    // Grid Always On Configuration (Register 137)
+    Register137 = 137,              // Grid Always On control register (bit 0 = enable/disable)
+    // AC Coupling Configuration (Registers 179, 220-223)
+    Register179 = 179,              // Function Enable 2 register (bit 11 = AC coupling enable/disable)
+    ACCoupleStartSOC = 220,         // AC coupling start SOC threshold (0-100%)
+    ACCoupleEndSOC = 221,           // AC coupling end SOC threshold (0-101%)
+    ACCoupleStartVolt = 222,        // AC coupling start voltage threshold (0.1V units)
+    ACCoupleEndVolt = 223,          // AC coupling end voltage threshold (0.1V units)
+    // Smart Load Configuration (Registers 213-217, 227-228)
+    SmartLoadStartVolt = 213,       // Smart Load start voltage threshold (0.1V units)
+    SmartLoadEndVolt = 214,         // Smart Load end voltage threshold (0.1V units)
+    SmartLoadStartSOC = 215,        // Smart Load start SOC threshold (0-100%)
+    SmartLoadEndSOC = 216,          // Smart Load end SOC threshold (0-100%)
+    StartPVPower = 217,             // Start PV power threshold for Smart Load (0.1kW units)
+    SmartLoadStartSOCAlt = 227,     // Alternative Smart Load start SOC threshold (0-100%)
+    SmartLoadStartVoltAlt = 228,    // Alternative Smart Load start voltage threshold (0.1V units)
+    // LCD Configuration (Register 225)
+    LCDPassword = 225,            // LCD password for local display access
     ResetSetting = 11,              // Reset settings register (bit 7 = InvReboot)
 }
 
@@ -655,6 +678,28 @@ pub enum Register110Bit {
     MicroGridEnable = 1 << 2,
     SharedBatteryEnable = 1 << 3,
     ChargeLastEnable = 1 << 4,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[repr(u16)]
+pub enum Register179Bit {
+    // Register 179 - Function Enable 2
+    ACCTDirection = 1 << 0,        // 0-Normal 1-Reversed
+    PVCTDirection = 1 << 1,        // 0-Normal 1-Reversed
+    AFCIAlarmClr = 1 << 2,         // 0-null 1-clear
+    BatWakeupEn = 1 << 3,          // 0-Disable 1-Enable
+    VoltWattEn = 1 << 4,           // 0-Disable 1-Enable
+    TriptimeUnit = 1 << 5,         // 0-Disable 1-Enable
+    ActPowerCMDEN = 1 << 6,        // 0-Disable 1-Enable
+    ACCouplingEnable = 1 << 11,    // 0-Disable 1-Enable AC coupling functionality
+    SmartLoadEnable = 1 << 13,     // 0-Disable 1-Enable Smart Load functionality
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[repr(u16)]
+pub enum Register137Bit {
+    // Register 137 - Grid Always On Control
+    GridAlwaysOnDisable = 1 << 0,    // 0-Enable 1-Disable Grid Always On functionality
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]

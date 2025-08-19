@@ -171,6 +171,8 @@ This register controls various system functions through individual bits with det
 - **Bit 7**: FuncEn.ACChargeEn
   - **Range**: 0/1
   - **Description**: AC Charge Enable
+  - **Current Value**: 1 (Enabled)
+  - **Note**: AC charging functionality is currently enabled and active
   
 - **Bit 8**: FuncEn.SWSeamlesslyEn
   - **Range**: 0/1
@@ -467,6 +469,36 @@ These registers control active power, reactive power, and power factor settings.
   - **Range**: 750-1000, 1750-2000
   - **Description**: PF setting value, 750-1000(under), 1750-2000(over)
 
+## AC Charging Configuration Overview
+**Current Configuration Status**: AC charging is **ENABLED** and configured for **VOLTAGE-BASED** operation.
+
+**Configuration Details**:
+- **AC Charge Enable**: Register 21, Bit 7 = 1 (Enabled)
+- **AC Charge Type**: Register 120, Bits 1-3 = 2 (According to voltage) ⚠️ **CONFIGURATION ISSUE**
+- **Power Limit**: 12.0% of rated capacity (Register 66 = 120)
+- **SOC Limit**: 90% maximum (Register 67 = 90)
+- **Time Windows**: All three time windows are disabled (00:00-00:00)
+- **Voltage Thresholds**: Start at 40.0V, Stop at 53.0V
+- **SOC Thresholds**: Start at 85%, Stop at 0% (configuration error)
+
+**Operation Mode**: Since time windows are disabled, AC charging operates purely based on voltage thresholds. Charging begins when battery voltage drops to 40.0V and stops when it reaches 53.0V.
+
+**⚠️ Configuration Issues and Recommendations**:
+1. **AC Charge Type Mismatch**: Currently set to voltage-based (2) but SOC thresholds are configured
+   - **Current**: Register 120, Bits 1-3 = 2 (According to voltage)
+   - **Recommended**: Register 120, Bits 1-3 = 3 (According to SOC)
+   - **Reason**: SOC thresholds (Start: 85%, End: 0%) are configured but not being used
+
+2. **SOC End Threshold Error**: Register 161 is set to 0% (should be 90% or higher)
+   - **Current**: 0% (charging would stop at 0% SOC)
+   - **Recommended**: 90% (to match Register 67 SOC limit)
+   - **Reason**: Prevents overcharging and aligns with the configured SOC limit
+
+3. **Time Windows Disabled**: All three time windows are set to 00:00-00:00
+   - **Current**: Time-based charging is completely disabled
+   - **Recommended**: Configure appropriate time windows or ensure voltage/SOC thresholds are correct
+   - **Reason**: Provides backup charging control and flexibility
+
 ## Power Soft Start and Charging Control (Registers 63-67)
 These registers control power ramp rates and basic charging parameters.
 
@@ -487,15 +519,18 @@ These registers control power ramp rates and basic charging parameters.
   - **Description**: Discharge power percentage setting
   
 - **Register 66**: ACChgPowerCMD
-  - **Unit**: %
-  - **Range**: 0-100
-  - **Description**: AC charge percentage setting
-  - **Note**: Located at `UL Compliance > Active Power-Reactive Power Mode > AC Charge Power (kW)` on EG4 monitoring installer website. GUI displays "kW" but stores percentage values in 0.1% units (120 = 12.0%, 110 = 11.0%). GUI fails with code 3 when trying to set above 12kW (120%), suggesting this is a maximum limit. Backup data shows values up to 120% despite documentation showing 0-100% range.
+  - **Unit**: 0.1%
+  - **Range**: 0-120% (0-1200 in register units)
+  - **Description**: AC charge power percentage setting
+  - **Current Value**: 120 (12.0%)
+  - **Note**: Located at `UL Compliance > Active Power-Reactive Power Mode > AC Charge Power (kW)` on EG4 monitoring installer website. GUI displays "kW" but stores percentage values in 0.1% units. The GUI has a maximum limit of 12.0kW (120%) and will fail with error code 3 if set higher. This register controls the maximum AC charging power as a percentage of the inverter's rated capacity.
   
 - **Register 67**: ACChgSOCLimit
   - **Unit**: %
-  - **Range**: 0-100
+  - **Range**: 0-100%
   - **Description**: AC charging SOC limit setting
+  - **Current Value**: 90%
+  - **Note**: This register sets the maximum battery SOC at which AC charging will stop. When the battery reaches 90% SOC, AC charging will automatically terminate to prevent overcharging.
 
 ## AC Charging Time Schedule 1 (Registers 68-69)
 These registers define the primary AC charging time window.
@@ -504,10 +539,12 @@ These registers define the primary AC charging time window.
 - **Register 68**: ACChgStartHour / ACChgStartMinute
   - **ACChgStartHour**: Range 0-23, Description: AC charging start time_hour setting
   - **ACChgStartMinute**: Range 0-59, Description: AC charging start time_minute setting
+  - **Current Value**: 0 (00:00 - AC charging disabled for primary time window)
   
 - **Register 69**: ACChgEndHour / ACChgEndMinute
   - **ACChgEndHour**: Range 0-23, Description: AC charging end time_hour setting
   - **ACChgEndMinute**: Range 0-59, Description: AC charging end time_min setting
+  - **Current Value**: 0 (00:00 - AC charging disabled for primary time window)
 
 ## AC Charging Time Schedule 2 (Registers 70-71)
 These registers define the secondary AC charging time window.
@@ -516,10 +553,12 @@ These registers define the secondary AC charging time window.
 - **Register 70**: ACChgStartHour1 / ACChgStartMinute1
   - **ACChgStartHour1**: Range 0-23, Description: AC charging start time_hour setting
   - **ACChgStartMinute1**: Range 0-59, Description: AC charging start time_minute setting
+  - **Current Value**: 0 (00:00 - AC charging disabled for secondary time window)
   
 - **Register 71**: ACChgEndHour1 / ACChgEndMinute1
   - **ACChgEndHour1**: Range 0-23, Description: AC charging end time_hour setting
   - **ACChgEndMinute1**: Range 0-59, Description: AC charging end time_min setting
+  - **Current Value**: 0 (00:00 - AC charging disabled for secondary time window)
 
 ## AC Charging Time Schedule 3 (Registers 72-73)
 These registers define the tertiary AC charging time window.
@@ -528,10 +567,12 @@ These registers define the tertiary AC charging time window.
 - **Register 72**: ACChgStartHour2 / ACChgStartMinute2
   - **ACChgStartHour2**: Range 0-23, Description: AC charging start time_hour setting
   - **ACChgStartMinute2**: Range 0-59, Description: AC charging start time_minute setting
+  - **Current Value**: 0 (00:00 - AC charging disabled for tertiary time window)
   
 - **Register 73**: ACChgEndHour2 / ACChgEndMinute2
   - **ACChgEndHour2**: Range 0-23, Description: AC charging end time_hour setting
   - **ACChgEndMinute2**: Range 0-59, Description: AC charging end time_min setting
+  - **Current Value**: 0 (00:00 - AC charging disabled for tertiary time window)
 
 ## Charging Priority Control (Registers 74-78)
 These registers control priority charging parameters and time schedules.
@@ -831,6 +872,7 @@ These registers control battery power limits and derating behavior.
   - **Unit**: 1W
   - **Range**: 50W-
   - **Description**: Sets the "Ptouser" limit for using battery power
+  - **Note**: This register may also serve as Smart Load Start SOC in some configurations. Current backup shows value 100, which could represent 100% SOC for Smart Load operation.
   
 - **Register 118**: VbatStartDerating
   - **Unit**: 0.1V
@@ -861,6 +903,8 @@ This register controls various system enable functions through individual bits.
     - 1: according to time
     - 2: according to voltage
     - 3: according to SOC
+  - **Current Value**: 2 (According to voltage)
+  - **Note**: AC charging is currently configured to operate based on battery voltage thresholds rather than time schedules or SOC levels. **RECOMMENDATION**: This should be set to 3 (according to SOC) since SOC thresholds are configured (Start: 85%, End: 0%). The current voltage-based operation may not align with the intended SOC-based charging strategy.
   
 - **Bit 4-5**: DischgCtrlType
   - **Range**: 0-2
@@ -1186,6 +1230,7 @@ These registers control float charging and output priority settings.
   - **Unit**: 0.1V
   - **Range**: 500-560
   - **Description**: Float given voltage
+  - **Note**: This register may also serve as Smart Load Start Volt in some configurations. Current backup shows value 540, which represents 54.0V and matches the Smart Load Start Volt setting in the GUI.
   
 - **Register 145**: OutputPrioConfig
   - **Range**: 0-3
@@ -1273,21 +1318,29 @@ These registers control the battery voltage and SOC thresholds for AC charging.
   - **Unit**: 0.1V
   - **Range**: 384-520
   - **Description**: AC charging starting battery voltage, valid after selecting ACChg according to voltage
+  - **Current Value**: 400 (40.0V)
+  - **Note**: AC charging will begin when the battery voltage drops to 40.0V or below
   
 - **Register 159**: ACChgEndVolt
   - **Unit**: 0.1V
   - **Range**: 480-590
   - **Description**: AC charging cut off the battery voltage, valid after selecting ACChg according to voltage
+  - **Current Value**: 530 (53.0V)
+  - **Note**: AC charging will stop when the battery voltage reaches 53.0V or above
   
 - **Register 160**: ACChgStartSOC
   - **Unit**: %
   - **Range**: 0-90
   - **Description**: AC charging starting SOC, valid after selecting ACChg according to SOC
+  - **Current Value**: 85%
+  - **Note**: AC charging will begin when the battery SOC drops to 85% or below
   
 - **Register 161**: ACChgEndSOC
   - **Unit**: %
   - **Range**: 20-100
   - **Description**: AC charging stops SOC, it is valid after selecting ACChg according to SOC
+  - **Current Value**: 0%
+  - **Note**: AC charging will stop when the battery SOC reaches 0% (this appears to be a configuration error - should typically be set to 90% or higher)
 
 ## Battery Low Voltage/SOC Alarm and Utility Conversion (Registers 162-167)
 These registers define alarm and recovery points for battery undervoltage and SOC, and parameters for converting to mains utility.
@@ -1331,6 +1384,8 @@ These registers control AC charging current and on-grid end-of-discharge voltage
   - **Unit**: A (Amperes)
   - **Range**: 0-140
   - **Description**: ChargeCurrent from AC Active When TakeLoadTogether enabled
+  - **Current Value**: 0A
+  - **Note**: This register controls the AC charging current when the inverter is powering loads simultaneously. A value of 0A disables this feature.
   
 - **Register 169**: OngridEOD_Voltage
   - **Unit**: 0.1V
@@ -1412,7 +1467,60 @@ This register controls various system functions through individual bits.
   - **Range**: 0,1
   - **Description**: 0-Disable 1-Enable
   
+- **Bit 11**: uFunctionEn2.ACCouplingEnable
+  - **Range**: 0,1
+  - **Description**: 0-Disable 1-Enable AC coupling functionality
+  - **Current Value**: 1 (Enabled)
+  - **Note**: This bit controls whether AC coupling functionality is enabled. When enabled, the inverter can manage AC-coupled loads and generators.
+  
 - **Bit 7-15**: uFunctionEn2.all
+
+## AC Coupling Configuration (Registers 220-223)
+These registers control AC coupling functionality for managing AC-coupled loads and generators.
+
+### Register Details
+- **Register 220**: ACCoupleStartSOC
+  - **Unit**: %
+  - **Range**: 0-100%
+  - **Description**: AC coupling start SOC threshold
+  - **Current Value**: 99%
+  - **Note**: Located at `Smart Load Settings > AC Coupling Settings > Smart Load Start SOC(%)` on EG4 monitoring installer website. This register sets the battery SOC at which AC coupling operation begins. When the battery SOC drops to 99% or below, AC coupling will activate to manage loads.
+  
+- **Register 221**: ACCoupleEndSOC
+  - **Unit**: %
+  - **Range**: 0-100%
+  - **Description**: AC coupling end SOC threshold
+  - **Current Value**: 101%
+  - **Note**: Located at `Smart Load Settings > AC Coupling Settings > Smart Load End SOC(%)` on EG4 monitoring installer website. This register sets the battery SOC at which AC coupling operation ends. The value 101% is intentionally set above 100% to ensure AC coupling continues until the battery is fully charged. In off-grid mode, this allows the AC Couple bypass to take over the load after the battery reaches full charge, providing seamless power management.
+  
+- **Register 222**: ACCoupleStartVolt
+  - **Unit**: 0.1V
+  - **Range**: 40.0V-60.0V (400-600 in register units)
+  - **Description**: AC coupling start voltage threshold
+  - **Current Value**: 595 (59.5V)
+  - **Note**: Located at `Smart Load Settings > AC Coupling Settings > Smart Load Start Volt(V)` on EG4 monitoring installer website. This register sets the battery voltage at which AC coupling operation begins. When the battery voltage drops to 59.5V or below, AC coupling will activate.
+  
+- **Register 223**: ACCoupleEndVolt
+  - **Unit**: 0.1V
+  - **Range**: 40.0V-60.0V (400-600 in register units)
+  - **Description**: AC coupling end voltage threshold
+  - **Current Value**: 800 (80.0V)
+  - **Note**: Located at `Smart Load Settings > AC Coupling Settings > Smart Load End Volt(V)` on EG4 monitoring installer website. This register sets the battery voltage at which AC coupling operation ends. The value 80.0V may use a different voltage scale or represent a different voltage reference point than the typical 40.0V-60.0V range.
+
+### AC Coupling Operation Mode
+**Current Configuration Status**: AC coupling is **ENABLED** (Register 179, Bit 11 = 1).
+
+**Configuration Details**:
+- **Enable/Disable**: Register 179, Bit 11 = 1 (Enabled)
+- **SOC Thresholds**: Start at 99%, End at 101% (intentionally set above 100% for full charge)
+- **Voltage Thresholds**: Start at 59.5V, End at 80.0V (may use different voltage scale)
+
+**Operation Behavior**: 
+- AC coupling activates when battery SOC drops to 99% or voltage drops to 59.5V
+- AC coupling deactivates when battery SOC reaches 101% (ensures full charge) or voltage reaches 80.0V
+- The SOC threshold of 101% is intentionally set above 100% to ensure AC coupling continues until the battery is fully charged
+
+**Note**: The SOC threshold of 101% is a deliberate configuration choice. In off-grid mode, this ensures AC coupling continues until the battery reaches full charge, at which point the AC Couple bypass takes over the load. The voltage threshold of 80.0V may use a different scale or represent a different voltage reference point than the typical 40.0V-60.0V range.
 
 ## AFCI Arc Fault Circuit Interrupter (Register 180)
 This register controls arc fault detection parameters.
@@ -1536,6 +1644,81 @@ These registers control comprehensive generator charging parameters including vo
   - **Unit**: A
   - **Range**: 0-60
   - **Description**: Charge current from generator
+
+## LCD Password Configuration (Register 225)
+This register stores the LCD password for accessing the inverter's local display interface.
+
+### Register Details
+- **Register 225**: LCDPassword
+  - **Unit**: Integer
+  - **Range**: 0-65535
+  - **Description**: LCD password value for local display access
+  - **Default**: 00000
+  - **Note**: Located at `Maintenance > Ramote Set > LCD Password` on EG4 monitoring installer website. This register stores the 5-digit password used to access the inverter's local LCD display interface. The password is stored as a plain integer value.
+
+## Smart Load Configuration (Registers 213-217, 227-228)
+These registers control Smart Load functionality for intelligent load management based on battery state and PV power.
+
+### Register Details
+- **Register 213**: SmartLoadStartVolt
+  - **Unit**: 0.1V
+  - **Range**: 40.0V-60.0V
+  - **Description**: Smart Load start voltage threshold (currently 54.0V)
+  - **Note**: Located at `Smart Load Settings > Smart Load Start Volt(V)` on EG4 monitoring installer website. This register controls the battery voltage at which Smart Load operation begins.
+
+- **Register 214**: SmartLoadEndVolt
+  - **Unit**: 0.1V
+  - **Range**: 40.0V-60.0V
+  - **Description**: Smart Load end voltage threshold (currently 48.0V)
+  - **Note**: Located at `Smart Load Settings > Smart Load End Volt(V)` on EG4 monitoring installer website. This register controls the battery voltage at which Smart Load operation ends.
+
+- **Register 215**: SmartLoadStartSOC
+  - **Unit**: %
+  - **Range**: 0-100%
+  - **Description**: Smart Load start SOC threshold (currently 100%)
+  - **Note**: Located at `Smart Load Settings > Smart Load Start SOC(%)` on EG4 monitoring installer website. This register controls the battery SOC at which Smart Load operation begins.
+
+- **Register 216**: SmartLoadEndSOC
+  - **Unit**: %
+  - **Range**: 0-100%
+  - **Description**: Smart Load end SOC threshold (currently 0%)
+  - **Note**: Located at `Smart Load Settings > Smart Load End SOC(%)` on EG4 monitoring installer website. This register controls the battery SOC at which Smart Load operation ends.
+
+- **Register 217**: StartPVPower
+  - **Unit**: 0.1kW
+  - **Range**: 0.0kW-10.0kW
+  - **Description**: Start PV power threshold for Smart Load operation (currently 0.5kW)
+  - **Note**: Located at `Smart Load Settings > Start PV Power(kW)` on EG4 monitoring installer website. This register controls the minimum PV power required to start Smart Load operation.
+
+- **Register 227**: SmartLoadStartSOCAlt
+  - **Unit**: %
+  - **Range**: 0-100%
+  - **Description**: Alternative Smart Load start SOC threshold (currently 100%)
+  - **Note**: This appears to be a duplicate or alternative register for Smart Load start SOC control.
+
+- **Register 228**: SmartLoadStartVoltAlt
+  - **Unit**: 0.1V
+  - **Range**: 40.0V-60.0V
+  - **Description**: Alternative Smart Load start voltage threshold (currently 54.0V)
+  - **Note**: This appears to be a duplicate or alternative register for Smart Load start voltage control.
+
+### Smart Load Control Bits
+Smart Load enable/disable is controlled through function enable registers:
+
+- **Register 21, Bit X**: Smart Load Enable/Disable (specific bit to be determined)
+- **Register 110, Bit X**: Grid Always On Enable/Disable (specific bit to be determined)
+- **Register 179, Bit X**: Additional Smart Load control (specific bit to be determined)
+
+**Note**: The exact bit positions for Smart Load and Grid Always On controls need to be determined through interactive testing (changing values in the GUI and taking before/after backups).
+
+### AC Coupling Integration
+**Important**: AC coupling functionality is closely integrated with Smart Load settings. The AC coupling registers (220-223) control thresholds that determine when AC-coupled loads are managed:
+
+- **Registers 220-221**: SOC thresholds for AC coupling operation
+- **Registers 222-223**: Voltage thresholds for AC coupling operation
+- **Register 179, Bit 11**: AC coupling enable/disable control
+
+When AC coupling is enabled, the inverter can manage AC-coupled loads and generators based on the configured SOC and voltage thresholds. This functionality works in conjunction with Smart Load settings to provide intelligent load management.
 
 
 
