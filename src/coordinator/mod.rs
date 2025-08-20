@@ -101,6 +101,7 @@ impl Coordinator {
             ReadInputs(inverter, 1) => self.read_inputs(inverter, 0_u16, 40).await,
             ReadInputs(inverter, 2) => self.read_inputs(inverter, 40_u16, 40).await,
             ReadInputs(inverter, 3) => self.read_inputs(inverter, 80_u16, 40).await,
+            ReadInputs(inverter, 4) => self.read_inputs(inverter, 120_u16, 40).await,
             ReadInputs(_, _) => unreachable!(),
             ReadInput(inverter, register, count) => {
                 self.read_inputs(inverter, register, count).await
@@ -1222,6 +1223,13 @@ impl Coordinator {
 
                             self.save_input_all(Box::new(input)).await?;
                         }
+                    }
+                    Ok(ReadInput::ReadInput4(r4)) => {
+                        let _datalog = r4.datalog;
+                        entry.set_read_input_4(r4);
+                        
+                        // Note: ReadInput4 contains registers 120-131 which are not part of the main input_all
+                        // These will be published individually via the MQTT message handling below
                     }
                     Err(x) => warn!("ignoring {:?}", x),
                 }

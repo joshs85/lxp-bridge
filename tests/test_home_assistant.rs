@@ -953,3 +953,26 @@ async fn all_has_smart_load_entities() {
     assert!(payload.contains("lxp/2222222222/hold/217"), "Should have correct state topic");
     assert!(payload.contains("lxp/cmd/2222222222/set/start_pv_power"), "Should have correct command topic");
 }
+
+#[tokio::test]
+async fn all_has_eps_voltage_l1n() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
+
+    assert!(r.is_ok());
+    let messages = r.unwrap();
+    
+    // Check that the EPS Voltage L1N sensor exists with the correct topic
+    let eps_voltage_message = messages.iter().find(|msg| msg.topic == "homeassistant/sensor/lxp_2222222222/eps_voltage_l1n/config");
+    assert!(eps_voltage_message.is_some(), "EPS Voltage L1N sensor not found");
+    
+    // Check that the payload contains the expected fields
+    let payload = &eps_voltage_message.unwrap().payload;
+    assert!(payload.contains("EPS Voltage L1N"), "Missing name");
+    assert!(payload.contains("measurement"), "Missing state_class");
+    assert!(payload.contains("voltage"), "Missing device_class");
+    assert!(payload.contains("V"), "Missing unit_of_measurement");
+    assert!(payload.contains("lxp/2222222222/input/127"), "Should have correct state topic");
+}

@@ -274,7 +274,6 @@ impl Config {
                 device_class: Some("battery"),
                 state_class: Some("measurement"),
                 unit_of_measurement: Some("%"),
-                // Remove invalid "measurement" category - let it use default
                 ..base.clone()
             },
             Entity {
@@ -410,49 +409,73 @@ impl Config {
             Entity {
                 key: "v_bat",
                 name: "Battery Voltage",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "v_ac_r",
                 name: "Grid Voltage",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "v_pv_1",
                 name: "PV Voltage (String 1)",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "v_pv_2",
                 name: "PV Voltage (String 2)",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "v_pv_3",
                 name: "PV Voltage (String 3)",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "v_eps_r",
                 name: "EPS Voltage",
-                // Remove invalid "measurement" category
+
+                ..voltage.clone()
+            },
+            Entity {
+                key: "eps_voltage_l1n",
+                name: "EPS Voltage L1N",
+                state_topic: &format!(
+                    "{}/{}/input/127",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+
+                ..voltage.clone()
+            },
+            Entity {
+                key: "eps_voltage_l2n",
+                name: "EPS Voltage L2N",
+                state_topic: &format!(
+                    "{}/{}/input/128",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+
                 ..voltage.clone()
             },
             Entity {
                 key: "f_ac",
                 name: "Grid Frequency",
-                // Remove invalid "measurement" category
+
                 ..frequency.clone()
             },
             Entity {
                 key: "f_eps",
                 name: "EPS Frequency",
-                // Remove invalid "measurement" category
+
                 ..frequency.clone()
             },
             Entity {
@@ -460,284 +483,284 @@ impl Config {
                 name: "Apparent EPS Power",
                 device_class: Some("apparent_power"),
                 unit_of_measurement: Some("VA"),
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_pv",
                 name: "PV Power (Array)",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_pv_1",
                 name: "PV Power (String 1)",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_pv_2",
                 name: "PV Power (String 2)",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_pv_3",
                 name: "PV Power (String 3)",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_battery",
                 name: "Battery Power (discharge is negative)",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_charge",
                 name: "Battery Charge",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_discharge",
                 name: "Battery Discharge",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_grid",
                 name: "Grid Power (export is negative)",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_to_user",
                 name: "Power from Grid",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_to_grid",
                 name: "Power to Grid",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_eps",
                 name: "Active EPS Power",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_inv",
                 name: "Inverter Power",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "p_rec",
                 name: "AC Charge Power",
-                // Remove invalid "measurement" category
+
                 ..power.clone()
             },
             Entity {
                 key: "e_pv_all",
                 name: "PV Generation (All time)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_all_1",
                 name: "PV Generation (All time) (String 1)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_all_2",
                 name: "PV Generation (All time) (String 2)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_all_3",
                 name: "PV Generation (All time) (String 3)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_day",
                 name: "PV Generation (Today))",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_day_1",
                 name: "PV Generation (Today) (String 1)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_day_2",
                 name: "PV Generation (Today) (String 2)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_pv_day_3",
                 name: "PV Generation (Today) (String 3)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "bat_capacity",
                 name: "Battery Capacity",
                 value_template: ValueTemplate::String("{{ float(value_json.bat_capacity) * 51.2 / 1000 }}".to_string()),
-                // Remove invalid "measurement" category
+
                 ..energy_storage.clone()
             },
             Entity {
                 key: "e_chg_all",
                 name: "Battery Charge (All time)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_chg_day",
                 name: "Battery Charge (Today)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_dischg_all",
                 name: "Battery Discharge (All time)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_dischg_day",
                 name: "Battery Discharge (Today)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_to_user_all",
                 name: "Energy from Grid (All time)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_to_user_day",
                 name: "Energy from Grid (Today)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_to_grid_all",
                 name: "Energy to Grid (All time)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_to_grid_day",
                 name: "Energy to Grid (Today)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_eps_all",
                 name: "Energy from EPS (All time)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_eps_day",
                 name: "Energy from EPS (Today)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_rec_all",
                 name: "Energy of AC Charging (All time)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_rec_day",
                 name: "Energy of AC Charging (Today)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_inv_all",
                 name: "Energy of Inverter (All time)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "e_inv_day",
                 name: "Energy of Inverter (Today)",
-                // Remove invalid "measurement" category
+
                 ..energy.clone()
             },
             Entity {
                 key: "t_inner",
                 name: "Inverter Temperature",
-                // Remove invalid "measurement" category
+
                 ..temperature.clone()
             },
             Entity {
                 key: "t_rad_1",
                 name: "Radiator 1 Temperature",
-                // Remove invalid "measurement" category
+
                 ..temperature.clone()
             },
             Entity {
                 key: "t_rad_2",
                 name: "Radiator 2 Temperature",
-                // Remove invalid "measurement" category
+
                 ..temperature.clone()
             },
             Entity {
                 key: "t_bat",
                 name: "Battery Temperature",
-                // Remove invalid "measurement" category
+
                 ..temperature.clone()
             },
             Entity {
                 key: "max_chg_curr",
                 name: "Max Charge Current",
-                // Remove invalid "measurement" category
+
                 ..current.clone()
             },
             Entity {
                 key: "max_dischg_curr",
                 name: "Max Discharge Current",
-                // Remove invalid "measurement" category
+
                 ..current.clone()
             },
             Entity {
                 key: "min_cell_voltage",
                 name: "Min Cell Voltage (BMS)",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "max_cell_voltage",
                 name: "Max Cell Voltage (BMS)",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "min_cell_temp",
                 name: "Min Cell Temperature (BMS)",
-                // Remove invalid "measurement" category
+
                 ..temperature.clone()
             },
             Entity {
                 key: "max_cell_temp",
                 name: "Max Cell Temperature (BMS)",
-                // Remove invalid "measurement" category
+
                 ..temperature.clone()
             },
             // System Information Sensors
@@ -792,25 +815,25 @@ impl Config {
             Entity {
                 key: "charge_volt_ref",
                 name: "Charge Voltage Reference",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "dischg_cut_volt",
                 name: "Discharge Cut-off Voltage",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
             Entity {
                 key: "bat_current",
                 name: "Battery Current",
-                // Remove invalid "measurement" category
+
                 ..current.clone()
             },
             Entity {
                 key: "vbat_inv",
                 name: "Inverter Battery Voltage",
-                // Remove invalid "measurement" category
+
                 ..voltage.clone()
             },
         ];

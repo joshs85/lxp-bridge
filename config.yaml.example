@@ -30,7 +30,6 @@ mqtt:
   
   # Reliability settings - IMPROVED to prevent restarts
   max_retries: 10                   # Increased from 3 for better resilience
-  circuit_breaker_threshold: 20     # Increased from 5 to be more tolerant
   reconnect_delay_secs: 5           # Increased from 1 to reduce rapid reconnection attempts
   max_reconnect_delay_secs: 600     # Increased to 10 minutes for better stability
 

@@ -97,9 +97,6 @@ pub struct Mqtt {
     #[serde(default = "Config::default_mqtt_max_retries")]
     pub max_retries: u32,
     
-    #[serde(default = "Config::default_mqtt_circuit_breaker_threshold")]
-    pub circuit_breaker_threshold: u32,
-    
     #[serde(default = "Config::default_mqtt_reconnect_delay")]
     pub reconnect_delay_secs: u64,
     
@@ -145,10 +142,6 @@ impl Mqtt {
 
     pub fn max_retries(&self) -> u32 {
         self.max_retries
-    }
-
-    pub fn circuit_breaker_threshold(&self) -> u32 {
-        self.circuit_breaker_threshold
     }
 
     pub fn reconnect_delay_secs(&self) -> u64 {
@@ -310,10 +303,6 @@ impl Config {
 
     fn default_mqtt_max_retries() -> u32 {
         3
-    }
-
-    fn default_mqtt_circuit_breaker_threshold() -> u32 {
-        5
     }
 
     fn default_mqtt_reconnect_delay() -> u64 {

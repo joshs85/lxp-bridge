@@ -74,7 +74,6 @@ fn create_test_config() -> config::Config {
             homeassistant_enabled: true,
             homeassistant_prefix: "test_homeassistant".to_string(),  // Test prefix
             max_retries: 10,
-            circuit_breaker_threshold: 20,
             reconnect_delay_secs: 5,
             max_reconnect_delay_secs: 600,
         },

@@ -10,6 +10,7 @@ pub enum ReadInput {
     ReadInput1(ReadInput1),
     ReadInput2(ReadInput2),
     ReadInput3(ReadInput3),
+    ReadInput4(ReadInput4),
 }
 
 // {{{ ReadInputAll
@@ -391,12 +392,45 @@ pub struct ReadInput3 {
     pub datalog: Serial,
 } // }}}
 
+// {{{ ReadInput4
+#[derive(Clone, Debug, Serialize, Nom)]
+#[nom(LittleEndian)]
+pub struct ReadInput4 {
+    // Generator & EPS Parameters (Registers 120-131)
+    #[nom(Parse = "Utils::le_u16_div10")]
+    pub half_bus_voltage: f64,           // Register 120: Half BUS Voltage (0.1V)
+    #[nom(Parse = "Utils::le_u16_div10")]
+    pub generator_voltage: f64,          // Register 121: Generator Voltage (0.1V)
+    #[nom(Parse = "Utils::le_u16_div100")]
+    pub generator_frequency: f64,        // Register 122: Generator Frequency (0.01Hz)
+    pub generator_power: u16,            // Register 123: Generator Power (W)
+    #[nom(Parse = "Utils::le_u16_div10")]
+    pub generator_daily_energy: f64,     // Register 124: Generator Daily Energy (0.1kWh)
+    #[nom(Parse = "Utils::le_u16_div10")]
+    pub generator_total_energy_low: f64, // Register 125: Generator Total Energy Low Word (0.1kWh)
+    #[nom(Parse = "Utils::le_u16_div10")]
+    pub generator_total_energy_high: f64,// Register 126: Generator Total Energy High Word (0.1kWh)
+    #[nom(Parse = "Utils::le_u16_div10")]
+    pub eps_voltage_l1n: f64,           // Register 127: EPS Voltage L1N (0.1V) - This is what we're adding!
+    #[nom(Parse = "Utils::le_u16_div10")]
+    pub eps_voltage_l2n: f64,           // Register 128: EPS Voltage L2N (0.1V)
+    pub eps_active_power_l1n: u16,      // Register 129: EPS Active Power L1N (W)
+    pub eps_active_power_l2n: u16,      // Register 130: EPS Active Power L2N (W)
+    pub eps_apparent_power_l1n: u16,    // Register 131: EPS Apparent Power L1N (VA)
+
+    #[nom(Parse = "Utils::current_time_for_nom")]
+    pub time: UnixTime,
+    #[nom(Ignore)]
+    pub datalog: Serial,
+} // }}}
+
 // {{{ ReadInputs
 #[derive(Default, Clone, Debug)]
 pub struct ReadInputs {
     read_input_1: Option<ReadInput1>,
     read_input_2: Option<ReadInput2>,
     read_input_3: Option<ReadInput3>,
+    read_input_4: Option<ReadInput4>,
 }
 
 impl ReadInputs {
@@ -409,14 +443,18 @@ impl ReadInputs {
     pub fn set_read_input_3(&mut self, i: ReadInput3) {
         self.read_input_3 = Some(i);
     }
+    pub fn set_read_input_4(&mut self, i: ReadInput4) {
+        self.read_input_4 = Some(i);
+    }
 
     pub fn to_input_all(&self) -> Option<ReadInputAll> {
         match (
             self.read_input_1.as_ref(),
             self.read_input_2.as_ref(),
             self.read_input_3.as_ref(),
+            self.read_input_4.as_ref(),
         ) {
-            (Some(ri1), Some(ri2), Some(ri3)) => Some(ReadInputAll {
+            (Some(ri1), Some(ri2), Some(ri3), Some(_ri4)) => Some(ReadInputAll {
                 status: ri1.status,
                 v_pv_1: ri1.v_pv_1,
                 v_pv_2: ri1.v_pv_2,
@@ -1061,6 +1099,7 @@ impl TranslatedData {
             (0, 80) => Ok(ReadInput::ReadInput1(self.read_input1()?)),
             (40, 80) => Ok(ReadInput::ReadInput2(self.read_input2()?)),
             (80, 80) => Ok(ReadInput::ReadInput3(self.read_input3()?)),
+            (120, 80) => Ok(ReadInput::ReadInput4(self.read_input4()?)),
             (r1, r2) => bail!("unhandled ReadInput register={} len={}", r1, r2),
         }
     }
@@ -1107,6 +1146,16 @@ impl TranslatedData {
 
     fn read_input3(&self) -> Result<ReadInput3> {
         match ReadInput3::parse(&self.values) {
+            Ok((_, mut r)) => {
+                r.datalog = self.datalog;
+                Ok(r)
+            }
+            Err(_) => Err(anyhow!("meh")),
+        }
+    }
+
+    fn read_input4(&self) -> Result<ReadInput4> {
+        match ReadInput4::parse(&self.values) {
             Ok((_, mut r)) => {
                 r.datalog = self.datalog;
                 Ok(r)

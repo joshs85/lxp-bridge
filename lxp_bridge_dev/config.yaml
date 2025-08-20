@@ -31,7 +31,6 @@ options:
     homeassistant_prefix: homeassistant
     publish_individual_input: true
     max_retries: 3
-    circuit_breaker_threshold: 5
     reconnect_delay_secs: 1
     max_reconnect_delay_secs: 300
   scheduler:
@@ -59,7 +58,6 @@ schema:
     homeassistant_prefix: str
     publish_individual_input: bool
     max_retries: int
-    circuit_breaker_threshold: int
     reconnect_delay_secs: int
     max_reconnect_delay_secs: int
   scheduler:
