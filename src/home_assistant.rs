@@ -740,6 +740,21 @@ impl Config {
                 ..current.clone()
             },
             Entity {
+                key: "inverter_current_rms",
+                name: "Inverter Current RMS",
+                state_topic: &format!(
+                    "{}/{}/input/18",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ (value | float) * 0.01 }}".to_string()),
+                device_class: Some("current"),
+                state_class: Some("measurement"),
+                unit_of_measurement: Some("A"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
                 key: "min_cell_voltage",
                 name: "Min Cell Voltage (BMS)",
 
@@ -835,6 +850,134 @@ impl Config {
                 name: "Inverter Battery Voltage",
 
                 ..voltage.clone()
+            },
+            // ===== OFF-GRID SYSTEM MONITORING (Registers 20-28) =====
+            // Note: Split-phase system - only L1/L2 voltages are relevant
+            Entity {
+                key: "offgrid_voltage_l1",
+                name: "Off-Grid Voltage L1",
+                state_topic: &format!(
+                    "{}/{}/input/20",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ (value | float) * 0.1 }}".to_string()),
+                device_class: Some("voltage"),
+                state_class: Some("measurement"),
+                unit_of_measurement: Some("V"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
+                key: "offgrid_voltage_l2",
+                name: "Off-Grid Voltage L2",
+                state_topic: &format!(
+                    "{}/{}/input/21",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ (value | float) * 0.1 }}".to_string()),
+                device_class: Some("voltage"),
+                state_class: Some("measurement"),
+                unit_of_measurement: Some("V"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
+                key: "offgrid_frequency",
+                name: "Off-Grid Frequency",
+                state_topic: &format!(
+                    "{}/{}/input/23",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ (value | float) * 0.01 }}".to_string()),
+                device_class: Some("frequency"),
+                state_class: Some("measurement"),
+                unit_of_measurement: Some("Hz"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
+                key: "offgrid_inverter_power",
+                name: "Off-Grid Inverter Power",
+                state_topic: &format!(
+                    "{}/{}/input/24",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+                device_class: Some("power"),
+                state_class: Some("measurement"),
+                unit_of_measurement: Some("W"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
+                key: "offgrid_apparent_power",
+                name: "Off-Grid Apparent Power",
+                state_topic: &format!(
+                    "{}/{}/input/25",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+                device_class: Some("apparent_power"),
+                state_class: Some("measurement"),
+                unit_of_measurement: Some("VA"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
+                key: "export_power_to_grid",
+                name: "Export Power to Grid",
+                state_topic: &format!(
+                    "{}/{}/input/26",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+                device_class: Some("power"),
+                state_class: Some("measurement"),
+                unit_of_measurement: Some("W"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
+                key: "import_power_from_grid",
+                name: "Import Power from Grid",
+                state_topic: &format!(
+                    "{}/{}/input/27",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::None,
+                device_class: Some("power"),
+                state_class: Some("measurement"),
+                unit_of_measurement: Some("W"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
+                key: "pv1_power_generation_today",
+                name: "PV1 Power Generation Today",
+                state_topic: &format!(
+                    "{}/{}/input/28",
+                    self.mqtt_config.namespace(),
+                    self.inverter.datalog()
+                ),
+                value_template: ValueTemplate::String("{{ (value | float) * 0.1 }}".to_string()),
+                device_class: Some("energy"),
+                state_class: Some("total_increasing"),
+                unit_of_measurement: Some("kWh"),
+                entity_category: Some("diagnostic"),
+                ..base.clone()
+            },
+            Entity {
+                key: "f_ac",
+                name: "Grid Frequency",
+
+                ..frequency.clone()
             },
         ];
 

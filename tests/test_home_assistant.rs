@@ -963,11 +963,11 @@ async fn all_has_eps_voltage_l1n() {
 
     assert!(r.is_ok());
     let messages = r.unwrap();
-    
+
     // Check that the EPS Voltage L1N sensor exists with the correct topic
     let eps_voltage_message = messages.iter().find(|msg| msg.topic == "homeassistant/sensor/lxp_2222222222/eps_voltage_l1n/config");
     assert!(eps_voltage_message.is_some(), "EPS Voltage L1N sensor not found");
-    
+
     // Check that the payload contains the expected fields
     let payload = &eps_voltage_message.unwrap().payload;
     assert!(payload.contains("EPS Voltage L1N"), "Missing name");
@@ -975,4 +975,63 @@ async fn all_has_eps_voltage_l1n() {
     assert!(payload.contains("voltage"), "Missing device_class");
     assert!(payload.contains("V"), "Missing unit_of_measurement");
     assert!(payload.contains("lxp/2222222222/input/127"), "Should have correct state topic");
+}
+
+#[tokio::test]
+async fn all_has_offgrid_system_entities() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
+
+    assert!(r.is_ok());
+    let messages = r.unwrap();
+
+    // Check that all Off-Grid System entities exist
+    let offgrid_entities = [
+        ("offgrid_voltage_l1", "Off-Grid Voltage L1", "voltage", "V", "lxp/2222222222/input/20"),
+        ("offgrid_voltage_l2", "Off-Grid Voltage L2", "voltage", "V", "lxp/2222222222/input/21"),
+        ("offgrid_frequency", "Off-Grid Frequency", "frequency", "Hz", "lxp/2222222222/input/23"),
+        ("offgrid_inverter_power", "Off-Grid Inverter Power", "power", "W", "lxp/2222222222/input/24"),
+        ("offgrid_apparent_power", "Off-Grid Apparent Power", "apparent_power", "VA", "lxp/2222222222/input/25"),
+        ("export_power_to_grid", "Export Power to Grid", "power", "W", "lxp/2222222222/input/26"),
+        ("import_power_from_grid", "Import Power from Grid", "power", "W", "lxp/2222222222/input/27"),
+        ("pv1_power_generation_today", "PV1 Power Generation Today", "energy", "kWh", "lxp/2222222222/input/28"),
+    ];
+
+    for (key, name, device_class, unit, topic) in offgrid_entities.iter() {
+        let entity_message = messages.iter().find(|msg| msg.topic == format!("homeassistant/sensor/lxp_2222222222/{}/config", key));
+        assert!(entity_message.is_some(), "{} entity not found", name);
+
+        let payload = &entity_message.unwrap().payload;
+        assert!(payload.contains(name), "Missing name for {}", key);
+        assert!(payload.contains(device_class), "Missing device_class for {}", key);
+        assert!(payload.contains(unit), "Missing unit_of_measurement for {}", key);
+        assert!(payload.contains(topic), "Should have correct state topic for {}", key);
+        assert!(payload.contains("diagnostic"), "Should be in diagnostic category for {}", key);
+    }
+}
+
+#[tokio::test]
+async fn all_has_inverter_current_rms() {
+    common_setup();
+
+    let config = Factory::example_config();
+    let r = home_assistant::Config::new(&config.inverters[0], &config.mqtt).all();
+
+    assert!(r.is_ok());
+    let messages = r.unwrap();
+
+    // Check that the Inverter Current RMS sensor exists with the correct topic
+    let inverter_current_message = messages.iter().find(|msg| msg.topic == "homeassistant/sensor/lxp_2222222222/inverter_current_rms/config");
+    assert!(inverter_current_message.is_some(), "Inverter Current RMS sensor not found");
+
+    // Check that the payload contains the expected fields
+    let payload = &inverter_current_message.unwrap().payload;
+    assert!(payload.contains("Inverter Current RMS"), "Missing name");
+    assert!(payload.contains("measurement"), "Missing state_class");
+    assert!(payload.contains("current"), "Missing device_class");
+    assert!(payload.contains("A"), "Missing unit_of_measurement");
+    assert!(payload.contains("lxp/2222222222/input/18"), "Should have correct state topic");
+    assert!(payload.contains("diagnostic"), "Should be in diagnostic category");
 }
