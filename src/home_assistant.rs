@@ -450,7 +450,7 @@ impl Config {
                     self.mqtt_config.namespace(),
                     self.inverter.datalog()
                 ),
-                value_template: ValueTemplate::None,
+                value_template: ValueTemplate::String("{{ (value | float) * 0.1 }}".to_string()),
 
                 ..voltage.clone()
             },
@@ -462,7 +462,7 @@ impl Config {
                     self.mqtt_config.namespace(),
                     self.inverter.datalog()
                 ),
-                value_template: ValueTemplate::None,
+                value_template: ValueTemplate::String("{{ (value | float) * 0.1 }}".to_string()),
 
                 ..voltage.clone()
             },
@@ -1812,8 +1812,10 @@ impl Config {
                 Register::GridVoltLimit3HighTime | Register::GridFreqLimit1LowTime | 
                 Register::GridFreqLimit1HighTime | Register::GridFreqLimit2LowTime | 
                 Register::GridFreqLimit2HighTime | Register::GridFreqLimit3LowTime | 
-                Register::GridFreqLimit3HighTime | Register::VrefFiltertime | Register::VoltWattDelayTime | Register::GeneratorCoolDownTime) {
-                "{{ float(value) / 100 }}".to_string() // Convert from 0.01s units for interface protection and reactive power, or 0.1 minute units for generator cool-down
+                Register::GridFreqLimit3HighTime | Register::VrefFiltertime | Register::VoltWattDelayTime) {
+                "{{ float(value) / 100 }}".to_string() // Convert from 0.01s units for interface protection and reactive power
+            } else if matches!(register, Register::GeneratorCoolDownTime) {
+                "{{ float(value) * 6 }}".to_string() // Convert from 0.1 minute units to seconds (0.1 * 60 = 6)
             } else {
                 "{{ value }}".to_string() // No conversion for regular time registers
             },
@@ -1825,7 +1827,7 @@ impl Config {
             min,
             max,
             step,
-            unit_of_measurement: "s".to_string(),
+            unit_of_measurement: "s".to_string(), // All time values are in seconds
         };
 
         Ok(mqtt::Message {
