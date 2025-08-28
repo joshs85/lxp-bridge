@@ -1124,8 +1124,8 @@ impl Config {
             self.switch_register179("ac_coupling_enable", "AC Coupling Enable", Some("config".to_string()))?,
             self.number_percent(Register::ACCoupleStartSOC, "AC Couple Start SOC (%)", 0.0, 100.0, 1.0, None, Some("config".to_string()))?,
             self.number_percent(Register::ACCoupleEndSOC, "AC Couple End SOC (%)", 0.0, 101.0, 1.0, None, Some("config".to_string()))?,
-            self.number_voltage(Register::ACCoupleStartVolt, "AC Couple Start Voltage (V)", 40.0, 60.0, 0.1, None, Some("config".to_string()))?,
-            self.number_voltage(Register::ACCoupleEndVolt, "AC Couple End Voltage (V)", 40.0, 60.0, 0.1, None, Some("config".to_string()))?,
+            self.number_voltage(Register::ACCoupleStartVolt, "AC Couple Start Voltage (V)", 40.0, 100.0, 0.1, None, Some("config".to_string()))?,
+            self.number_voltage(Register::ACCoupleEndVolt, "AC Couple End Voltage (V)", 40.0, 100.0, 0.1, None, Some("config".to_string()))?,
             
             // ===== SMART LOAD CONFIGURATION =====
             self.switch_register179("smart_load_enable", "Smart Load Enable", Some("config".to_string()))?,

@@ -787,7 +787,7 @@ async fn all_has_generator_cool_down_time() {
     assert!(payload.contains("0.1"), "Missing step value");
     
     // Check that it has the correct value template for 0.1 minute units
-    assert!(payload.contains("{{ float(value) / 100 }}"), "Should convert from 0.1 minute units");
+    assert!(payload.contains("{{ float(value) * 6 }}"), "Should convert from 0.1 minute units to seconds");
     
     // Check that it has the correct MQTT topics
     assert!(payload.contains("lxp/2222222222/hold/237"), "Should have correct state topic");
@@ -842,7 +842,7 @@ async fn all_has_ac_coupling_entities() {
     assert!(payload.contains("AC Couple Start Voltage (V)"), "Missing name");
     assert!(payload.contains("config"), "Missing entity_category");
     assert!(payload.contains("40.0"), "Missing min value");
-    assert!(payload.contains("60.0"), "Missing max value");
+    assert!(payload.contains("100.0"), "Missing max value");
     assert!(payload.contains("0.1"), "Missing step value");
     assert!(payload.contains("{{ float(value) / 10 }}"), "Should convert from 0.1V units");
     assert!(payload.contains("lxp/2222222222/hold/222"), "Should have correct state topic");
@@ -855,7 +855,7 @@ async fn all_has_ac_coupling_entities() {
     assert!(payload.contains("AC Couple End Voltage (V)"), "Missing name");
     assert!(payload.contains("config"), "Missing entity_category");
     assert!(payload.contains("40.0"), "Missing min value");
-    assert!(payload.contains("60.0"), "Missing max value");
+    assert!(payload.contains("100.0"), "Missing max value");
     assert!(payload.contains("0.1"), "Missing step value");
     assert!(payload.contains("{{ float(value) / 10 }}"), "Should convert from 0.1V units");
     assert!(payload.contains("lxp/2222222222/hold/223"), "Should have correct state topic");
