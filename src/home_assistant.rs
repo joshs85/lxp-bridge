@@ -488,7 +488,7 @@ impl Config {
                     self.mqtt_config.namespace(),
                     self.inverter.datalog()
                 ),
-                value_template: ValueTemplate::String("{{ (value | float) | round(2) }}".to_string()),
+                value_template: ValueTemplate::String("{{ (value | float / 100) | round(2) }}".to_string()),
                 device_class: Some("frequency"),
                 state_class: Some("measurement"),
                 unit_of_measurement: Some("Hz"),
@@ -503,7 +503,7 @@ impl Config {
                     self.mqtt_config.namespace(),
                     self.inverter.datalog()
                 ),
-                value_template: ValueTemplate::String("{{ (value | float) | round(1) }}".to_string()),
+                value_template: ValueTemplate::String("{{ (value | float / 10) | round(1) }}".to_string()),
                 device_class: Some("voltage"),
                 state_class: Some("measurement"),
                 unit_of_measurement: Some("V"),

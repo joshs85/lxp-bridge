@@ -43,7 +43,7 @@ fn test_all_frequency_entities_have_2_decimal_precision() {
         .expect("Generator Frequency entity should be present");
 
     let payload: serde_json::Value = serde_json::from_str(&generator_freq_entity.payload).unwrap();
-    assert_eq!(payload["value_template"], "{{ (value | float) | round(2) }}",
+    assert_eq!(payload["value_template"], "{{ (value | float / 100) | round(2) }}",
                "Generator Frequency entity should have 2 decimal precision template");
 }
 

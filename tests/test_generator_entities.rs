@@ -38,7 +38,7 @@ fn test_generator_frequency_entity_creation() {
     assert_eq!(payload["state_topic"], expected_topic);
 
     // Validate value template for 2 decimal places
-    assert_eq!(payload["value_template"], "{{ (value | float) | round(2) }}");
+    assert_eq!(payload["value_template"], "{{ (value | float / 100) | round(2) }}");
 
     // Validate unique ID
     let expected_unique_id = format!("lxp_{}_generator_frequency", config.inverters[0].datalog());
@@ -82,7 +82,7 @@ fn test_generator_voltage_entity_creation() {
     assert_eq!(payload["state_topic"], expected_topic);
 
     // Validate value template for 1 decimal place
-    assert_eq!(payload["value_template"], "{{ (value | float) | round(1) }}");
+    assert_eq!(payload["value_template"], "{{ (value | float / 10) | round(1) }}");
 
     // Validate unique ID
     let expected_unique_id = format!("lxp_{}_generator_voltage", config.inverters[0].datalog());
@@ -177,17 +177,13 @@ fn test_generator_frequency_value_conversion() {
     ];
 
     for (raw_value, expected_display) in test_cases {
-        // Simulate the packet decoder conversion (div100)
-        let packet_decoder_value = raw_value as f64 / 100.0;
-        
-        // Simulate the Home Assistant value template conversion (round to 2 decimal places)
-        let ha_display_value = (packet_decoder_value * 100.0).round() / 100.0;
+        // Simulate the Home Assistant value template conversion: (value | float / 100) | round(2)
+        let ha_display_value = ((raw_value as f64 / 100.0) * 100.0).round() / 100.0;
         
         assert!(
             (ha_display_value - expected_display).abs() < 0.01,
-            "Generator frequency conversion failed: raw {} -> packet decoder {} -> HA display {} (expected {})",
+            "Generator frequency conversion failed: raw {} -> HA display {} (expected {})",
             raw_value,
-            packet_decoder_value,
             ha_display_value,
             expected_display
         );
@@ -209,17 +205,13 @@ fn test_generator_voltage_value_conversion() {
     ];
 
     for (raw_value, expected_display) in test_cases {
-        // Simulate the packet decoder conversion (div10)
-        let packet_decoder_value = raw_value as f64 / 10.0;
-        
-        // Simulate the Home Assistant value template conversion (round to 1 decimal place)
-        let ha_display_value = (packet_decoder_value * 10.0).round() / 10.0;
+        // Simulate the Home Assistant value template conversion: (value | float / 10) | round(1)
+        let ha_display_value = ((raw_value as f64 / 10.0) * 10.0).round() / 10.0;
         
         assert!(
             (ha_display_value - expected_display).abs() < 0.1,
-            "Generator voltage conversion failed: raw {} -> packet decoder {} -> HA display {} (expected {})",
+            "Generator voltage conversion failed: raw {} -> HA display {} (expected {})",
             raw_value,
-            packet_decoder_value,
             ha_display_value,
             expected_display
         );
@@ -415,7 +407,7 @@ fn test_generator_entities_value_templates() {
         .expect("Generator frequency entity should be present");
 
     let payload: serde_json::Value = serde_json::from_str(&generator_freq_entity.payload).unwrap();
-    assert_eq!(payload["value_template"], "{{ (value | float) | round(2) }}");
+    assert_eq!(payload["value_template"], "{{ (value | float / 100) | round(2) }}");
 
     // Test generator voltage value template (1 decimal place)
     let generator_voltage_entity = messages
@@ -424,7 +416,7 @@ fn test_generator_entities_value_templates() {
         .expect("Generator voltage entity should be present");
 
     let payload: serde_json::Value = serde_json::from_str(&generator_voltage_entity.payload).unwrap();
-    assert_eq!(payload["value_template"], "{{ (value | float) | round(1) }}");
+    assert_eq!(payload["value_template"], "{{ (value | float / 10) | round(1) }}");
 
     // Test generator power value template (whole numbers)
     let generator_power_entity = messages
