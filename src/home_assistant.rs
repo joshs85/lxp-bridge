@@ -473,14 +473,14 @@ impl Config {
             Entity {
                 key: "f_ac",
                 name: "Grid Frequency",
-                value_template: ValueTemplate::String("{{ (value | float) | round(3) }}".to_string()),
+                value_template: ValueTemplate::String("{{ (value | float) | round(2) }}".to_string()),
 
                 ..frequency.clone()
             },
             Entity {
                 key: "f_eps",
                 name: "EPS Frequency",
-                value_template: ValueTemplate::String("{{ (value | float) | round(3) }}".to_string()),
+                value_template: ValueTemplate::String("{{ (value | float) | round(2) }}".to_string()),
 
                 ..frequency.clone()
             },
@@ -492,7 +492,7 @@ impl Config {
                     self.mqtt_config.namespace(),
                     self.inverter.datalog()
                 ),
-                value_template: ValueTemplate::String("{{ (value | float / 100) | round(3) }}".to_string()),
+                value_template: ValueTemplate::String("{{ (value | float / 100) | round(2) }}".to_string()),
                 device_class: Some("frequency"),
                 state_class: Some("measurement"),
                 unit_of_measurement: Some("Hz"),
@@ -951,7 +951,7 @@ impl Config {
             Entity {
                 key: "f_ac",
                 name: "Grid Frequency",
-                value_template: ValueTemplate::String("{{ (value | float) | round(3) }}".to_string()),
+                value_template: ValueTemplate::String("{{ (value | float) | round(2) }}".to_string()),
 
                 ..frequency.clone()
             },

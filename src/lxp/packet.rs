@@ -37,9 +37,9 @@ pub struct ReadInputAll {
     pub p_pv_1: u16,
     pub p_pv_2: u16,
     pub p_pv_3: u16,
+    pub p_charge: u16,
     #[nom(Ignore)]
     pub p_battery: i32,
-    pub p_charge: u16,
     pub p_discharge: u16,
 
     #[nom(Parse = "Utils::le_u16_div10")]
@@ -217,9 +217,9 @@ pub struct ReadInput1 {
     pub p_pv_1: u16,
     pub p_pv_2: u16,
     pub p_pv_3: u16,
+    pub p_charge: u16,
     #[nom(Ignore)]
     pub p_battery: i32,
-    pub p_charge: u16,
     pub p_discharge: u16,
 
     #[nom(Parse = "Utils::le_u16_div10")]
@@ -467,8 +467,8 @@ impl ReadInputs {
                 p_pv_1: ri1.p_pv_1,
                 p_pv_2: ri1.p_pv_2,
                 p_pv_3: ri1.p_pv_3,
-                p_battery: ri1.p_battery,
                 p_charge: ri1.p_charge,
+                p_battery: ri1.p_battery,
                 p_discharge: ri1.p_discharge,
                 v_ac_r: ri1.v_ac_r,
                 v_ac_s: ri1.v_ac_s,
