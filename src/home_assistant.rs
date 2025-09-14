@@ -106,6 +106,8 @@ pub struct Entity<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     unit_of_measurement: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    suggested_display_precision: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     icon: Option<&'a str>,
 
     device: Device,
@@ -191,6 +193,7 @@ impl Config {
             device_class: None,
             state_class: None,
             unit_of_measurement: None,
+            suggested_display_precision: None,
             icon: None,
             value_template: ValueTemplate::Default, // "{{ value_json.$key }}"
             // TODO: might change this to an enum that defaults to InputsAll but can be replaced
@@ -215,6 +218,7 @@ impl Config {
             device_class: Some("frequency"),
             state_class: Some("measurement"),
             unit_of_measurement: Some("Hz"),
+            suggested_display_precision: Some(2),
             ..base.clone()
         };
 
@@ -492,6 +496,7 @@ impl Config {
                 device_class: Some("frequency"),
                 state_class: Some("measurement"),
                 unit_of_measurement: Some("Hz"),
+                suggested_display_precision: Some(2),
                 entity_category: Some("diagnostic"),
                 ..base.clone()
             },
@@ -991,6 +996,13 @@ impl Config {
             // Clean up duplicate anti_islanding topic on startup
             self.remove_old_entity("anti_islanding")?,
             
+            // Clean up removed off-grid duplicate entities on startup
+            self.remove_old_entity("offgrid_frequency")?,
+            self.remove_old_entity("offgrid_voltage_l1")?,
+            self.remove_old_entity("offgrid_voltage_l2")?,
+            self.remove_old_entity("offgrid_inverter_power")?,
+            self.remove_old_entity("offgrid_apparent_power")?,
+            
             // ===== SYSTEM CONTROL =====
             // System control
             self.button("restart", "Restart Inverter", Some("diagnostic".to_string()))?,
@@ -1210,6 +1222,7 @@ impl Config {
             name.replace('/', "_"),
         )
     }
+
 
     fn switch(&self, name: &str, label: &str, entity_category: Option<String>) -> Result<mqtt::Message> {
         let config = Switch {
