@@ -994,14 +994,14 @@ impl Config {
     pub fn all(&self) -> Result<Vec<mqtt::Message>> {
         let mut r = vec![
             // Clean up duplicate anti_islanding topic on startup
-            self.remove_old_entity("anti_islanding")?,
+            self.remove_old_entity("switch", "anti_islanding")?,
             
             // Clean up removed off-grid duplicate entities on startup
-            self.remove_old_entity("off_grid_frequency")?,
-            self.remove_old_entity("off_grid_voltage_l1")?,
-            self.remove_old_entity("off_grid_voltage_l2")?,
-            self.remove_old_entity("off_grid_inverter_power")?,
-            self.remove_old_entity("off_grid_apparent_power")?,
+            self.remove_old_entity("sensor", "offgrid_frequency")?,
+            self.remove_old_entity("sensor", "offgrid_voltage_l1")?,
+            self.remove_old_entity("sensor", "offgrid_voltage_l2")?,
+            self.remove_old_entity("sensor", "offgrid_inverter_power")?,
+            self.remove_old_entity("sensor", "offgrid_apparent_power")?,
             
             // ===== SYSTEM CONTROL =====
             // System control
@@ -1382,9 +1382,9 @@ impl Config {
     /// Currently used to clean up the duplicate "anti_islanding" topic that conflicts
     /// with the correct "anti_island" topic. The duplicate topic is created by some
     /// external system and needs to be removed on startup.
-    fn remove_old_entity(&self, name: &str) -> Result<mqtt::Message> {
+    fn remove_old_entity(&self, entity_type: &str, name: &str) -> Result<mqtt::Message> {
         Ok(mqtt::Message {
-            topic: self.ha_discovery_topic("switch", name),
+            topic: self.ha_discovery_topic(entity_type, name),
             retain: true,
             payload: "".to_string(), // Empty payload tells Home Assistant to remove the entity
         })
