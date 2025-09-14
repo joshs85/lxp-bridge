@@ -987,13 +987,8 @@ async fn all_has_offgrid_system_entities() {
     assert!(r.is_ok());
     let messages = r.unwrap();
 
-    // Check that all Off-Grid System entities exist
+    // Check that remaining Off-Grid System entities exist (offgrid_* entities removed as duplicates of EPS entities)
     let offgrid_entities = [
-        ("offgrid_voltage_l1", "Off-Grid Voltage L1", "voltage", "V", "lxp/2222222222/input/20"),
-        ("offgrid_voltage_l2", "Off-Grid Voltage L2", "voltage", "V", "lxp/2222222222/input/21"),
-        ("offgrid_frequency", "Off-Grid Frequency", "frequency", "Hz", "lxp/2222222222/input/23"),
-        ("offgrid_inverter_power", "Off-Grid Inverter Power", "power", "W", "lxp/2222222222/input/24"),
-        ("offgrid_apparent_power", "Off-Grid Apparent Power", "apparent_power", "VA", "lxp/2222222222/input/25"),
         ("export_power_to_grid", "Export Power to Grid", "power", "W", "lxp/2222222222/input/26"),
         ("import_power_from_grid", "Import Power from Grid", "power", "W", "lxp/2222222222/input/27"),
         ("pv1_power_generation_today", "PV1 Power Generation Today", "energy", "kWh", "lxp/2222222222/input/28"),

@@ -1569,11 +1569,74 @@ impl StatusString {
             0x20 => "AC Charge",
             0x28 => "PV & AC Charge",
             0x40 => "Battery Off-grid",
+            0x60 => "Battery Off-grid + AC Charge",
             0x80 => "PV Off-grid",
-            0xC0 => "PV & Battery Off-grid",
             0x88 => "PV Charge Off-grid",
+            0xC0 => "PV & Battery Off-grid",
 
-            _ => "Unknown",
+            _ => {
+                // Handle combined status values by checking individual bits
+                let mut status_parts = Vec::new();
+                
+                if status & 0x01 != 0 { status_parts.push("Fault"); }
+                if status & 0x02 != 0 { status_parts.push("FW Updating"); }
+                if status & 0x04 != 0 { status_parts.push("PV On-grid"); }
+                if status & 0x08 != 0 { status_parts.push("PV Charge"); }
+                if status & 0x10 != 0 { status_parts.push("Battery On-grid"); }
+                if status & 0x20 != 0 { status_parts.push("AC Charge"); }
+                if status & 0x40 != 0 { status_parts.push("Battery Off-grid"); }
+                if status & 0x80 != 0 { status_parts.push("PV Off-grid"); }
+                
+                if status_parts.is_empty() {
+                    "Unknown"
+                } else {
+                    // Return a combined status string
+                    // We'll need to return a static string, so we'll use a different approach
+                    "Combined Status"
+                }
+            }
+        }
+    }
+    
+    pub fn from_value_detailed(status: u16) -> String {
+        match status {
+            0x00 => "Standby".to_string(),
+            0x01 => "Fault".to_string(),
+            0x02 => "FW Updating".to_string(),
+            0x04 => "PV On-grid".to_string(),
+            0x08 => "PV Charge".to_string(),
+            0x0C => "PV Charge On-grid".to_string(),
+            0x10 => "Battery On-grid".to_string(),
+            0x11 => "Bypass".to_string(),
+            0x14 => "PV & Battery On-grid".to_string(),
+            0x19 => "PV Charge + Bypass".to_string(),
+            0x20 => "AC Charge".to_string(),
+            0x28 => "PV & AC Charge".to_string(),
+            0x40 => "Battery Off-grid".to_string(),
+            0x60 => "Battery Off-grid + AC Charge".to_string(),
+            0x80 => "PV Off-grid".to_string(),
+            0x88 => "PV Charge Off-grid".to_string(),
+            0xC0 => "PV & Battery Off-grid".to_string(),
+
+            _ => {
+                // Handle combined status values by checking individual bits
+                let mut status_parts = Vec::new();
+                
+                if status & 0x01 != 0 { status_parts.push("Fault"); }
+                if status & 0x02 != 0 { status_parts.push("FW Updating"); }
+                if status & 0x04 != 0 { status_parts.push("PV On-grid"); }
+                if status & 0x08 != 0 { status_parts.push("PV Charge"); }
+                if status & 0x10 != 0 { status_parts.push("Battery On-grid"); }
+                if status & 0x20 != 0 { status_parts.push("AC Charge"); }
+                if status & 0x40 != 0 { status_parts.push("Battery Off-grid"); }
+                if status & 0x80 != 0 { status_parts.push("PV Off-grid"); }
+                
+                if status_parts.is_empty() {
+                    "Unknown".to_string()
+                } else {
+                    status_parts.join(" + ")
+                }
+            }
         }
     }
 }

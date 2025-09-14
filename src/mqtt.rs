@@ -116,7 +116,7 @@ impl Message {
                     r.push(mqtt::Message {
                         topic: format!("{}/input/{}/parsed", td.datalog, register),
                         retain: false,
-                        payload: lxp::packet::StatusString::from_value(value).to_owned(),
+                        payload: lxp::packet::StatusString::from_value_detailed(value),
                     });
                 }
 
