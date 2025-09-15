@@ -30,6 +30,19 @@ use lxp::packet::Register;
 
 use serde::{Serialize, Serializer};
 
+// Reactive Power Command Type Options
+// This constant ensures the options list and MQTT description mapping stay in sync
+pub const REACTIVE_POWER_CMD_TYPE_OPTIONS: &[&str] = &[
+    "0 - Unit power factor (disabled/off)",
+    "1 - Fixed PF", 
+    "2 - Default PF curve (Q(P))",
+    "3 - Custom PF curve",
+    "4 - Capacitive reactive power percentage",
+    "5 - Inductive reactive power percentage",
+    "6 - Q(V) curve (Voltage-Reactive Power Mode)",
+    "7 - Q(V) Dynamic",
+];
+
 // ValueTemplate {{{
 #[derive(Clone, Debug, PartialEq)]
 pub enum ValueTemplate {
@@ -158,6 +171,24 @@ pub struct Number {
     max: f64,
     step: f64,
     unit_of_measurement: String,
+}
+
+// https://www.home-assistant.io/integrations/select.mqtt/
+#[derive(Debug, Serialize)]
+pub struct Select {
+    name: String,
+    state_topic: String,
+    command_topic: String,
+    value_template: String,
+    command_template: String,
+    unique_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    entity_category: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    enabled_by_default: Option<bool>,
+    device: Device,
+    availability: Availability,
+    options: Vec<String>,
 }
 
 // https://www.home-assistant.io/integrations/text.mqtt/
@@ -1002,7 +1033,8 @@ impl Config {
             self.remove_old_entity("sensor", "offgrid_voltage_l2")?,
             self.remove_old_entity("sensor", "offgrid_inverter_power")?,
             self.remove_old_entity("sensor", "offgrid_apparent_power")?,
-            
+            // Clean up old reactive power command type number entity
+            self.remove_old_entity("number", "ReactivePowerCMDType")?,
             // ===== SYSTEM CONTROL =====
             // System control
             self.button("restart", "Restart Inverter", Some("diagnostic".to_string()))?,
@@ -1077,8 +1109,15 @@ impl Config {
             self.number_voltage(Register::V1H, "Reactive Power - Q(V) Curve V1 High (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
             self.number_voltage(Register::V2H, "Reactive Power - Q(V) Curve V2 High (V)", 180.0, 280.0, 0.1, Some(false), Some("config".to_string()))?,
             
+           
             // Reactive Power Command Type and Values (Registers 59-62)
-            self.number_percent(Register::ReactivePowerCMDType, "Reactive Power - Command Type", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
+            self.select_entity(
+                Register::ReactivePowerCMDType, 
+                "Reactive Power - Command Type", 
+                REACTIVE_POWER_CMD_TYPE_OPTIONS.iter().map(|s| s.to_string()).collect(),
+                Some(false), 
+                Some("config".to_string())
+            )?,
             self.number_percent(Register::ActivePowerPercentCMD, "Reactive Power - Active Power Percentage Command (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
             self.number_percent(Register::ReactivePowerPercentCMD, "Reactive Power - Reactive Power Percentage Command (%)", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
             self.number_percent(Register::PFCMD, "Reactive Power - Power Factor Command", 0.0, 100.0, 1.0, Some(false), Some("config".to_string()))?,
@@ -1666,6 +1705,51 @@ impl Config {
 
         Ok(mqtt::Message {
             topic: self.ha_discovery_topic("number", &format!("{register:?}")),
+            retain: true,
+            payload: serde_json::to_string(&config)?,
+        })
+    }
+
+    pub fn select_entity(
+        &self,
+        register: Register,
+        label: &str,
+        options: Vec<String>,
+        enabled_by_default: Option<bool>,
+        entity_category: Option<String>,
+    ) -> Result<mqtt::Message> {
+        // Map register to command name for proper MQTT routing
+        let command_name = match register {
+            Register::ReactivePowerCMDType => "reactive_power_cmd_type",
+            _ => return Err(anyhow!("select_entity: unsupported register {:?}", register)),
+        };
+
+        let config = Select {
+            name: label.to_string(),
+            state_topic: format!(
+                "{}/{}/hold/{}/description",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                register.clone() as u16,
+            ),
+            command_topic: format!(
+                "{}/cmd/{}/set/{}",
+                self.mqtt_config.namespace(),
+                self.inverter.datalog(),
+                command_name,
+            ),
+            value_template: "{{ value }}".to_string(),
+            command_template: "{{ value.split(' - ')[0] }}".to_string(),
+            unique_id: format!("{}_{}_select_{:?}", self.mqtt_config.namespace(), self.inverter.datalog(), register),
+            entity_category,
+            enabled_by_default,
+            device: self.device(),
+            availability: self.availability(),
+            options,
+        };
+
+        Ok(mqtt::Message {
+            topic: self.ha_discovery_topic("select", &format!("{register:?}")),
             retain: true,
             payload: serde_json::to_string(&config)?,
         })

@@ -75,6 +75,21 @@ impl Message {
                     payload: serde_json::to_string(&bits)?,
                 });
             }
+
+            if register == 59 {
+                // Import the shared constant from home_assistant module
+                use crate::home_assistant::REACTIVE_POWER_CMD_TYPE_OPTIONS;
+                
+                let description = REACTIVE_POWER_CMD_TYPE_OPTIONS
+                    .get(value as usize)
+                    .unwrap_or(&"Unknown");
+                    
+                r.push(mqtt::Message {
+                    topic: format!("{}/hold/{}/description", td.datalog, register),
+                    retain: true,
+                    payload: serde_json::to_string(description)?,
+                });
+            }
         }
 
         Ok(r)
