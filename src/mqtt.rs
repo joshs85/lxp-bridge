@@ -87,7 +87,7 @@ impl Message {
                 r.push(mqtt::Message {
                     topic: format!("{}/hold/{}/description", td.datalog, register),
                     retain: true,
-                    payload: serde_json::to_string(description)?,
+                    payload: description.to_string(),
                 });
             }
         }
