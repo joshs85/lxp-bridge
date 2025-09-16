@@ -504,14 +504,14 @@ impl Config {
             Entity {
                 key: "f_ac",
                 name: "Grid Frequency",
-                value_template: ValueTemplate::String("{{ (value | float) | round(2) }}".to_string()),
+                value_template: ValueTemplate::String("{{ (value_json.f_ac | float) | round(2) }}".to_string()),
 
                 ..frequency.clone()
             },
             Entity {
                 key: "f_eps",
                 name: "EPS Frequency",
-                value_template: ValueTemplate::String("{{ (value | float) | round(2) }}".to_string()),
+                value_template: ValueTemplate::String("{{ (value_json.f_eps | float) | round(2) }}".to_string()),
 
                 ..frequency.clone()
             },
@@ -978,13 +978,6 @@ impl Config {
                 unit_of_measurement: Some("kWh"),
                 entity_category: Some("diagnostic"),
                 ..base.clone()
-            },
-            Entity {
-                key: "f_ac",
-                name: "Grid Frequency",
-                value_template: ValueTemplate::String("{{ (value | float) | round(2) }}".to_string()),
-
-                ..frequency.clone()
             },
         ];
 

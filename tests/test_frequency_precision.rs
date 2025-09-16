@@ -21,8 +21,8 @@ fn test_all_frequency_entities_have_2_decimal_precision() {
 
     for entity in &grid_freq_entities {
         let payload: serde_json::Value = serde_json::from_str(&entity.payload).unwrap();
-        assert_eq!(payload["value_template"], "{{ (value | float) | round(2) }}",
-                   "Grid Frequency entity should have 2 decimal precision template");
+        assert_eq!(payload["value_template"], "{{ (value_json.f_ac | float) | round(2) }}",
+                   "Grid Frequency entity should have 2 decimal precision template with JSON extraction");
     }
 
     // Test EPS Frequency (f_eps)
@@ -32,8 +32,8 @@ fn test_all_frequency_entities_have_2_decimal_precision() {
         .expect("EPS Frequency entity should be present");
 
     let payload: serde_json::Value = serde_json::from_str(&eps_freq_entity.payload).unwrap();
-    assert_eq!(payload["value_template"], "{{ (value | float) | round(2) }}",
-               "EPS Frequency entity should have 2 decimal precision template");
+    assert_eq!(payload["value_template"], "{{ (value_json.f_eps | float) | round(2) }}",
+               "EPS Frequency entity should have 2 decimal precision template with JSON extraction");
 
 
     // Test Generator Frequency
